@@ -1,0 +1,262 @@
+/* ==========================================================================
+   PROFILE PAGE (profile.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Sidebar Card
+   2. Profile Nav (Tabs)
+   3. Content Card + Tab Panels
+   4. Form / Save Success
+   5. Notification Toggles
+   6. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. SIDEBAR CARD
+   ========================================================================== */
+.profile-sidebar-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 2rem 1.75rem;
+    text-align: center;
+}
+
+.profile-avatar-wrap {
+    position: relative;
+    width: 110px;
+    margin: 0 auto 1.25rem;
+}
+
+.profile-avatar-lg {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--primary-light);
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary);
+    color: var(--white);
+    border: 3px solid var(--white);
+    border-radius: 50%;
+    font-size: 0.85rem;
+    transition: var(--transition-fast);
+}
+
+.avatar-edit-btn:hover {
+    background-color: var(--primary-dark);
+    transform: scale(1.08);
+}
+
+.profile-name {
+    margin-bottom: 0.4rem;
+}
+
+.role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.9rem;
+    border-radius: var(--border-radius-pill);
+    margin-bottom: 1.5rem;
+}
+
+.profile-stats {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.25rem 0;
+    margin-bottom: 1.5rem;
+}
+
+.profile-stat h6 {
+    margin-bottom: 0.15rem;
+    color: var(--primary);
+    font-size: 1.15rem;
+}
+
+.profile-stat p {
+    font-size: 0.75rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   2. PROFILE NAV (TABS)
+   ========================================================================== */
+.profile-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    text-align: left;
+}
+
+.profile-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    background: none;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: 0.7rem 0.9rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.profile-nav-link i:first-child {
+    color: var(--text-light);
+    font-size: 1rem;
+    transition: var(--transition-fast);
+}
+
+.profile-nav-link:hover {
+    background-color: var(--light-gray);
+}
+
+.profile-nav-link.active {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.profile-nav-link.active i:first-child {
+    color: var(--primary);
+}
+
+.profile-nav-external {
+    margin-top: 0.4rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 1rem;
+}
+
+
+/* ==========================================================================
+   3. CONTENT CARD + TAB PANELS
+   ========================================================================== */
+.profile-content-card {
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 2.25rem;
+}
+
+.profile-tab-panel {
+    display: none;
+}
+
+.profile-tab-panel.active {
+    display: block;
+    animation: fadeInUp 0.4s ease both;
+}
+
+.tab-title {
+    margin-bottom: 0.4rem;
+}
+
+.tab-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.75rem;
+}
+
+
+/* ==========================================================================
+   4. FORM / SAVE SUCCESS
+   ========================================================================== */
+.profile-form .form-label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.profile-form .form-control {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 0.65rem 1rem;
+    font-size: 0.92rem;
+}
+
+.profile-form .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.save-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--success);
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-left: 1rem;
+}
+
+
+/* ==========================================================================
+   5. NOTIFICATION TOGGLES
+   ========================================================================== */
+.notification-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.notification-toggle:last-of-type {
+    border-bottom: none;
+}
+
+.notification-toggle h6 {
+    margin-bottom: 0.2rem;
+    font-size: 0.95rem;
+}
+
+.notification-toggle p {
+    font-size: 0.82rem;
+    margin: 0;
+}
+
+.notification-toggle .form-switch .form-check-input {
+    width: 2.75rem;
+    height: 1.5rem;
+    cursor: pointer;
+}
+
+.notification-toggle .form-switch .form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+
+/* ==========================================================================
+   6. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .profile-content-card {
+        padding: 1.5rem;
+    }
+
+    .profile-stats {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+}

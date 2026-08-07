@@ -1,0 +1,49 @@
+/* ==========================================================================
+   SERVICES PAGE (services.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Process Steps ("How It Works")
+   2. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. PROCESS STEPS
+   ========================================================================== */
+.process-step {
+    position: relative;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    padding: 2.5rem 1.75rem 2rem;
+    text-align: center;
+    height: 100%;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.process-step:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+}
+
+.process-number {
+    position: absolute;
+    top: 1rem;
+    right: 1.25rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--border-color);
+}
+
+.process-step .feature-icon {
+    margin-top: 0.5rem;
+}
+
+
+/* ==========================================================================
+   2. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .process-step {
+        padding: 2rem 1.25rem 1.75rem;
+    }
+}

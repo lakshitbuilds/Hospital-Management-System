@@ -1,0 +1,175 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}About Us - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/about.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>About Us</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">About</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     MISSION & VISION
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row align-items-center gy-5">
+
+            <div class="col-lg-6">
+                <div class="about-image-wrap">
+                    <img src="{% static 'public/images/about-hospital.jpg' %}" alt="MediCare Hospital building" class="about-image rounded-custom">
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <span class="section-tag">Who We Are</span>
+                <h2 class="section-title">
+                    Two Decades of <span class="text-primary-custom">Trusted Care</span>
+                </h2>
+                <p class="section-text">
+                    Founded in 1998, MediCare Hospital has grown into a multi-specialty healthcare
+                    institution serving thousands of families every year. Our mission is simple:
+                    deliver accurate, compassionate, and affordable care to every patient who
+                    walks through our doors.
+                </p>
+
+                <ul class="about-checklist">
+                    <li><i class="bi bi-check-circle-fill"></i>120+ specialists across 18 departments</li>
+                    <li><i class="bi bi-check-circle-fill"></i>NABH-accredited facilities and processes</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Patient-first approach to every treatment plan</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Continuous investment in modern medical technology</li>
+                </ul>
+
+                <a href="#" class="btn btn-primary btn-lg mt-3">Book Appointment</a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CORE VALUES
+============================================================= -->
+<section class="section-padding bg-light-gray">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Our Core Values</span>
+            <h2 class="section-title">What Drives Us Every Day</h2>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-heart-fill"></i></div>
+                    <h6>Compassion</h6>
+                    <p>Every patient is treated with empathy, dignity, and respect.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+                    <h6>Integrity</h6>
+                    <p>Honest diagnoses and transparent treatment recommendations.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-lightbulb-fill"></i></div>
+                    <h6>Innovation</h6>
+                    <p>Investing continually in modern medical technology.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-people-fill"></i></div>
+                    <h6>Teamwork</h6>
+                    <p>Specialists collaborating for the best patient outcomes.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     MILESTONES TIMELINE
+============================================================= -->
+<section class="section-padding timeline-section">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Our Journey</span>
+            <h2 class="section-title">Milestones Over the Years</h2>
+        </div>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="timeline-year">1998</span>
+                    <h6>Hospital Founded</h6>
+                    <p>Opened with 3 departments and 20 beds serving the local community.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="timeline-year">2006</span>
+                    <h6>Expanded to Multi-Specialty</h6>
+                    <p>Added Cardiology, Neurology, and Orthopedics departments.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="timeline-year">2014</span>
+                    <h6>NABH Accreditation</h6>
+                    <p>Recognized for excellence in patient safety and care quality.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <span class="timeline-year">2023</span>
+                    <h6>Digital Patient Portal</h6>
+                    <p>Launched online appointment booking and e-health records.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CTA BANNER
+============================================================= -->
+<section class="cta-banner">
+    <div class="container">
+        <div class="cta-content text-center">
+            <h2>Ready to Experience Better Healthcare?</h2>
+            <p>Schedule a consultation with one of our specialists today.</p>
+            <div class="cta-actions">
+                <a href="#" class="btn btn-light btn-lg">
+                    <i class="bi bi-calendar2-check me-2"></i>Book Appointment
+                </a>
+                <a href="#" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-people me-2"></i>Meet Our Doctors
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

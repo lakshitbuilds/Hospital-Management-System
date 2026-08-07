@@ -1,0 +1,101 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>Notifications</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">Notifications</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     NOTIFICATIONS SECTION
+     NOTE: static/dummy data for now - wire up to a real Notification
+     model + queryset once the backend exists.
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <div class="notifications-card">
+
+                    <!-- Toolbar -->
+                    <div class="notifications-toolbar">
+                        <div class="notif-filters">
+                            <button type="button" class="notif-filter-btn active" data-filter="all">All</button>
+                            <button type="button" class="notif-filter-btn" data-filter="unread">
+                                Unread <span class="unread-count-badge" id="unreadCountBadge">{{ notifications|length }}</span>
+                            </button>
+                        </div>
+                        <button type="button" class="mark-all-read-btn" id="markAllReadBtn">
+                            <i class="bi bi-check2-all me-1"></i>Mark all as read
+                        </button>
+                    </div>
+
+                    <!-- Notification List -->
+                    <ul class="notification-list" id="notificationList">
+    {% for note in notifications %}
+    <li class="notification-item {% if not note.is_read %}is-unread{% endif %}" data-status="{% if note.is_read %}read{% else %}unread{% endif %}">
+        <div class="notif-icon {% if note.notification_type == 'confirmed' %}notif-icon-success{% elif note.notification_type == 'reminder' %}notif-icon-warning{% elif note.notification_type == 'cancelled' %}notif-icon-danger{% else %}notif-icon-primary{% endif %}">
+            {% if note.notification_type == 'confirmed' %}
+                <i class="bi bi-calendar-check"></i>
+            {% elif note.notification_type == 'reminder' %}
+                <i class="bi bi-clock-history"></i>
+            {% elif note.notification_type == 'cancelled' %}
+                <i class="bi bi-x-circle"></i>
+            {% else %}
+                <i class="bi bi-bell"></i>
+            {% endif %}
+        </div>
+        <div class="notif-body">
+            <h6>{{ note.get_notification_type_display }}</h6>
+            <p>{{ note.message }}</p>
+            <span class="notif-time">{{ note.created_at|timesince }} ago</span>
+        </div>
+        <form action="{% url 'mark_all_read' %}" method="post" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="mark-all-read-btn" id="markAllReadBtn">
+        <i class="bi bi-check2-all me-1"></i>Mark all as read
+    </button>
+</form>
+    </li>
+    {% empty %}
+    <li class="text-center text-muted py-4">No notifications yet.</li>
+    {% endfor %}
+</ul>
+
+                    <!-- Empty State (shown by JS when list has no matches / is cleared) -->
+                    <div class="notif-empty-state d-none" id="notifEmptyState">
+                        <i class="bi bi-bell-slash"></i>
+                        <h6>You're all caught up!</h6>
+                        <p>No notifications to show right now.</p>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/notifications.js' %}"></script>
+{% endblock %}

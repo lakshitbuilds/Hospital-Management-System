@@ -1,0 +1,452 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Home - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/index.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     HERO SECTION
+============================================================= -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center gy-5">
+
+            <!-- Hero Text -->
+            <div class="col-lg-6 hero-text fade-in-up">
+                <span class="hero-badge">
+                    <i class="bi bi-heart-pulse-fill"></i> Trusted Healthcare Since 1998
+                </span>
+                <h1 class="hero-title">
+                    Your Health Is Our <span class="text-primary-custom">Top Priority</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Compassionate care, advanced technology, and a team of expert specialists
+                    working together to keep you and your family healthy.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="{% url 'book_appointment' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-calendar2-check me-2"></i>Book Appointment
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-telephone me-2"></i>Emergency Contact
+                    </a>
+                </div>
+
+                <div class="hero-trust">
+                    <div class="hero-trust-item">
+                        <i class="bi bi-patch-check-fill"></i>
+                        <span>Certified Specialists</span>
+                    </div>
+                    <div class="hero-trust-item">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Safe &amp; Hygienic</span>
+                    </div>
+                    <div class="hero-trust-item">
+                        <i class="bi bi-clock-history"></i>
+                        <span>24/7 Emergency</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hero Image -->
+            <div class="col-lg-6 hero-visual">
+                <div class="hero-image-wrap">
+                    <img src="{% static 'public/images/hero-doctor.png' %}" alt="MediCare Hospital doctor" class="hero-image">
+
+                    <!-- Floating Card: Experience -->
+                    <div class="floating-card floating-card-top">
+                        <div class="floating-icon"><i class="bi bi-award-fill"></i></div>
+                        <div>
+                            <h6>25+ Years</h6>
+                            <p>Of Medical Excellence</p>
+                        </div>
+                    </div>
+
+                    <!-- Floating Card: Appointment -->
+                    <div class="floating-card floating-card-bottom">
+                        <div class="floating-icon"><i class="bi bi-calendar2-week-fill"></i></div>
+                        <div>
+                            <h6>Book a Visit</h6>
+                            <p>Available Today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     STATS BAR
+============================================================= -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row gy-4 text-center">
+            <div class="col-6 col-lg-3">
+                <div class="stat-item">
+                    <i class="bi bi-person-badge-fill"></i>
+                    <h2 class="counter" data-target="120">0</h2>
+                    <p>Expert Doctors</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-item">
+                    <i class="bi bi-emoji-smile-fill"></i>
+                    <h2 class="counter" data-target="45000">0</h2>
+                    <p>Happy Patients</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-item">
+                    <i class="bi bi-building-fill"></i>
+                    <h2 class="counter" data-target="18">0</h2>
+                    <p>Departments</p>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="stat-item">
+                    <i class="bi bi-trophy-fill"></i>
+                    <h2 class="counter" data-target="25">0</h2>
+                    <p>Years of Service</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     ABOUT SNIPPET
+============================================================= -->
+<section class="about-section section-padding">
+    <div class="container">
+        <div class="row align-items-center gy-5">
+
+            <div class="col-lg-6">
+                <div class="about-image-wrap">
+                    <img src="{% static 'public/images/about-hospital.jpg' %}" alt="Hospital building" class="about-image rounded-custom">
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <span class="section-tag">About MediCare</span>
+                <h2 class="section-title">
+                    Providing Better Medical Care <span class="text-primary-custom">For Your Family</span>
+                </h2>
+                <p class="section-text">
+                    At MediCare Hospital, we combine cutting-edge medical technology with genuine,
+                    patient-first care. Our multidisciplinary team works around the clock to deliver
+                    accurate diagnoses, effective treatment, and a comfortable healing experience.
+                </p>
+
+                <ul class="about-checklist">
+                    <li><i class="bi bi-check-circle-fill"></i>Highly qualified &amp; experienced specialists</li>
+                    <li><i class="bi bi-check-circle-fill"></i>State-of-the-art diagnostic equipment</li>
+                    <li><i class="bi bi-check-circle-fill"></i>24/7 emergency &amp; ambulance services</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Affordable treatment packages</li>
+                </ul>
+
+                <a href="{% url 'about' %}" class="btn btn-primary btn-lg mt-3">
+                    Learn More About Us
+                </a>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SERVICES SECTION
+============================================================= -->
+<section class="services-section section-padding bg-light-gray">
+    <div class="container">
+
+        <div class="text-center section-heading">
+            <span class="section-tag">What We Offer</span>
+            <h2 class="section-title">Our Medical Services</h2>
+            <p class="section-text mx-auto">
+                Comprehensive healthcare services delivered by specialists across every major department.
+            </p>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+                    <h5>Cardiology</h5>
+                    <p>Comprehensive heart care from diagnosis to advanced cardiac surgery.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-activity"></i></div>
+                    <h5>Neurology</h5>
+                    <p>Expert care for disorders of the brain, spine, and nervous system.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-person-wheelchair"></i></div>
+                    <h5>Orthopedics</h5>
+                    <p>Advanced treatment for bones, joints, ligaments, and the spine.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-emoji-smile-fill"></i></div>
+                    <h5>Pediatrics</h5>
+                    <p>Gentle, specialized care for infants, children, and adolescents.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-eye-fill"></i></div>
+                    <h5>Ophthalmology</h5>
+                    <p>Complete eye care including surgery, screening, and vision correction.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+                    <h5>General Medicine</h5>
+                    <p>Routine checkups, diagnostics, and preventive care for the whole family.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ============================================================
+     WHY CHOOSE US
+============================================================= -->
+<section class="why-us-section section-padding">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Why Choose Us</span>
+            <h2 class="section-title">Committed to Your Well-Being</h2>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-person-badge"></i></div>
+                    <h6>Expert Doctors</h6>
+                    <p>Board-certified specialists across every department.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-cpu-fill"></i></div>
+                    <h6>Modern Equipment</h6>
+                    <p>Advanced diagnostic and surgical technology.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-truck-front-fill"></i></div>
+                    <h6>24/7 Emergency</h6>
+                    <p>Round-the-clock emergency and ambulance support.</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="bi bi-cash-coin"></i></div>
+                    <h6>Affordable Care</h6>
+                    <p>Transparent pricing and flexible payment options.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     FEATURED DOCTORS
+============================================================= -->
+<section class="doctors-section section-padding bg-light-gray">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Meet Our Team</span>
+            <h2 class="section-title">Our Specialist Doctors</h2>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="doctor-card">
+                    <div class="doctor-photo">
+                        <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. Sarah Mitchell">
+                        <div class="doctor-social">
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                        </div>
+                    </div>
+                    <div class="doctor-info">
+                        <h6>Dr. Sarah Mitchell</h6>
+                        <p>Cardiologist</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="doctor-card">
+                    <div class="doctor-photo">
+                        <img src="{% static 'public/images/doctor-2.jpg' %}" alt="Dr. James Carter">
+                        <div class="doctor-social">
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                        </div>
+                    </div>
+                    <div class="doctor-info">
+                        <h6>Dr. James Carter</h6>
+                        <p>Neurologist</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="doctor-card">
+                    <div class="doctor-photo">
+                        <img src="{% static 'public/images/doctor-3.jpg' %}" alt="Dr. Emily Chen">
+                        <div class="doctor-social">
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                        </div>
+                    </div>
+                    <div class="doctor-info">
+                        <h6>Dr. Emily Chen</h6>
+                        <p>Pediatrician</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="doctor-card">
+                    <div class="doctor-photo">
+                        <img src="{% static 'public/images/doctor-4.jpg' %}" alt="Dr. Michael Reyes">
+                        <div class="doctor-social">
+                            <a href="#"><i class="bi bi-facebook"></i></a>
+                            <a href="#"><i class="bi bi-linkedin"></i></a>
+                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                        </div>
+                    </div>
+                    <div class="doctor-info">
+                        <h6>Dr. Michael Reyes</h6>
+                        <p>Orthopedic Surgeon</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="{% url 'doctors' %}" class="btn btn-outline-primary btn-lg">View All Doctors</a>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     TESTIMONIALS
+============================================================= -->
+<section class="testimonial-section section-padding">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Patient Stories</span>
+            <h2 class="section-title">What Our Patients Say</h2>
+        </div>
+
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+
+                <div class="carousel-item active">
+                    <div class="testimonial-card mx-auto">
+                        <i class="bi bi-quote quote-icon"></i>
+                        <p>"The care I received at MediCare Hospital was outstanding. The doctors were
+                        attentive, and the staff made me feel comfortable throughout my treatment."</p>
+                        <div class="testimonial-author">
+                            <img src="{% static 'public/images/patient-1.jpg' %}" alt="Patient">
+                            <div>
+                                <h6>Anita Sharma</h6>
+                                <span>Cardiology Patient</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="testimonial-card mx-auto">
+                        <i class="bi bi-quote quote-icon"></i>
+                        <p>"From diagnosis to recovery, the entire team kept me informed every step
+                        of the way. Truly world-class facilities and genuine care."</p>
+                        <div class="testimonial-author">
+                            <img src="{% static 'public/images/patient-2.jpg' %}" alt="Patient">
+                            <div>
+                                <h6>Rohit Verma</h6>
+                                <span>Orthopedic Patient</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-item">
+                    <div class="testimonial-card mx-auto">
+                        <i class="bi bi-quote quote-icon"></i>
+                        <p>"Our daughter's pediatrician was incredibly patient and kind. We finally
+                        found a hospital we trust for our whole family."</p>
+                        <div class="testimonial-author">
+                            <img src="{% static 'public/images/patient-3.jpg' %}" alt="Patient">
+                            <div>
+                                <h6>Priya Nair</h6>
+                                <span>Pediatric Care</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="testimonial-nav-btn"><i class="bi bi-chevron-left"></i></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="testimonial-nav-btn"><i class="bi bi-chevron-right"></i></span>
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     APPOINTMENT CTA BANNER
+============================================================= -->
+<section class="cta-banner">
+    <div class="container">
+        <div class="cta-content text-center">
+            <h2>Need to See a Doctor?</h2>
+            <p>Book your appointment online in just a few clicks, or call us for urgent care.</p>
+            <div class="cta-actions">
+                <a href="{% url 'book_appointment' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-calendar2-check me-2"></i>Book Appointment
+                </a>
+                <a href="tel:+919876543210" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-telephone me-2"></i>+91 98765 43210
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/index.js' %}"></script>
+{% endblock %}

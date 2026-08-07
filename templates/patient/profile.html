@@ -1,0 +1,643 @@
+{% extends 'patient/base.html' %} {% load static %} 
+{% block title %}My Profile - MediCare Hospital
+{% endblock %} 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/profile.css' %}" />
+{% endblock %} 
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+  <div class="container">
+    <h1>My Profile</h1>
+    <nav class="breadcrumb-nav">
+      <a href="#">Home</a>
+      <i class="bi bi-chevron-right"></i>
+      <span class="current">Profile</span>
+    </nav>
+  </div>
+</section>
+
+{% if messages %}
+<div class="container mt-4">
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ============================================================
+     PROFILE SECTION
+============================================================= -->
+<section class="section-padding">
+  <div class="container">
+    <div class="row gy-4">
+      <!-- Sidebar -->
+      <div class="col-lg-4">
+        <div class="profile-sidebar-card">
+          <div class="profile-avatar-wrap">
+            {% if patient.profile_image %}
+            <img
+              src="{{ patient.profile_image.url }}"
+              alt="Profile Picture"
+              id="avatarPreview"
+              class="profile-avatar-lg"
+            />
+            {% else %}
+            <img
+              src="{% static 'public/images/patient-1.jpg' %}"
+              alt="Profile Picture"
+              id="avatarPreview"
+              class="profile-avatar-lg"
+            />
+            {% endif %}
+
+            <button
+              type="button"
+              class="avatar-edit-btn"
+              id="avatarEditBtn"
+              aria-label="Change profile picture"
+            >
+              <i class="bi bi-camera-fill"></i>
+            </button>
+
+            <input
+              type="file"
+              id="avatarInput"
+              name="profile_image"
+              form="personalInfoForm"
+              accept="image/*"
+              class="d-none"
+            />
+          </div>
+          <h5 class="profile-name">Anita Sharma</h5>
+          <span class="role-badge"
+            ><i class="bi bi-person-fill"></i>Patient</span
+          >
+          <p class="patient-id-text">Patient ID: <strong>PAT000001</strong></p>
+
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <h6>12</h6>
+              <p>Appointments</p>
+            </div>
+            <div class="profile-stat">
+              <h6>3</h6>
+              <p>Prescriptions</p>
+            </div>
+            <div class="profile-stat">
+              <h6>2026</h6>
+              <p>Member Since</p>
+            </div>
+          </div>
+
+          <a href="{% url 'patient_profile' %}" class="profile-nav-link active">
+            <i class="bi bi-person-lines-fill"></i>
+            Personal Info
+          </a>
+
+          <a href="#" class="profile-nav-link">
+            <i class="bi bi-shield-lock-fill"></i>
+            Change Password
+          </a>
+
+          <a href="{% url 'notifications' %}" class="profile-nav-link">
+            <i class="bi bi-bell-fill"></i>
+            Notifications
+          </a>
+          <a
+            href="{% url 'my_appointments' %}"
+            class="profile-nav-link profile-nav-external"
+          >
+            <i class="bi bi-calendar2-week-fill"></i>My Appointments
+            <i class="bi bi-box-arrow-up-right ms-auto"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="col-lg-8">
+        <div class="profile-content-card">
+          <!-- Personal Info Tab -->
+          <div class="profile-tab-panel active" id="personal-info">
+            <h5 class="tab-title">Personal Information</h5>
+            <p class="tab-subtitle">
+              Update your personal details and contact information.
+            </p>
+
+            <form
+              id="personalInfoForm"
+              method="POST"
+              class="profile-form"
+              enctype="multipart/form-data"
+            >
+              {% csrf_token %}
+
+              <!-- Basic Information -->
+              <h6 class="form-section-title">
+                <i class="bi bi-person-fill"></i>Basic Information
+              </h6>
+
+              <div class="row gy-3 mb-4">
+                <div class="col-md-6">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="firstName"
+                    name="first_name"
+                    value="{{ user.first_name }}"
+                    required
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="lastName" class="form-label">Last Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="lastName"
+                    name="last_name"
+                    value="{{ user.last_name }}"
+                    required
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="profileEmail" class="form-label"
+                    >Email Address</label
+                  >
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="profileEmail"
+                    name="email"
+                    value="{{ user.email }}"
+                    required
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="profilePhone" class="form-label"
+                    >Phone Number</label
+                  >
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="profilePhone"
+                    name="phone"
+                    value="{{ patient.phone }}"
+                    required
+                  />
+                </div>
+              </div>
+
+              <!-- Personal Details -->
+              <h6 class="form-section-title">
+                <i class="bi bi-card-heading"></i>Personal Details
+              </h6>
+
+              <div class="row gy-3 mb-4">
+                <div class="col-md-4">
+                  <label for="profileDob" class="form-label"
+                    >Date of Birth</label
+                  >
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="profileDob"
+                    name="date_of_birth"
+                    value="{{ patient.date_of_birth|date:'Y-m-d' }}"
+                  />
+                </div>
+
+                <div class="col-md-4">
+                  <label for="profileGender" class="form-label">Gender</label>
+                  <select class="form-select" id="profileGender" name="gender">
+                    <option
+                      value="Male"
+                      {%
+                      if
+                      patient.gender=""
+                      ="Male"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Male
+                    </option>
+                    <option
+                      value="Female"
+                      {%
+                      if
+                      patient.gender=""
+                      ="Female"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Female
+                    </option>
+                    <option
+                      value="Other"
+                      {%
+                      if
+                      patient.gender=""
+                      ="Other"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      Other
+                    </option>
+                  </select>
+                </div>
+
+                <div class="col-md-4">
+                  <label for="profileBloodGroup" class="form-label"
+                    >Blood Group</label
+                  >
+
+                  <select
+                    class="form-select"
+                    id="profileBloodGroup"
+                    name="blood_group"
+                  >
+                    <option value="">Select Blood Group</option>
+
+                    <option
+                      value="A+"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="A+"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      A+
+                    </option>
+                    <option
+                      value="A-"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="A-"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      A-
+                    </option>
+                    <option
+                      value="B+"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="B+"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      B+
+                    </option>
+                    <option
+                      value="B-"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="B-"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      B-
+                    </option>
+                    <option
+                      value="AB+"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="AB+"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      AB+
+                    </option>
+                    <option
+                      value="AB-"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="AB-"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      AB-
+                    </option>
+                    <option
+                      value="O+"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="O+"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      O+
+                    </option>
+                    <option
+                      value="O-"
+                      {%
+                      if
+                      patient.blood_group=""
+                      ="O-"
+                      %}selected{%
+                      endif
+                      %}
+                    >
+                      O-
+                    </option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Address -->
+              <h6 class="form-section-title">
+                <i class="bi bi-geo-alt-fill"></i>Address Information
+              </h6>
+
+              <div class="row gy-3 mb-4">
+                <div class="col-12">
+                  <label for="profileAddress" class="form-label">Address</label>
+                  <textarea
+                    class="form-control"
+                    id="profileAddress"
+                    name="address"
+                    rows="2"
+                  >
+{{ patient.address }}</textarea
+                  >
+                </div>
+
+                <div class="col-md-3">
+                  <label for="profileCity" class="form-label">City</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profileCity"
+                    name="city"
+                    value="{{ patient.city }}"
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label for="profileState" class="form-label">State</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profileState"
+                    name="state"
+                    value="{{ patient.state }}"
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label for="profileCountry" class="form-label">Country</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profileCountry"
+                    name="country"
+                    value="{{ patient.country }}"
+                  />
+                </div>
+
+                <div class="col-md-3">
+                  <label for="profilePincode" class="form-label">Pincode</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="profilePincode"
+                    name="pincode"
+                    value="{{ patient.pincode }}"
+                  />
+                </div>
+              </div>
+
+              <!-- Emergency Contact -->
+              <h6 class="form-section-title">
+                <i class="bi bi-telephone-plus-fill"></i>Emergency Contact
+              </h6>
+
+              <div class="row gy-3 mb-4">
+                <div class="col-md-6">
+                  <label for="emergencyName" class="form-label"
+                    >Contact Name</label
+                  >
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="emergencyName"
+                    name="emergency_contact_name"
+                    value="{{ patient.emergency_contact_name }}"
+                  />
+                </div>
+
+                <div class="col-md-6">
+                  <label for="emergencyNumber" class="form-label"
+                    >Contact Number</label
+                  >
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="emergencyNumber"
+                    name="emergency_contact_number"
+                    value="{{ patient.emergency_contact_number }}"
+                  />
+                </div>
+              </div>
+
+              <!-- Medical Information -->
+              <h6 class="form-section-title">
+                <i class="bi bi-clipboard2-pulse-fill"></i>Medical Information
+              </h6>
+
+              <div class="row gy-3">
+                <div class="col-md-6">
+                  <label for="allergies" class="form-label">Allergies</label>
+                  <textarea
+                    class="form-control"
+                    id="allergies"
+                    name="allergies"
+                    rows="3"
+                  >
+{{ patient.allergies }}</textarea
+                  >
+                </div>
+
+                <div class="col-md-6">
+                  <label for="medicalHistory" class="form-label"
+                    >Medical History</label
+                  >
+                  <textarea
+                    class="form-control"
+                    id="medicalHistory"
+                    name="medical_history"
+                    rows="3"
+                  >
+{{ patient.medical_history }}</textarea
+                  >
+                </div>
+
+                <div class="col-12 mt-2">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check2-circle me-2"></i>
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Change Password Tab -->
+          <div class="profile-tab-panel" id="change-password">
+            <h5 class="tab-title">Change Password</h5>
+            <p class="tab-subtitle">
+              Use a strong password you don't use elsewhere.
+            </p>
+
+            <form id="changePasswordForm" class="profile-form" novalidate>
+              <div class="row gy-3">
+                <div class="col-12">
+                  <label for="currentPassword" class="form-label"
+                    >Current Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="currentPassword"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="newPassword" class="form-label"
+                    >New Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="newPassword"
+                    minlength="8"
+                    required
+                  />
+                </div>
+                <div class="col-md-6">
+                  <label for="confirmNewPassword" class="form-label"
+                    >Confirm New Password</label
+                  >
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="confirmNewPassword"
+                    minlength="8"
+                    required
+                  />
+                  <div class="invalid-feedback">Passwords do not match.</div>
+                </div>
+                <div class="col-12">
+                  <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-shield-check me-2"></i>Update Password
+                  </button>
+                  <span class="save-success d-none" id="passwordSuccess">
+                    <i class="bi bi-check-circle-fill"></i>Password updated
+                  </span>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Notifications Tab -->
+          <div class="profile-tab-panel" id="notifications">
+            <h5 class="tab-title">Notification Preferences</h5>
+            <p class="tab-subtitle">Choose how you'd like to hear from us.</p>
+
+            <form id="notificationsForm" class="profile-form">
+              <div class="notification-toggle">
+                <div>
+                  <h6>Email Notifications</h6>
+                  <p>Appointment confirmations and account updates.</p>
+                </div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="notifyEmail"
+                    checked
+                  />
+                </div>
+              </div>
+              <div class="notification-toggle">
+                <div>
+                  <h6>SMS Alerts</h6>
+                  <p>Text message reminders before your visit.</p>
+                </div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="notifySms"
+                    checked
+                  />
+                </div>
+              </div>
+              <div class="notification-toggle">
+                <div>
+                  <h6>Appointment Reminders</h6>
+                  <p>Reminder 24 hours before a scheduled appointment.</p>
+                </div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="notifyReminders"
+                    checked
+                  />
+                </div>
+              </div>
+              <div class="notification-toggle">
+                <div>
+                  <h6>Promotional Offers</h6>
+                  <p>Health checkup packages and seasonal offers.</p>
+                </div>
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="notifyPromo"
+                  />
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-lg mt-3">
+                <i class="bi bi-check2-circle me-2"></i>Save Preferences
+              </button>
+              <span class="save-success d-none" id="notificationsSuccess">
+                <i class="bi bi-check-circle-fill"></i>Preferences saved
+              </span>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %} {% block javascript %}
+<script src="{% static 'js/patient/profile.js' %}"></script>
+{% endblock %}

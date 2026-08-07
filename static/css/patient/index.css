@@ -1,0 +1,308 @@
+/* ==========================================================================
+   HOME PAGE (index.html) - PAGE SPECIFIC STYLES
+   Shared components (section heading, service/feature/doctor cards, cta
+   banner) now live in the global style.css so inner pages can reuse them.
+   This file only holds what's unique to the homepage.
+   Structure:
+   1. Hero Section
+   2. Stats Section
+   3. Testimonial Section
+   4. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. HERO SECTION
+   ========================================================================== */
+.hero-section {
+    background: linear-gradient(180deg, var(--primary-light) 0%, var(--background) 100%);
+    padding: 5rem 0 6rem;
+    overflow: hidden;
+}
+
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--white);
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.5rem 1.1rem;
+    border-radius: var(--border-radius-pill);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1.25rem;
+}
+
+.hero-subtitle {
+    font-size: 1.05rem;
+    color: var(--text-light);
+    margin-bottom: 2rem;
+    max-width: 520px;
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.hero-trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.75rem;
+}
+
+.hero-trust-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+.hero-trust-item i {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.hero-visual {
+    position: relative;
+}
+
+.hero-image-wrap {
+    position: relative;
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+.hero-image {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.floating-card {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background-color: var(--white);
+    padding: 0.9rem 1.2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    animation: floatCard 4s ease-in-out infinite;
+}
+
+.floating-card h6 {
+    font-size: 0.9rem;
+    margin-bottom: 0.1rem;
+}
+
+.floating-card p {
+    font-size: 0.78rem;
+    margin: 0;
+    color: var(--text-light);
+}
+
+.floating-icon {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border-radius: 50%;
+    font-size: 1.1rem;
+}
+
+.floating-card-top {
+    top: -1.5rem;
+    left: -1.5rem;
+    animation-delay: 0.3s;
+}
+
+.floating-card-bottom {
+    bottom: -1.5rem;
+    right: -1.5rem;
+    animation-delay: 0.8s;
+}
+
+@keyframes floatCard {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+
+/* ==========================================================================
+   2. STATS SECTION
+   ========================================================================== */
+.stats-section {
+    background-color: var(--primary);
+    padding: 3rem 0;
+}
+
+.stat-item i {
+    font-size: 1.8rem;
+    color: var(--white);
+    opacity: 0.85;
+    margin-bottom: 0.5rem;
+}
+
+.stat-item .counter {
+    color: var(--white);
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-item p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   3. TESTIMONIAL SECTION
+   ========================================================================== */
+.testimonial-card {
+    max-width: 700px;
+    text-align: center;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 2.5rem 2rem;
+}
+
+.quote-icon {
+    font-size: 2rem;
+    color: var(--primary-light);
+    margin-bottom: 1rem;
+}
+
+.testimonial-card p {
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    font-style: italic;
+    margin-bottom: 1.5rem;
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.testimonial-author img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.testimonial-author h6 {
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.testimonial-author span {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+.testimonial-nav-btn {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--white);
+    color: var(--primary);
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-fast);
+}
+
+.testimonial-nav-btn:hover {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: auto;
+    opacity: 1;
+}
+
+.carousel-control-prev {
+    left: -10px;
+}
+
+.carousel-control-next {
+    right: -10px;
+}
+
+
+/* ==========================================================================
+   4. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .hero-title {
+        font-size: 2.3rem;
+    }
+
+    .hero-image-wrap {
+        margin-top: 2rem;
+    }
+
+    .floating-card {
+        padding: 0.7rem 1rem;
+    }
+
+    .floating-card-top {
+        left: 0;
+    }
+
+    .floating-card-bottom {
+        right: 0;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .hero-section {
+        padding: 3rem 0 4rem;
+        text-align: center;
+    }
+
+    .hero-subtitle {
+        margin-inline: auto;
+    }
+
+    .hero-actions,
+    .hero-trust {
+        justify-content: center;
+    }
+
+    .floating-card {
+        position: static;
+        margin: 0.75rem auto 0;
+        max-width: fit-content;
+        animation: none;
+    }
+
+    .stat-item .counter {
+        font-size: 1.9rem;
+    }
+}

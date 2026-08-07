@@ -1,0 +1,165 @@
+/* ==========================================================================
+   CONTACT PAGE (contact.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Contact Info Cards
+   2. Contact Form
+   3. Form Success Message
+   4. Map Placeholder
+   5. Emergency Box
+   6. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. CONTACT INFO CARDS
+   ========================================================================== */
+.contact-info-card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    height: 100%;
+    transition: var(--transition);
+}
+
+.contact-info-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+    border-color: transparent;
+}
+
+.contact-info-card .feature-icon {
+    margin-bottom: 1rem;
+}
+
+.contact-info-card h6 {
+    margin-bottom: 0.5rem;
+}
+
+.contact-info-card p {
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   2. CONTACT FORM
+   ========================================================================== */
+.contact-form .form-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.contact-form .form-control,
+.contact-form .form-select {
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 0.7rem 1rem;
+    font-size: 0.92rem;
+    transition: var(--transition-fast);
+}
+
+.contact-form .form-control:focus,
+.contact-form .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.contact-form .invalid-feedback {
+    font-size: 0.8rem;
+}
+
+
+/* ==========================================================================
+   3. FORM SUCCESS MESSAGE
+   ========================================================================== */
+.form-success {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(25, 135, 84, 0.25);
+    border-radius: var(--border-radius-sm);
+    padding: 1rem 1.25rem;
+    font-size: 0.92rem;
+    margin-top: 1.25rem;
+}
+
+.form-success i {
+    font-size: 1.2rem;
+}
+
+
+/* ==========================================================================
+   4. MAP PLACEHOLDER
+   ========================================================================== */
+.map-placeholder {
+    background-color: var(--light-gray);
+    border: 1px dashed var(--border-color);
+    border-radius: var(--border-radius);
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.map-placeholder i {
+    font-size: 2rem;
+    color: var(--primary);
+    margin-bottom: 0.75rem;
+}
+
+.map-placeholder p {
+    font-size: 0.85rem;
+    max-width: 260px;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   5. EMERGENCY BOX
+   ========================================================================== */
+.emergency-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+}
+
+.emergency-box h6 {
+    margin-bottom: 0.35rem;
+}
+
+.emergency-box p {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.emergency-number {
+    display: inline-block;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.05rem;
+}
+
+
+/* ==========================================================================
+   6. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .emergency-box {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+}

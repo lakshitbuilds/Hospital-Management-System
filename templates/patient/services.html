@@ -1,0 +1,176 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Our Services - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/services.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>Our Services</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">Services</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     SERVICES INTRO
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Comprehensive Care</span>
+            <h2 class="section-title">Medical Services We Provide</h2>
+            <p class="section-text mx-auto">
+                From routine checkups to advanced surgical procedures, our specialists
+                deliver complete care under one roof.
+            </p>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+                    <h5>Cardiology</h5>
+                    <p>Comprehensive heart care from diagnosis to advanced cardiac surgery.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-activity"></i></div>
+                    <h5>Neurology</h5>
+                    <p>Expert care for disorders of the brain, spine, and nervous system.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-person-wheelchair"></i></div>
+                    <h5>Orthopedics</h5>
+                    <p>Advanced treatment for bones, joints, ligaments, and the spine.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-emoji-smile-fill"></i></div>
+                    <h5>Pediatrics</h5>
+                    <p>Gentle, specialized care for infants, children, and adolescents.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-eye-fill"></i></div>
+                    <h5>Ophthalmology</h5>
+                    <p>Complete eye care including surgery, screening, and vision correction.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+                    <h5>General Medicine</h5>
+                    <p>Routine checkups, diagnostics, and preventive care for the whole family.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-droplet-half"></i></div>
+                    <h5>Dermatology</h5>
+                    <p>Diagnosis and treatment for skin, hair, and nail conditions.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-capsule"></i></div>
+                    <h5>Pharmacy</h5>
+                    <p>In-house pharmacy stocked with prescribed and over-the-counter medication.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="service-card">
+                    <div class="service-icon"><i class="bi bi-truck-front-fill"></i></div>
+                    <h5>Emergency Care</h5>
+                    <p>24/7 emergency response with fully-equipped ambulance services.</p>
+                    <a href="#" class="service-link">Learn More <i class="bi bi-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     HOW IT WORKS
+============================================================= -->
+<section class="section-padding bg-light-gray process-section">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">How It Works</span>
+            <h2 class="section-title">Getting Treated in 3 Simple Steps</h2>
+        </div>
+
+        <div class="row gy-4">
+            <div class="col-lg-4">
+                <div class="process-step">
+                    <span class="process-number">01</span>
+                    <div class="feature-icon"><i class="bi bi-calendar2-check"></i></div>
+                    <h6>Book an Appointment</h6>
+                    <p>Choose your department and preferred doctor, then pick a convenient time slot.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="process-step">
+                    <span class="process-number">02</span>
+                    <div class="feature-icon"><i class="bi bi-clipboard2-pulse"></i></div>
+                    <h6>Consult &amp; Diagnose</h6>
+                    <p>Meet your specialist for a thorough consultation and diagnostic tests.</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="process-step">
+                    <span class="process-number">03</span>
+                    <div class="feature-icon"><i class="bi bi-heart-pulse"></i></div>
+                    <h6>Receive Treatment</h6>
+                    <p>Get a personalized treatment plan and ongoing care until you're fully recovered.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CTA BANNER
+============================================================= -->
+<section class="cta-banner">
+    <div class="container">
+        <div class="cta-content text-center">
+            <h2>Not Sure Which Service You Need?</h2>
+            <p>Talk to our care coordinators and we'll guide you to the right specialist.</p>
+            <div class="cta-actions">
+                <a href="#" class="btn btn-light btn-lg">
+                    <i class="bi bi-calendar2-check me-2"></i>Book Appointment
+                </a>
+                <a href="#" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-telephone me-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

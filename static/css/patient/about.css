@@ -1,0 +1,75 @@
+/* ==========================================================================
+   ABOUT PAGE (about.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Timeline
+   2. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TIMELINE
+   ========================================================================== */
+.timeline-section {
+    background-color: var(--white);
+}
+
+.timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    padding-left: 2.25rem;
+    border-left: 2px solid var(--border-color);
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 2.5rem;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-dot {
+    position: absolute;
+    left: -2.6rem;
+    top: 0.25rem;
+    width: 16px;
+    height: 16px;
+    background-color: var(--primary);
+    border: 3px solid var(--primary-light);
+    border-radius: 50%;
+}
+
+.timeline-year {
+    display: inline-block;
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.35rem;
+}
+
+.timeline-content h6 {
+    margin-bottom: 0.4rem;
+}
+
+.timeline-content p {
+    font-size: 0.92rem;
+    margin: 0;
+    max-width: 520px;
+}
+
+
+/* ==========================================================================
+   2. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .timeline {
+        padding-left: 1.75rem;
+    }
+
+    .timeline-dot {
+        left: -2.05rem;
+    }
+}

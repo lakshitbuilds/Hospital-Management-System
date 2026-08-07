@@ -1,0 +1,174 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Departments - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/departments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>Departments</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">Departments</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     DEPARTMENTS GRID
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+        <div class="text-center section-heading">
+            <span class="section-tag">Specialized Care</span>
+            <h2 class="section-title">Explore Our Departments</h2>
+            <p class="section-text mx-auto">
+                18 dedicated departments staffed by specialists using the latest
+                diagnostic and treatment technology.
+            </p>
+        </div>
+
+        <div class="row gy-4">
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-cardiology.jpg' %}" alt="Cardiology department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-heart-pulse-fill"></i></div>
+                        <h5>Cardiology</h5>
+                        <p>12 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-neurology.jpg' %}" alt="Neurology department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-activity"></i></div>
+                        <h5>Neurology</h5>
+                        <p>9 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-orthopedics.jpg' %}" alt="Orthopedics department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-person-wheelchair"></i></div>
+                        <h5>Orthopedics</h5>
+                        <p>10 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-pediatrics.jpg' %}" alt="Pediatrics department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-emoji-smile-fill"></i></div>
+                        <h5>Pediatrics</h5>
+                        <p>8 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-ophthalmology.jpg' %}" alt="Ophthalmology department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-eye-fill"></i></div>
+                        <h5>Ophthalmology</h5>
+                        <p>6 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-dermatology.jpg' %}" alt="Dermatology department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-droplet-half"></i></div>
+                        <h5>Dermatology</h5>
+                        <p>5 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-general-medicine.jpg' %}" alt="General Medicine department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
+                        <h5>General Medicine</h5>
+                        <p>15 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-dental.jpg' %}" alt="Dental Care department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-emoji-laughing-fill"></i></div>
+                        <h5>Dental Care</h5>
+                        <p>7 Specialists</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="department-card">
+                    <img src="{% static 'public/images/dept-emergency.jpg' %}" alt="Emergency department">
+                    <div class="department-overlay">
+                        <div class="department-icon"><i class="bi bi-truck-front-fill"></i></div>
+                        <h5>Emergency Care</h5>
+                        <p>24/7 Availability</p>
+                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     CTA BANNER
+============================================================= -->
+<section class="cta-banner">
+    <div class="container">
+        <div class="cta-content text-center">
+            <h2>Looking for a Specific Department?</h2>
+            <p>Our care coordinators can connect you with the right team in minutes.</p>
+            <div class="cta-actions">
+                <a href="#" class="btn btn-light btn-lg">
+                    <i class="bi bi-calendar2-check me-2"></i>Book Appointment
+                </a>
+                <a href="#" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-telephone me-2"></i>Contact Us
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

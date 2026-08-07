@@ -1,0 +1,157 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}My Appointments - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/my_appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>My Appointments</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">My Appointments</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     APPOINTMENTS SECTION
+     NOTE: static/dummy data for now - wire up to a real Appointment
+     model + queryset once the backend exists.
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+
+        <!-- Toolbar -->
+        <div class="appointments-toolbar">
+            <div class="apt-filters">
+                <button type="button" class="apt-filter-btn active" data-filter="all">All</button>
+                <button type="button" class="apt-filter-btn" data-filter="upcoming">Upcoming</button>
+                <button type="button" class="apt-filter-btn" data-filter="completed">Completed</button>
+                <button type="button" class="apt-filter-btn" data-filter="cancelled">Cancelled</button>
+            </div>
+            <a href="{% url 'book_appointment' %}" class="btn btn-primary">
+                <i class="bi bi-calendar2-plus me-2"></i>Book New Appointment
+            </a>
+        </div>
+
+        <!-- Appointment List -->
+        <div class="appointment-list" id="appointmentList">
+    {% for appt in appointments %}
+    <div class="appointment-card" id="apt-{{ appt.id }}"
+         data-status="{% if appt.status == 'completed' %}completed{% elif appt.status == 'cancelled' %}cancelled{% else %}upcoming{% endif %}">
+        <div class="apt-date-block">
+            <span class="apt-day">{{ appt.appointment_date|date:"d" }}</span>
+            <span class="apt-month">{{ appt.appointment_date|date:"M" }}</span>
+        </div>
+        <div class="apt-info">
+            <h6>Dr. {{ appt.doctor.user.get_full_name }}</h6>
+            <p><i class="bi bi-hospital"></i>{{ appt.get_department_display }}</p>
+            <p><i class="bi bi-clock"></i>{{ appt.time_slot }}</p>
+        </div>
+        <div class="apt-status">
+            {% if appt.status == 'confirmed' %}
+                <span class="status-badge status-confirmed"><i class="bi bi-check-circle-fill"></i>Confirmed</span>
+            {% elif appt.status == 'pending' %}
+                <span class="status-badge status-pending"><i class="bi bi-hourglass-split"></i>Pending</span>
+            {% elif appt.status == 'completed' %}
+                <span class="status-badge status-completed"><i class="bi bi-check2-all"></i>Completed</span>
+            {% else %}
+                <span class="status-badge status-cancelled"><i class="bi bi-x-circle-fill"></i>Cancelled</span>
+            {% endif %}
+        </div>
+        <div class="apt-actions">
+            <button type="button" class="apt-action-btn" title="View Details"
+        data-bs-toggle="modal" data-bs-target="#viewDetailsModal"
+        data-doctor="Dr. {{ appt.doctor.user.get_full_name }}"
+        data-department="{{ appt.get_department_display }}"
+        data-date="{{ appt.appointment_date|date:'d M Y' }}"
+        data-time="{{ appt.time_slot }}"
+        data-visit-type="{{ appt.get_visit_type_display }}"
+        data-status="{{ appt.get_status_display }}"
+        data-reason="{{ appt.reason }}">
+    <i class="bi bi-eye"></i>
+</button>
+            {% if appt.status == 'pending' or appt.status == 'confirmed' %}
+            <button type="button" class="apt-action-btn apt-action-danger" title="Cancel"
+                    data-bs-toggle="modal" data-bs-target="#cancelModal"
+                    data-appointment-id="{{ appt.id }}" data-doctor-name="Dr. {{ appt.doctor.user.get_full_name }}">
+                <i class="bi bi-x-circle"></i>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <p>No appointments booked yet.</p>
+    {% endfor %}
+</div>
+
+        <!-- Empty State -->
+        <div class="apt-empty-state d-none" id="aptEmptyState">
+            <i class="bi bi-calendar-x"></i>
+            <h6>No appointments here</h6>
+            <p>You don't have any appointments in this category yet.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ============================================================
+     CANCEL CONFIRMATION MODAL
+============================================================= -->
+<div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <form id="cancelForm" method="POST" action="">
+    {% csrf_token %}
+</form>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="modal-icon-circle">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <h5 class="modal-title-text" id="cancelModalLabel">Cancel Appointment?</h5>
+                <p>Are you sure you want to cancel your appointment with <strong id="cancelDoctorName">this doctor</strong>? This action cannot be undone.</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Keep Appointment</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelBtn">Yes, Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="viewDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewDetailsModalLabel">Appointment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Doctor:</strong> <span id="detailDoctor"></span></p>
+                <p><strong>Department:</strong> <span id="detailDepartment"></span></p>
+                <p><strong>Date:</strong> <span id="detailDate"></span></p>
+                <p><strong>Time:</strong> <span id="detailTime"></span></p>
+                <p><strong>Visit Type:</strong> <span id="detailVisitType"></span></p>
+                <p><strong>Status:</strong> <span id="detailStatus"></span></p>
+                <p><strong>Reason:</strong> <span id="detailReason"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/patient/my_appointments.js' %}"></script>
+{% endblock %}

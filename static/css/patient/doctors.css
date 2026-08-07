@@ -1,0 +1,68 @@
+/* ==========================================================================
+   DOCTORS PAGE (doctors.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Filter Tabs
+   2. No Results State
+   3. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. FILTER TABS
+   ========================================================================== */
+.doctor-filters {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 3rem;
+}
+
+.filter-btn {
+    border: 1px solid var(--border-color);
+    background-color: var(--white);
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.55rem 1.4rem;
+    border-radius: var(--border-radius-pill);
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.filter-btn:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-btn.active {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+    box-shadow: 0 4px 14px rgba(13, 110, 253, 0.25);
+}
+
+
+/* ==========================================================================
+   2. NO RESULTS STATE
+   ========================================================================== */
+.no-results {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    padding: 2rem 0;
+}
+
+
+/* ==========================================================================
+   3. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .doctor-filters {
+        gap: 0.5rem;
+    }
+
+    .filter-btn {
+        padding: 0.45rem 1.1rem;
+        font-size: 0.85rem;
+    }
+}

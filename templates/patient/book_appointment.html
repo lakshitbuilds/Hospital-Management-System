@@ -1,0 +1,238 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Book Appointment - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/book_appointment.css' %}">
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>Book an Appointment</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">Book Appointment</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     BOOKING SECTION
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+
+        <!-- Success Banner (shown after submit) -->
+        <div id="bookingSuccess" class="booking-success d-none">
+            <i class="bi bi-check-circle-fill"></i>
+            <div>
+                <h6>Appointment Request Sent!</h6>
+                <p>We've received your request and will confirm it by email/SMS shortly.</p>
+            </div>
+        </div>
+
+        <div class="row gy-4">
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+            <!-- Booking Form -->
+            <div class="col-lg-8">
+                <div class="booking-form-card">
+                    <form id="bookAppointmentForm" method="POST" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Step 1: Department -->
+                        <div class="booking-step">
+                            <h6 class="booking-step-title"><span>1</span>Select Department</h6>
+                            <div class="department-select-grid">
+
+                                <input type="radio" name="department" id="dept_cardiology" value="cardiology" class="department-input" data-label="Cardiology" checked>
+                                <label for="dept_cardiology" class="department-option">
+                                    <i class="bi bi-heart-pulse-fill"></i>Cardiology
+                                </label>
+
+                                <input type="radio" name="department" id="dept_neurology" value="neurology" class="department-input" data-label="Neurology">
+                                <label for="dept_neurology" class="department-option">
+                                    <i class="bi bi-activity"></i>Neurology
+                                </label>
+
+                                <input type="radio" name="department" id="dept_orthopedics" value="orthopedics" class="department-input" data-label="Orthopedics">
+                                <label for="dept_orthopedics" class="department-option">
+                                    <i class="bi bi-person-wheelchair"></i>Orthopedics
+                                </label>
+
+                                <input type="radio" name="department" id="dept_pediatrics" value="pediatrics" class="department-input" data-label="Pediatrics">
+                                <label for="dept_pediatrics" class="department-option">
+                                    <i class="bi bi-emoji-smile-fill"></i>Pediatrics
+                                </label>
+
+                                <input type="radio" name="department" id="dept_dermatology" value="dermatology" class="department-input" data-label="Dermatology">
+                                <label for="dept_dermatology" class="department-option">
+                                    <i class="bi bi-droplet-half"></i>Dermatology
+                                </label>
+
+                                <input type="radio" name="department" id="dept_general" value="general" class="department-input" data-label="General Medicine">
+                                <label for="dept_general" class="department-option">
+                                    <i class="bi bi-clipboard2-pulse-fill"></i>General Medicine
+                                </label>
+
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Doctor -->
+                        <div class="booking-step">
+                            <h6 class="booking-step-title"><span>2</span>Select Doctor</h6>
+                            <select class="form-select" id="doctorSelect" name="doctor" required>
+                                <option value="" disabled selected>Choose a doctor</option>
+                                {% for doc in doctors %}
+                                    <option value="{{ doc.id }}" data-department="{{ doc.department }}">
+                                        Dr. {{ doc.user.get_full_name }} — {{ doc.get_department_display }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <div class="invalid-feedback">Please choose a doctor.</div>
+                        </div>
+
+                        <!-- Step 3: Date & Time -->
+                        <div class="booking-step">
+                            <h6 class="booking-step-title"><span>3</span>Select Date &amp; Time</h6>
+
+                            <div class="mb-3">
+                                <label for="appointmentDate" class="form-label">Preferred Date</label>
+                                <input type="date" class="form-control" id="appointmentDate" name="appointment_date" required>                                
+                                <div class="invalid-feedback">Please select a date.</div>
+                            </div>
+
+                            <label class="form-label d-block">Available Time Slots</label>
+                            <div class="time-slot-grid" id="timeSlotGrid">
+                                <input type="radio" name="time_slot" id="slot_0900" value="09:00 AM" class="time-slot-input">
+                                <label for="slot_0900" class="time-slot-option">09:00 AM</label>
+
+                                <input type="radio" name="time_slot" id="slot_0930" value="09:30 AM" class="time-slot-input">
+                                <label for="slot_0930" class="time-slot-option">09:30 AM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1000" value="10:00 AM" class="time-slot-input" disabled>
+                                <label for="slot_1000" class="time-slot-option is-booked">10:00 AM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1030" value="10:30 AM" class="time-slot-input">
+                                <label for="slot_1030" class="time-slot-option">10:30 AM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1100" value="11:00 AM" class="time-slot-input">
+                                <label for="slot_1100" class="time-slot-option">11:00 AM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1130" value="11:30 AM" class="time-slot-input">
+                                <label for="slot_1130" class="time-slot-option">11:30 AM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1400" value="02:00 PM" class="time-slot-input">
+                                <label for="slot_1400" class="time-slot-option">02:00 PM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1430" value="02:30 PM" class="time-slot-input">
+                                <label for="slot_1430" class="time-slot-option">02:30 PM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1500" value="03:00 PM" class="time-slot-input" disabled>
+                                <label for="slot_1500" class="time-slot-option is-booked">03:00 PM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1530" value="03:30 PM" class="time-slot-input">
+                                <label for="slot_1530" class="time-slot-option">03:30 PM</label>
+
+                                <input type="radio" name="time_slot" id="slot_1600" value="04:00 PM" class="time-slot-input">
+                                <label for="slot_1600" class="time-slot-option">04:00 PM</label>
+                            </div>
+                            <p class="time-slot-hint"><i class="bi bi-square-fill is-booked-dot"></i>Booked slots are unavailable</p>
+                        </div>
+
+                        <!-- Step 4: Patient Details -->
+                        <div class="booking-step">
+                            <h6 class="booking-step-title"><span>4</span>Your Details</h6>
+                            <div class="row gy-3">
+                                <div class="col-md-6">
+                                    <label for="patientName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="patientName" name="patient_name" placeholder="John Doe" required>
+                                    <div class="invalid-feedback">Please enter your full name.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="patientPhone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="patientPhone" name="patient_phone" placeholder="+91 98765 43210" required>
+                                    <div class="invalid-feedback">Please enter a valid phone number.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="patientEmail" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="patientEmail" name="patient_email" placeholder="you@example.com" required>
+                                    <div class="invalid-feedback">Please enter a valid email address.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="visitType" class="form-label">Visit Type</label>
+                                    <select class="form-select" id="visitType" name="visit_type" required>
+                                        <option value="new" selected>New Visit</option>
+                                        <option value="follow-up">Follow-up Visit</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label for="reasonForVisit" class="form-label">Reason for Visit</label>
+                                    <textarea class="form-control" id="reasonForVisit" name="reason" rows="4" placeholder="Briefly describe your symptoms or reason for the visit..." required></textarea>
+                                    <div class="invalid-feedback">Please describe your reason for visit.</div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="bi bi-calendar2-check me-2"></i>Confirm Appointment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Booking Summary Sidebar -->
+            <div class="col-lg-4">
+                <div class="booking-summary-card">
+                    <h6 class="summary-title"><i class="bi bi-clipboard2-check-fill me-2"></i>Booking Summary</h6>
+
+                    <ul class="summary-list">
+                        <li>
+                            <span class="summary-label"><i class="bi bi-hospital"></i>Department</span>
+                            <span class="summary-value" id="summaryDepartment">Cardiology</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-person-badge"></i>Doctor</span>
+                            <span class="summary-value" id="summaryDoctor">Dr. Sarah Mitchell</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-calendar3"></i>Date</span>
+                            <span class="summary-value" id="summaryDate">Not selected</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-clock"></i>Time</span>
+                            <span class="summary-value" id="summaryTime">Not selected</span>
+                        </li>
+                    </ul>
+
+                    <div class="emergency-box mt-4">
+                        <div class="feature-icon"><i class="bi bi-telephone-fill"></i></div>
+                        <div>
+                            <h6>Need Help Booking?</h6>
+                            <p>Call our front desk for assistance.</p>
+                            <a href="tel:+919876543210" class="emergency-number">+91 98765 43210</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/book_appointment.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Login - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     LOGIN SECTION
+============================================================= -->
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-wrapper">
+
+            <!-- Left Brand Panel -->
+            <div class="brand-panel d-none d-lg-flex">
+                <div class="brand-panel-content">
+                    <img src="{% static 'public/images/logo.png' %}" alt="MediCare Hospital Logo" class="brand-panel-logo">
+                    <h3>Welcome Back to MediCare</h3>
+                    <p>Access your appointments, medical records, and care team — all in one place.</p>
+
+                    <ul class="brand-feature-list">
+                        <li><i class="bi bi-check-circle-fill"></i>Manage appointments online</li>
+                        <li><i class="bi bi-check-circle-fill"></i>View prescriptions &amp; reports</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Chat securely with your doctor</li>
+                    </ul>
+                </div>
+                <div class="brand-panel-shape shape-one"></div>
+                <div class="brand-panel-shape shape-two"></div>
+            </div>
+
+            <!-- Login Form Card -->
+            <div class="auth-card">
+                <div class="auth-header">
+                    <span class="section-tag">Sign In</span>
+                    <h2 class="section-title">Login to Your Account</h2>
+                    <p class="section-text">Select your role and enter your credentials to continue.</p>
+                </div>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert
+                            {% if message.tags == 'success' %}alert-success
+                            {% elif message.tags == 'error' %}alert-danger
+                            {% elif message.tags == 'warning' %}alert-warning
+                            {% else %}alert-info
+                            {% endif %}
+                            alert-dismissible fade show mb-3"
+                            role="alert">
+
+                            {{ message }}
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert"
+                                    aria-label="Close">
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <form id="loginForm" class="auth-form" action="#" method="post" novalidate>
+                    {% csrf_token %}
+                    <!-- Role Selector -->
+                    <div class="role-selector mb-4">
+                        <input type="radio" name="role" id="role_patient" value="patient" class="role-input" checked>
+                        <label for="role_patient" class="role-option">
+                            <i class="bi bi-person-fill"></i>
+                            <span>Patient</span>
+                        </label>
+
+                        <input type="radio" name="role" id="role_doctor" value="doctor" class="role-input">
+                        <label for="role_doctor" class="role-option">
+                            <i class="bi bi-heart-pulse-fill"></i>
+                            <span>Doctor</span>
+                        </label>
+
+                        <input type="radio" name="role" id="role_receptionist" value="receptionist" class="role-input">
+                        <label for="role_receptionist" class="role-option">
+                            <i class="bi bi-headset"></i>
+                            <span>Receptionist</span>
+                        </label>
+
+                        <input type="radio" name="role" id="role_admin" value="admin" class="role-input">
+                        <label for="role_admin" class="role-option">
+                            <i class="bi bi-shield-lock-fill"></i>
+                            <span>Admin</span>
+                        </label>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="loginEmail" class="form-label">Email Address</label>
+                        <div class="input-icon-group">
+                            <i class="bi bi-envelope-fill"></i>
+                            <input type="email" class="form-control" id="loginEmail" name="email" placeholder="you@example.com" required>
+                        </div>
+                        <div class="invalid-feedback">Please enter a valid email address.</div>
+                    </div>
+
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="loginPassword" class="form-label">Password</label>
+                        <div class="input-icon-group">
+                            <i class="bi bi-lock-fill"></i>
+                            <input type="password" class="form-control" id="loginPassword" name="password" placeholder="Enter your password" required>
+                            <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">Please enter your password.</div>
+                    </div>
+
+                    <!-- Remember / Forgot -->
+                    <div class="d-flex justify-content-between align-items-center mb-4 auth-meta">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="rememberMe" name="remember_me">
+                            <label class="form-check-label" for="rememberMe">Remember me</label>
+                        </div>
+                        <a href="{% url 'forgot_password' %}" class="auth-link">Forgot password?</a>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                    </button>
+                </form>
+
+                <p class="auth-footer-text">
+                    Don't have an account? <a href="{% url 'register' %}" class="auth-link fw-semibold">Register here</a>
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/auth.js' %}"></script>
+{% endblock %}
