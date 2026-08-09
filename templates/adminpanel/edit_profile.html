@@ -1,0 +1,64 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Admin Panel{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/adminpanel/form.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'admin_profile' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Profile</a>
+
+<h4 class="adm-page-title">Edit Profile</h4>
+<p class="adm-page-subtitle">Update your account details.</p>
+
+<div class="row gy-4">
+
+    <div class="col-lg-4">
+        <div class="adm-card text-center">
+            <div class="initials-avatar initials-avatar-lg mx-auto mb-3">{{ request.user.first_name|slice:":1" }}{{ request.user.last_name|slice:":1" }}</div>
+            <h6 class="mb-1">{{ request.user.get_full_name }}</h6>
+            <p class="mb-0">Administrator</p>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="adm-card">
+            <form id="editProfileForm" method="POST" novalidate>
+                {% csrf_token %}
+
+                <h6 class="form-section-title"><i class="bi bi-person-fill"></i>Basic Information</h6>
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="first_name" value="{{ request.user.first_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="last_name" value="{{ request.user.last_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ request.user.email }}" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check2-circle me-2"></i>Save Changes
+                    </button>
+                    <a href="{% url 'admin_profile' %}" class="btn btn-outline-primary btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/adminpanel/edit_profile.js' %}"></script>
+{% endblock %}

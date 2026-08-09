@@ -1,0 +1,83 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Patient List - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/patient_list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="rec-page-title">Patient List</h4>
+        <p class="rec-page-subtitle mb-0">{{ patients|length }} patient{{ patients|length|pluralize }} registered in the system.</p>
+    </div>
+    <a href="{% url 'receptionist_register_patient' %}" class="btn btn-primary">
+        <i class="bi bi-person-plus-fill me-2"></i>Register Patient
+    </a>
+</div>
+
+<div class="rec-card">
+
+    <!-- Toolbar -->
+    <div class="list-toolbar">
+        <form class="list-search-box" method="get">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by name, patient ID, phone, or email...">
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="patient-table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Patient ID</th>
+                    <th>Contact</th>
+                    <th>Gender</th>
+                    <th>Registered</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                {% for patient in patients %}
+                <tr>
+                    <td>
+                        <div class="table-patient-cell">
+                            {% if patient.profile_image %}
+                            <img src="{{ patient.profile_image.url }}" alt="{{ patient.user.get_full_name }}">
+                            {% else %}
+                            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ patient.user.get_full_name }}">
+                            {% endif %}
+                            <div>
+                                <h6>{{ patient.user.get_full_name }}</h6>
+                                <span>{{ patient.user.email }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ patient.patient_id }}</td>
+                    <td>{{ patient.phone|default:"Not provided" }}</td>
+                    <td>{{ patient.gender|default:"-" }}</td>
+                    <td>{{ patient.created_at|date:"M d, Y" }}</td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{% url 'receptionist_patient_detail' patient.id %}" class="table-action-btn" title="View Details"><i class="bi bi-eye"></i></a>
+                            <a href="{% url 'receptionist_book_appointment' %}" class="table-action-btn" title="Book Appointment"><i class="bi bi-calendar2-plus"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No patients found.</td></tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

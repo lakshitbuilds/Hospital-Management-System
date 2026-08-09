@@ -1,0 +1,222 @@
+/* ==========================================================================
+   APPOINTMENT LIST PAGE (appointment_list.html) - PAGE SPECIFIC STYLES
+   Note: .table-patient-cell / .table-actions / .table-action-btn /
+   .table-empty-state now live in the shared base.css since patient_list.html
+   and patient_detail.html use them too.
+   Structure:
+   1. Toolbar
+   2. Table
+   3. Pagination
+   4. Cancel Modal
+   5. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TOOLBAR
+   ========================================================================== */
+.appointment-list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.apt-search-box {
+    flex: 1;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--rec-background);
+    border: 1px solid var(--rec-border-color);
+    border-radius: var(--rec-radius-pill);
+    padding: 0.55rem 1.1rem;
+}
+
+.apt-search-box i {
+    color: var(--rec-text-light);
+}
+
+.apt-search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.apt-status-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.apt-filter-btn {
+    border: 1px solid var(--rec-border-color);
+    background-color: var(--rec-white);
+    color: var(--rec-text-light);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.45rem 1.1rem;
+    border-radius: var(--rec-radius-pill);
+    cursor: pointer;
+    transition: var(--rec-transition);
+}
+
+.apt-filter-btn:hover {
+    border-color: var(--rec-primary);
+    color: var(--rec-primary);
+}
+
+.apt-filter-btn.active {
+    background-color: var(--rec-primary);
+    border-color: var(--rec-primary);
+    color: var(--rec-white);
+}
+
+
+/* ==========================================================================
+   2. TABLE
+   ========================================================================== */
+.appointment-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.appointment-table thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--rec-text-light);
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--rec-border-color);
+    white-space: nowrap;
+}
+
+.appointment-table tbody td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--rec-border-color);
+    font-size: 0.85rem;
+    color: var(--rec-text-dark);
+    vertical-align: middle;
+}
+
+.appointment-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.appointment-table tbody tr:hover {
+    background-color: var(--rec-background);
+}
+
+
+/* ==========================================================================
+   3. PAGINATION
+   ========================================================================== */
+.appointment-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--rec-border-color);
+}
+
+.pagination-info {
+    font-size: 0.8rem;
+    color: var(--rec-text-light);
+}
+
+.pagination-controls {
+    display: flex;
+    list-style: none;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+}
+
+.page-link-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rec-border-color);
+    border-radius: var(--rec-radius-sm);
+    font-size: 0.82rem;
+    color: var(--rec-text-dark);
+    transition: var(--rec-transition);
+}
+
+.page-link-btn:hover:not(.disabled) {
+    border-color: var(--rec-primary);
+    color: var(--rec-primary);
+}
+
+.page-link-btn.active {
+    background-color: var(--rec-primary);
+    border-color: var(--rec-primary);
+    color: var(--rec-white);
+}
+
+.page-link-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   4. CANCEL MODAL
+   ========================================================================== */
+#cancelAptModal .modal-content {
+    border: none;
+    border-radius: var(--rec-radius);
+    padding: 1rem;
+}
+
+.modal-icon-circle {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--rec-danger);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    margin: 0.5rem auto 1.1rem;
+}
+
+#cancelAptModal p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.85rem;
+}
+
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .appointment-list-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .apt-search-box {
+        max-width: none;
+    }
+}

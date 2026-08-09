@@ -1,0 +1,86 @@
+/* ==========================================================================
+   DOCTOR LIST PAGE (doctor_list.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Doctor Card
+   2. Availability Badge
+   3. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DOCTOR CARD
+   ========================================================================== */
+.doctor-list-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: 100%;
+}
+
+.doctor-list-avatar {
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.doctor-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.doctor-list-info h6 {
+    font-size: 0.92rem;
+    margin-bottom: 0.15rem;
+}
+
+.doctor-list-info p {
+    font-size: 0.78rem;
+    margin-bottom: 0.4rem;
+}
+
+.doctor-list-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+
+/* ==========================================================================
+   2. AVAILABILITY BADGE
+   ========================================================================== */
+.availability-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.6rem;
+    border-radius: var(--rec-radius-pill);
+}
+
+.availability-badge-on {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--rec-success);
+}
+
+.availability-badge-off {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--rec-danger);
+}
+
+.availability-badge i {
+    font-size: 0.5rem;
+}
+
+
+/* ==========================================================================
+   3. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .doctor-list-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}

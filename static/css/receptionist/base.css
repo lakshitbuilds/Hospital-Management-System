@@ -1,0 +1,694 @@
+/* ==========================================================================
+   RECEPTIONIST PORTAL - SHARED THEME + LAYOUT
+   Deliberately a different visual identity from the doctor portal (teal)
+   and the patient-facing marketing site (blue) - indigo accent + a
+   indigo-tinted dark sidebar so all three apps feel distinct.
+   Structure:
+   1. Root Variables
+   2. Reset / Typography
+   3. Shell Layout (Sidebar + Main Column)
+   4. Sidebar
+   5. Topbar
+   6. Content Area / Shared Components
+   7. Status Badges
+   8. Table Row / Action Components
+   9. Info Pills
+   10. Buttons (Receptionist Portal Overrides)
+   11. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. ROOT VARIABLES
+   ========================================================================== */
+:root {
+    --rec-primary: #4f46e5;
+    --rec-primary-dark: #4338ca;
+    --rec-primary-light: #eef2ff;
+    --rec-sidebar-bg: #1e1b4b;
+    --rec-sidebar-bg-active: #312e81;
+    --rec-sidebar-text: #a5b4fc;
+    --rec-sidebar-text-active: #ffffff;
+    --rec-background: #f4f5f9;
+    --rec-white: #ffffff;
+    --rec-border-color: #e5e7eb;
+    --rec-text-dark: #111827;
+    --rec-text-light: #6b7280;
+    --rec-success: #16a34a;
+    --rec-warning: #d97706;
+    --rec-danger: #dc2626;
+
+    --rec-radius: 0.85rem;
+    --rec-radius-sm: 0.5rem;
+    --rec-radius-pill: 50rem;
+
+    --rec-shadow-sm: 0 2px 10px rgba(30, 27, 75, 0.06);
+    --rec-shadow-md: 0 8px 24px rgba(30, 27, 75, 0.10);
+    --rec-transition: all 0.25s ease;
+}
+
+
+/* ==========================================================================
+   2. RESET / TYPOGRAPHY
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--rec-text-dark);
+    background-color: var(--rec-background);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--rec-text-dark);
+    line-height: 1.3;
+}
+
+p {
+    color: var(--rec-text-light);
+}
+
+
+/* ==========================================================================
+   3. SHELL LAYOUT
+   ========================================================================== */
+.receptionist-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.receptionist-main {
+    flex: 1;
+    min-width: 0;
+    margin-left: 268px;
+    display: flex;
+    flex-direction: column;
+    transition: var(--rec-transition);
+}
+
+
+/* ==========================================================================
+   4. SIDEBAR
+   ========================================================================== */
+.receptionist-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 268px;
+    height: 100vh;
+    background-color: var(--rec-sidebar-bg);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 1050;
+    transition: var(--rec-transition);
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.sidebar-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--rec-radius-sm);
+    object-fit: contain;
+    background-color: var(--rec-white);
+    padding: 4px;
+}
+
+.sidebar-brand-name {
+    display: block;
+    color: var(--rec-sidebar-text-active);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.sidebar-brand-tag {
+    display: block;
+    color: var(--rec-sidebar-text);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-receptionist-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 1.25rem 1.5rem;
+    padding: 0.85rem 1rem;
+    background-color: var(--rec-sidebar-bg-active);
+    border-radius: var(--rec-radius-sm);
+}
+
+.sidebar-receptionist-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.sidebar-receptionist-card h6 {
+    color: var(--rec-sidebar-text-active);
+    font-size: 0.88rem;
+    margin-bottom: 0.1rem;
+}
+
+.sidebar-receptionist-card span {
+    color: var(--rec-sidebar-text);
+    font-size: 0.74rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 0 1rem 1.5rem;
+}
+
+.sidebar-nav-label {
+    display: block;
+    color: #8183b8;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0.9rem 0.75rem 0.4rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--rec-radius-sm);
+    color: var(--rec-sidebar-text);
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 0.15rem;
+    transition: var(--rec-transition);
+    position: relative;
+}
+
+.sidebar-link i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-link:hover {
+    background-color: var(--rec-sidebar-bg-active);
+    color: var(--rec-sidebar-text-active);
+}
+
+.sidebar-link.active {
+    background-color: var(--rec-primary);
+    color: var(--rec-sidebar-text-active);
+}
+
+.sidebar-badge {
+    margin-left: auto;
+    background-color: var(--rec-danger);
+    color: var(--rec-white);
+    font-size: 0.68rem;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.25rem 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--rec-sidebar-text-active);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.6rem;
+    border-radius: var(--rec-radius-sm);
+    transition: var(--rec-transition);
+}
+
+.sidebar-logout-btn:hover {
+    background-color: var(--rec-danger);
+    border-color: var(--rec-danger);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(30, 27, 75, 0.5);
+    z-index: 1040;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+
+/* ==========================================================================
+   5. TOPBAR
+   ========================================================================== */
+.receptionist-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--rec-white);
+    border-bottom: 1px solid var(--rec-border-color);
+    padding: 0.85rem 1.5rem;
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--rec-text-dark);
+}
+
+.topbar-search {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--rec-background);
+    border: 1px solid var(--rec-border-color);
+    border-radius: var(--rec-radius-pill);
+    padding: 0.55rem 1.1rem;
+}
+
+.topbar-search i {
+    color: var(--rec-text-light);
+}
+
+.topbar-search input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.88rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.topbar-date {
+    font-size: 0.85rem;
+    color: var(--rec-text-light);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.topbar-icon-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--rec-background);
+    border: none;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    color: var(--rec-text-dark);
+    transition: var(--rec-transition);
+}
+
+.topbar-icon-btn:hover {
+    background-color: var(--rec-primary-light);
+    color: var(--rec-primary);
+}
+
+.topbar-notif-dot {
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--rec-danger);
+    border-radius: 50%;
+    border: 2px solid var(--rec-white);
+}
+
+.topbar-notif-menu {
+    min-width: 280px;
+    border: none;
+    box-shadow: var(--rec-shadow-md);
+    border-radius: var(--rec-radius-sm);
+    padding: 0.5rem 0;
+}
+
+.topbar-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    border-radius: var(--rec-radius-pill);
+}
+
+.topbar-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.topbar-profile-btn i {
+    font-size: 0.75rem;
+    color: var(--rec-text-light);
+}
+
+.receptionist-topbar .dropdown-menu {
+    border: none;
+    box-shadow: var(--rec-shadow-md);
+    border-radius: var(--rec-radius-sm);
+    padding: 0.5rem 0;
+}
+
+.receptionist-topbar .dropdown-item {
+    font-size: 0.88rem;
+    padding: 0.55rem 1.1rem;
+}
+
+.receptionist-topbar .dropdown-item:hover {
+    background-color: var(--rec-primary-light);
+    color: var(--rec-primary);
+}
+
+
+/* ==========================================================================
+   6. CONTENT AREA / SHARED COMPONENTS
+   ========================================================================== */
+.receptionist-content {
+    padding: 1.75rem;
+}
+
+.rec-card {
+    background-color: var(--rec-white);
+    border-radius: var(--rec-radius);
+    box-shadow: var(--rec-shadow-sm);
+    padding: 1.5rem;
+}
+
+.rec-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.rec-card-header h6 {
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.rec-card-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--rec-primary);
+}
+
+.rec-page-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.3rem;
+}
+
+.rec-page-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--rec-text-light);
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: var(--rec-primary);
+}
+
+
+/* ==========================================================================
+   7. STATUS BADGES (shared across dashboard, appointment_list, etc.)
+   ========================================================================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--rec-radius-pill);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.status-confirmed {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--rec-success);
+}
+
+.status-pending {
+    background-color: rgba(217, 119, 6, 0.1);
+    color: var(--rec-warning);
+}
+
+.status-completed {
+    background-color: var(--rec-primary-light);
+    color: var(--rec-primary);
+}
+
+.status-cancelled {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--rec-danger);
+}
+
+
+/* ==========================================================================
+   8. TABLE ROW / ACTION COMPONENTS (shared across list + detail pages)
+   ========================================================================== */
+.table-patient-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.table-patient-cell img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.table-patient-cell h6 {
+    font-size: 0.86rem;
+    margin-bottom: 0.1rem;
+}
+
+.table-patient-cell span {
+    font-size: 0.76rem;
+    color: var(--rec-text-light);
+}
+
+.table-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.table-action-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--rec-background);
+    color: var(--rec-text-dark);
+    border: none;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    transition: var(--rec-transition);
+}
+
+.table-action-btn:hover {
+    background-color: var(--rec-primary);
+    color: var(--rec-white);
+}
+
+.table-action-success:hover {
+    background-color: var(--rec-success);
+    color: var(--rec-white);
+}
+
+.table-action-danger:hover {
+    background-color: var(--rec-danger);
+    color: var(--rec-white);
+}
+
+.table-empty-state {
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+}
+
+.table-empty-state i {
+    font-size: 2.25rem;
+    color: var(--rec-border-color);
+    margin-bottom: 0.75rem;
+}
+
+.table-empty-state h6 {
+    margin-bottom: 0.3rem;
+}
+
+.table-empty-state p {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   9. INFO PILLS (shared across profile, patient_detail, etc.)
+   ========================================================================== */
+.info-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: var(--rec-background);
+    color: var(--rec-text-dark);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--rec-radius-pill);
+}
+
+.info-pill-blood {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--rec-danger);
+}
+
+.info-pill-primary {
+    background-color: var(--rec-primary-light);
+    color: var(--rec-primary);
+}
+
+
+/* ==========================================================================
+   10. BUTTONS (Receptionist Portal Overrides)
+   ========================================================================== */
+.receptionist-content .btn-primary,
+.rec-card .btn-primary {
+    background-color: var(--rec-primary);
+    border-color: var(--rec-primary);
+}
+
+.receptionist-content .btn-primary:hover,
+.rec-card .btn-primary:hover {
+    background-color: var(--rec-primary-dark);
+    border-color: var(--rec-primary-dark);
+}
+
+.receptionist-content .btn-outline-primary,
+.rec-card .btn-outline-primary {
+    color: var(--rec-primary);
+    border-color: var(--rec-primary);
+}
+
+.receptionist-content .btn-outline-primary:hover,
+.rec-card .btn-outline-primary:hover {
+    background-color: var(--rec-primary);
+    color: var(--rec-white);
+}
+
+.receptionist-content .form-control:focus,
+.receptionist-content .form-select:focus {
+    border-color: var(--rec-primary);
+    box-shadow: 0 0 0 0.2rem rgba(79, 70, 229, 0.15);
+}
+
+
+/* ==========================================================================
+   11. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .receptionist-sidebar {
+        left: -268px;
+    }
+
+    .receptionist-sidebar.show {
+        left: 0;
+    }
+
+    .receptionist-main {
+        margin-left: 0;
+    }
+
+    .sidebar-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .topbar-search {
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .receptionist-content {
+        padding: 1.25rem;
+    }
+
+    .topbar-search {
+        display: none;
+    }
+
+    .topbar-date {
+        display: none;
+    }
+}

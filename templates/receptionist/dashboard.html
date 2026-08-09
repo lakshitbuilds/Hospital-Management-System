@@ -1,0 +1,153 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     WELCOME BANNER
+============================================================= -->
+<div class="welcome-banner">
+    <div>
+        <h4>Welcome back, {{ request.user.get_full_name }}</h4>
+        <p>Here's the front desk overview for today, {% now "d M Y" %}.</p>
+    </div>
+    <a href="{% url 'receptionist_book_appointment' %}" class="btn btn-light">
+        <i class="bi bi-calendar2-plus-fill me-2"></i>Book Appointment
+    </a>
+</div>
+
+<!-- ============================================================
+     STATS CARDS
+============================================================= -->
+<div class="row gy-3 stats-row">
+    <div class="col-lg-3 col-md-6">
+        <div class="rec-stat-card">
+            <div class="rec-stat-icon rec-stat-icon-primary"><i class="bi bi-calendar-day-fill"></i></div>
+            <div>
+                <h3>{{ today_count }}</h3>
+                <p>Today's Appointments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="rec-stat-card">
+            <div class="rec-stat-icon rec-stat-icon-success"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <h3>{{ total_patients }}</h3>
+                <p>Total Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="rec-stat-card">
+            <div class="rec-stat-icon rec-stat-icon-info"><i class="bi bi-person-badge-fill"></i></div>
+            <div>
+                <h3>{{ total_doctors }}</h3>
+                <p>Total Doctors</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6">
+        <div class="rec-stat-card">
+            <div class="rec-stat-icon rec-stat-icon-warning"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <h3>{{ pending_count }}</h3>
+                <p>Pending Confirmations</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row gy-4 mt-1">
+
+    <!-- Today's Appointments Preview -->
+    <div class="col-lg-8">
+        <div class="rec-card">
+            <div class="rec-card-header">
+                <h6><i class="bi bi-calendar-day-fill me-2"></i>Today's Appointments</h6>
+                <a href="{% url 'receptionist_today_appointments' %}" class="rec-card-link">View All <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            {% for appt in todays_appointments %}
+            <div class="rec-appointment-row">
+                <div class="rec-appt-time">{{ appt.time_slot }}</div>
+                {% if appt.patient.profile_image %}
+                <img src="{{ appt.patient.profile_image.url }}" alt="Patient" class="rec-appt-avatar">
+                {% else %}
+                <img src="{% static 'public/images/patient-1.jpg' %}" alt="Patient" class="rec-appt-avatar">
+                {% endif %}
+                <div class="rec-appt-info">
+                    <h6>{{ appt.patient.user.get_full_name }}</h6>
+                    <p>with Dr. {{ appt.doctor.user.get_full_name }} &middot; {{ appt.get_department_display }}</p>
+                </div>
+                <span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span>
+                <a href="{% url 'receptionist_patient_detail' appt.patient.id %}" class="rec-appt-action"><i class="bi bi-chevron-right"></i></a>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0 py-3">No appointments scheduled for today.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Sidebar Column: Quick Actions + Recent Patients -->
+    <div class="col-lg-4">
+
+        <div class="rec-card mb-4">
+            <div class="rec-card-header">
+                <h6><i class="bi bi-lightning-charge-fill me-2"></i>Quick Actions</h6>
+            </div>
+            <div class="quick-actions-grid">
+                <a href="{% url 'receptionist_register_patient' %}" class="quick-action-btn">
+                    <i class="bi bi-person-plus-fill"></i>
+                    Register Patient
+                </a>
+
+                <a href="{% url 'receptionist_book_appointment' %}" class="quick-action-btn">
+                    <i class="bi bi-calendar2-plus-fill"></i>
+                    Book Appointment
+                </a>
+
+                <a href="{% url 'receptionist_appointment_list' %}" class="quick-action-btn">
+                    <i class="bi bi-calendar2-week-fill"></i>
+                    Appointment List
+                </a>
+
+                <a href="{% url 'receptionist_doctor_list' %}" class="quick-action-btn">
+                    <i class="bi bi-person-badge-fill"></i>
+                    View Doctors
+                </a>
+            </div>
+        </div>
+
+        <div class="rec-card">
+            <div class="rec-card-header">
+                <h6><i class="bi bi-person-lines-fill me-2"></i>Recently Registered</h6>
+            </div>
+
+            {% for p in recent_patients %}
+            <a href="{% url 'receptionist_patient_detail' p.id %}" class="recent-patient-row text-decoration-none">
+                {% if p.profile_image %}
+                <img src="{{ p.profile_image.url }}" alt="Patient" class="recent-patient-avatar">
+                {% else %}
+                <img src="{% static 'public/images/patient-1.jpg' %}" alt="Patient" class="recent-patient-avatar">
+                {% endif %}
+                <div>
+                    <h6>{{ p.user.get_full_name }}</h6>
+                    <p>Patient ID: {{ p.patient_id }}</p>
+                </div>
+            </a>
+            {% empty %}
+            <p class="text-muted mb-0">No patients yet.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

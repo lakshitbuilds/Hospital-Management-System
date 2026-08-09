@@ -1,0 +1,169 @@
+/* ==========================================================================
+   ADMIN DASHBOARD (dashboard.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Welcome Banner
+   2. Stats Cards
+   3. Chart Containers
+   4. Recent Activity Rows
+   5. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. WELCOME BANNER
+   ========================================================================== */
+.welcome-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, var(--adm-primary) 0%, var(--adm-primary-dark) 100%);
+    border-radius: var(--adm-radius);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-banner h4 {
+    color: var(--adm-white);
+    margin-bottom: 0.3rem;
+}
+
+.welcome-banner p {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.welcome-banner .btn-light {
+    flex-shrink: 0;
+    font-weight: 500;
+    color: var(--adm-primary-dark);
+}
+
+
+/* ==========================================================================
+   2. STATS CARDS
+   ========================================================================== */
+.adm-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background-color: var(--adm-white);
+    border-radius: var(--adm-radius);
+    box-shadow: var(--adm-shadow-sm);
+    padding: 1.1rem 1.1rem;
+    height: 100%;
+    transition: var(--adm-transition);
+}
+
+.adm-stat-card:hover {
+    box-shadow: var(--adm-shadow-md);
+    transform: translateY(-3px);
+}
+
+.adm-stat-icon {
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--adm-radius-sm);
+    font-size: 1.2rem;
+}
+
+.adm-stat-icon-primary {
+    background-color: var(--adm-primary-light);
+    color: var(--adm-primary-dark);
+}
+
+.adm-stat-icon-success {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--adm-success);
+}
+
+.adm-stat-icon-warning {
+    background-color: rgba(234, 88, 12, 0.1);
+    color: var(--adm-warning);
+}
+
+.adm-stat-icon-info {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--adm-info);
+}
+
+.adm-stat-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 0.1rem;
+}
+
+.adm-stat-card p {
+    font-size: 0.74rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   3. CHART CONTAINERS
+   ========================================================================== */
+.adm-card-sublabel {
+    font-size: 0.75rem;
+    color: var(--adm-text-light);
+}
+
+.chart-wrap {
+    position: relative;
+    height: 260px;
+}
+
+.chart-wrap-donut {
+    height: 260px;
+}
+
+.chart-wrap-bar {
+    height: 220px;
+}
+
+
+/* ==========================================================================
+   4. RECENT ACTIVITY ROWS
+   ========================================================================== */
+.adm-list-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--adm-border-color);
+}
+
+.adm-list-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.adm-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.adm-list-info h6 {
+    font-size: 0.88rem;
+    margin-bottom: 0.1rem;
+}
+
+.adm-list-info p {
+    font-size: 0.76rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .welcome-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+}

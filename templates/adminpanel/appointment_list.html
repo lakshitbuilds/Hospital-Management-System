@@ -1,0 +1,85 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}All Appointments - Admin Panel{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/adminpanel/list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="adm-page-title">All Appointments</h4>
+<p class="adm-page-subtitle">System-wide view across every doctor, patient, and date.</p>
+
+<div class="adm-card">
+
+    <div class="list-toolbar">
+        <div class="list-search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" id="searchInput" placeholder="Search by patient or doctor name...">
+        </div>
+        <div class="apt-status-filters">
+            <button type="button" class="apt-filter-btn active" data-filter="all">All</button>
+            <button type="button" class="apt-filter-btn" data-filter="pending">Pending</button>
+            <button type="button" class="apt-filter-btn" data-filter="confirmed">Confirmed</button>
+            <button type="button" class="apt-filter-btn" data-filter="completed">Completed</button>
+            <button type="button" class="apt-filter-btn" data-filter="cancelled">Cancelled</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table" id="appointmentTable">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Department</th>
+                    <th>Date &amp; Time</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appt in appointments %}
+                <tr data-status="{{ appt.status }}" data-patient="{{ appt.patient.user.get_full_name|lower }}" data-doctor="{{ appt.doctor.user.get_full_name|lower }}">
+                    <td>
+                        <div class="table-person-cell">
+                            <div class="initials-avatar initials-avatar-sm">{{ appt.patient.user.first_name|slice:":1" }}{{ appt.patient.user.last_name|slice:":1" }}</div>
+                            <div>
+                                <h6>{{ appt.patient.user.get_full_name }}</h6>
+                                <span>{{ appt.patient.patient_id }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
+                    <td>{{ appt.get_department_display }}</td>
+                    <td>{{ appt.appointment_date|date:"M d, Y" }} &middot; {{ appt.time_slot }}</td>
+                    <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{% url 'admin_patient_detail' appt.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-person"></i></a>
+                            <a href="{% url 'admin_doctor_detail' appt.doctor.id %}" class="table-action-btn" title="View Doctor"><i class="bi bi-person-badge"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No appointments found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-empty-state d-none" id="tableEmptyState">
+        <i class="bi bi-calendar-x"></i>
+        <h6>No appointments found</h6>
+        <p>Try a different search term or filter.</p>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/adminpanel/appointment_list.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,241 @@
+/* ==========================================================================
+   PATIENT DETAIL PAGE (patient_detail.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Back Link
+   2. Patient Header Card
+   3. Detail List (Personal Info / Emergency Contact)
+   4. Medical Alerts
+   5. Appointment History Table
+   6. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. BACK LINK
+   ========================================================================== */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--rec-text-light);
+    margin-bottom: 1.25rem;
+}
+
+.back-link:hover {
+    color: var(--rec-primary);
+}
+
+
+/* ==========================================================================
+   2. PATIENT HEADER CARD
+   ========================================================================== */
+.patient-header-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.patient-header-main {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.patient-header-avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.patient-header-main h4 {
+    margin-bottom: 0.3rem;
+}
+
+.patient-id-tag {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--rec-text-light);
+    margin-bottom: 0.5rem;
+}
+
+.patient-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+/* .info-pill / .info-pill-blood now live in the shared doctor.css
+   since profile.html uses .info-pill too. */
+
+.patient-header-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.patient-header-contact a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--rec-text-light);
+}
+
+.patient-header-contact a:hover {
+    color: var(--rec-primary);
+}
+
+.patient-header-contact i {
+    color: var(--rec-primary);
+}
+
+.patient-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+
+/* ==========================================================================
+   3. DETAIL LIST (Personal Info / Emergency Contact)
+   ========================================================================== */
+.detail-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.detail-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--rec-border-color);
+    font-size: 0.85rem;
+}
+
+.detail-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-list li span:first-child {
+    color: var(--rec-text-light);
+}
+
+.detail-list li span:last-child {
+    font-weight: 500;
+    color: var(--rec-text-dark);
+    text-align: right;
+}
+
+
+/* ==========================================================================
+   4. MEDICAL ALERTS
+   ========================================================================== */
+.patient-allergy-alert {
+    display: flex;
+    gap: 0.75rem;
+    background-color: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: var(--rec-radius-sm);
+    padding: 1rem;
+}
+
+.patient-allergy-alert i {
+    color: var(--rec-danger);
+    font-size: 1.1rem;
+    margin-top: 0.1rem;
+}
+
+.patient-allergy-alert h6 {
+    color: var(--rec-danger);
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+}
+
+.patient-allergy-alert p {
+    font-size: 0.82rem;
+    margin: 0;
+    color: var(--rec-text-dark);
+}
+
+.medical-history-block h6 {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+.medical-history-block p {
+    font-size: 0.85rem;
+    margin: 0;
+    line-height: 1.7;
+}
+
+
+/* ==========================================================================
+   5. APPOINTMENT HISTORY TABLE
+   ========================================================================== */
+.patient-history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patient-history-table thead th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--rec-text-light);
+    padding: 0.7rem 0.5rem;
+    border-bottom: 2px solid var(--rec-border-color);
+}
+
+.patient-history-table tbody td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--rec-border-color);
+    font-size: 0.85rem;
+}
+
+.patient-history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ==========================================================================
+   6. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .patient-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .patient-header-actions {
+        width: 100%;
+    }
+
+    .patient-header-actions .btn {
+        flex: 1;
+    }
+}
+
+/* Print - hide chrome, keep only patient summary */
+@media print {
+    .receptionist-sidebar,
+    .receptionist-topbar,
+    .back-link,
+    .patient-header-actions {
+        display: none !important;
+    }
+
+    .receptionist-main {
+        margin-left: 0 !important;
+    }
+}

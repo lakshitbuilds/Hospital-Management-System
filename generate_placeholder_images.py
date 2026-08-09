@@ -190,6 +190,10 @@ PATIENTS = [
     ('patient-3.jpg', 'PT', (20, 140, 160), (100, 200, 210)),
 ]
 
+RECEPTIONISTS = [
+    ('receptionist-1.jpg', 'FD', (79, 70, 229), (129, 122, 240)),
+]
+
 logo()
 hero_doctor()
 about_hospital()
@@ -203,4 +207,7 @@ for filename, initials, c1, c2 in DOCTORS:
 for filename, initials, c1, c2 in PATIENTS:
     person_avatar(os.path.join(OUT_DIR, filename), (400, 400), initials, c1, c2)
 
-print('Generated', len(DEPARTMENTS) + len(DOCTORS) + len(PATIENTS) + 3, 'images in', OUT_DIR)
+for filename, initials, c1, c2 in RECEPTIONISTS:
+    person_avatar(os.path.join(OUT_DIR, filename), (400, 400), initials, c1, c2)
+
+print('Generated', len(DEPARTMENTS) + len(DOCTORS) + len(PATIENTS) + len(RECEPTIONISTS) + 3, 'images in', OUT_DIR)

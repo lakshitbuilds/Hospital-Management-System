@@ -72,7 +72,7 @@
               class="d-none"
             />
           </div>
-          <h5 class="profile-name">Anita Sharma</h5>
+          <h5 class="profile-name">{{ patient.user.get_full_name }}</h5>
           <span class="role-badge"
             ><i class="bi bi-person-fill"></i>Patient</span
           >
@@ -80,15 +80,15 @@
 
           <div class="profile-stats">
             <div class="profile-stat">
-              <h6>12</h6>
+              <h6>{{ appointments_count }}</h6>
               <p>Appointments</p>
             </div>
             <div class="profile-stat">
-              <h6>3</h6>
+              <h6>{{ prescriptions_count }}</h6>
               <p>Prescriptions</p>
             </div>
             <div class="profile-stat">
-              <h6>2026</h6>
+              <h6>{{ member_since_year }}</h6>
               <p>Member Since</p>
             </div>
           </div>
@@ -218,37 +218,19 @@
                   <select class="form-select" id="profileGender" name="gender">
                     <option
                       value="Male"
-                      {%
-                      if
-                      patient.gender=""
-                      ="Male"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.gender == "Male" %}selected{% endif %}
                     >
                       Male
                     </option>
                     <option
                       value="Female"
-                      {%
-                      if
-                      patient.gender=""
-                      ="Female"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.gender == "Female" %}selected{% endif %}
                     >
                       Female
                     </option>
                     <option
                       value="Other"
-                      {%
-                      if
-                      patient.gender=""
-                      ="Other"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.gender == "Other" %}selected{% endif %}
                     >
                       Other
                     </option>
@@ -269,97 +251,49 @@
 
                     <option
                       value="A+"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="A+"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "A+" %}selected{% endif %}
                     >
                       A+
                     </option>
                     <option
                       value="A-"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="A-"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "A-" %}selected{% endif %}
                     >
                       A-
                     </option>
                     <option
                       value="B+"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="B+"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "B+" %}selected{% endif %}
                     >
                       B+
                     </option>
                     <option
                       value="B-"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="B-"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "B-" %}selected{% endif %}
                     >
                       B-
                     </option>
                     <option
                       value="AB+"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="AB+"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "AB+" %}selected{% endif %}
                     >
                       AB+
                     </option>
                     <option
                       value="AB-"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="AB-"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "AB-" %}selected{% endif %}
                     >
                       AB-
                     </option>
                     <option
                       value="O+"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="O+"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "O+" %}selected{% endif %}
                     >
                       O+
                     </option>
                     <option
                       value="O-"
-                      {%
-                      if
-                      patient.blood_group=""
-                      ="O-"
-                      %}selected{%
-                      endif
-                      %}
+                      {% if patient.blood_group == "O-" %}selected{% endif %}
                     >
                       O-
                     </option>

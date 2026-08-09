@@ -1,0 +1,117 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Book Appointment - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/edit_profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/receptionist/book_appointment.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="rec-page-title">Book Appointment</h4>
+<p class="rec-page-subtitle">Schedule an appointment on behalf of a patient. It is confirmed immediately.</p>
+
+<div class="row gy-4">
+
+    <!-- Booking Form -->
+    <div class="col-lg-8">
+        <div class="rec-card">
+            <form id="bookAppointmentForm" method="POST" novalidate>
+                {% csrf_token %}
+
+                <h6 class="form-section-title"><i class="bi bi-people-fill"></i>Patient &amp; Doctor</h6>
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="patientSelect" class="form-label">Patient</label>
+                        <select class="form-select" id="patientSelect" name="patient" required>
+                            <option value="" disabled {% if not preselected_patient_id %}selected{% endif %}>Choose a patient</option>
+                            {% for p in patients %}
+                            <option value="{{ p.id }}" {% if preselected_patient_id|stringformat:"s" == p.id|stringformat:"s" %}selected{% endif %}>
+                                {{ p.user.get_full_name }} &middot; {{ p.patient_id }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="doctorSelect" class="form-label">Doctor</label>
+                        <select class="form-select" id="doctorSelect" name="doctor" required>
+                            <option value="" disabled selected>Choose a doctor</option>
+                            {% for doc in doctors %}
+                            <option value="{{ doc.id }}">Dr. {{ doc.user.get_full_name }} &mdash; {{ doc.get_department_display }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <h6 class="form-section-title"><i class="bi bi-calendar3"></i>Date &amp; Time</h6>
+                <div class="row gy-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="appointmentDate" class="form-label">Appointment Date</label>
+                        <input type="date" class="form-control" id="appointmentDate" name="appointment_date" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="visitType" class="form-label">Visit Type</label>
+                        <select class="form-select" id="visitType" name="visit_type">
+                            <option value="new" selected>New Visit</option>
+                            <option value="follow-up">Follow-up Visit</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="form-label d-block">Time Slot</label>
+                <div class="time-slot-grid" id="timeSlotGrid">
+                    {% for slot in time_slots %}
+                    <input type="radio" name="time_slot" id="slot_{{ forloop.counter }}" value="{{ slot }}" class="time-slot-input" required>
+                    <label for="slot_{{ forloop.counter }}" class="time-slot-option">{{ slot }}</label>
+                    {% endfor %}
+                </div>
+
+                <h6 class="form-section-title mt-4"><i class="bi bi-card-text"></i>Reason for Visit</h6>
+                <div class="mb-4">
+                    <textarea class="form-control" name="reason" rows="3" placeholder="Briefly describe the reason for the visit..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-calendar2-check me-2"></i>Confirm Appointment
+                    </button>
+                    <a href="{% url 'receptionist_appointment_list' %}" class="btn btn-outline-primary btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Summary Sidebar -->
+    <div class="col-lg-4">
+        <div class="rec-card booking-summary-card">
+            <h6 class="summary-title"><i class="bi bi-clipboard2-check-fill me-2"></i>Booking Summary</h6>
+            <ul class="summary-list">
+                <li>
+                    <span class="summary-label"><i class="bi bi-person"></i>Patient</span>
+                    <span class="summary-value" id="summaryPatient">Not selected</span>
+                </li>
+                <li>
+                    <span class="summary-label"><i class="bi bi-person-badge"></i>Doctor</span>
+                    <span class="summary-value" id="summaryDoctor">Not selected</span>
+                </li>
+                <li>
+                    <span class="summary-label"><i class="bi bi-calendar3"></i>Date</span>
+                    <span class="summary-value" id="summaryDate">Not selected</span>
+                </li>
+                <li>
+                    <span class="summary-label"><i class="bi bi-clock"></i>Time</span>
+                    <span class="summary-value" id="summaryTime">Not selected</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/receptionist/book_appointment.js' %}"></script>
+{% endblock %}

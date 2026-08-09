@@ -1,0 +1,156 @@
+/* ==========================================================================
+   SHARED DETAIL PAGE STYLES
+   Used by doctor_detail.html and patient_detail.html.
+   Structure:
+   1. Header Card
+   2. Detail List
+   3. History Table
+   4. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. HEADER CARD
+   ========================================================================== */
+.detail-header-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.detail-header-main {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.detail-header-main h4 {
+    margin-bottom: 0.3rem;
+}
+
+.detail-id-tag {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--adm-text-light);
+    margin-bottom: 0.5rem;
+}
+
+.detail-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.detail-header-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.detail-header-contact a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--adm-text-light);
+}
+
+.detail-header-contact a:hover {
+    color: var(--adm-primary-dark);
+}
+
+.detail-header-contact i {
+    color: var(--adm-primary);
+}
+
+.detail-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+
+/* ==========================================================================
+   2. DETAIL LIST
+   ========================================================================== */
+.detail-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.detail-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--adm-border-color);
+    font-size: 0.85rem;
+}
+
+.detail-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-list li span:first-child {
+    color: var(--adm-text-light);
+}
+
+.detail-list li span:last-child {
+    font-weight: 500;
+    color: var(--adm-text-dark);
+    text-align: right;
+}
+
+
+/* ==========================================================================
+   3. HISTORY TABLE
+   ========================================================================== */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.history-table thead th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--adm-text-light);
+    padding: 0.7rem 0.5rem;
+    border-bottom: 2px solid var(--adm-border-color);
+}
+
+.history-table tbody td {
+    padding: 0.75rem 0.5rem;
+    border-bottom: 1px solid var(--adm-border-color);
+    font-size: 0.85rem;
+}
+
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ==========================================================================
+   4. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .detail-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .detail-header-actions {
+        width: 100%;
+    }
+
+    .detail-header-actions .btn {
+        flex: 1;
+    }
+}

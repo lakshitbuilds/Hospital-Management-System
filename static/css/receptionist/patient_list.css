@@ -1,0 +1,99 @@
+/* ==========================================================================
+   PATIENT LIST PAGE (patient_list.html) - PAGE SPECIFIC STYLES
+   Note: .table-patient-cell / .table-actions / .table-action-btn /
+   .table-empty-state live in the shared base.css.
+   Structure:
+   1. Toolbar
+   2. Table
+   3. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TOOLBAR
+   ========================================================================== */
+.list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.list-search-box {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--rec-background);
+    border: 1px solid var(--rec-border-color);
+    border-radius: var(--rec-radius-pill);
+    padding: 0.55rem 1.1rem;
+}
+
+.list-search-box i {
+    color: var(--rec-text-light);
+}
+
+.list-search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+
+/* ==========================================================================
+   2. TABLE
+   ========================================================================== */
+.patient-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patient-table thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--rec-text-light);
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--rec-border-color);
+    white-space: nowrap;
+}
+
+.patient-table tbody td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--rec-border-color);
+    font-size: 0.85rem;
+    color: var(--rec-text-dark);
+    vertical-align: middle;
+}
+
+.patient-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.patient-table tbody tr:hover {
+    background-color: var(--rec-background);
+}
+
+
+/* ==========================================================================
+   3. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .list-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .list-search-box {
+        max-width: none;
+    }
+}

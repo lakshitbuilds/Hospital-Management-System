@@ -1,0 +1,140 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Register Patient - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/edit_profile.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'receptionist_patient_list' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Patient List</a>
+
+<h4 class="rec-page-title">Register New Patient</h4>
+<p class="rec-page-subtitle">Create a walk-in patient account and profile.</p>
+
+<div class="rec-card">
+
+    <form method="POST" novalidate>
+        {% csrf_token %}
+
+        <!-- Account -->
+        <h6 class="form-section-title"><i class="bi bi-person-fill"></i>Basic Information</h6>
+        <div class="row gy-3 mb-4">
+            <div class="col-md-6">
+                <label for="fullName" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="fullName" name="full_name" placeholder="John Doe" required>
+            </div>
+            <div class="col-md-6">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="you@example.com" required>
+            </div>
+            <div class="col-md-6">
+                <label for="phone" class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" id="phone" name="phone" placeholder="+91 98765 43210">
+            </div>
+            <div class="col-md-3">
+                <label for="password" class="form-label">Temporary Password</label>
+                <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+            </div>
+            <div class="col-md-3">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirm_password" minlength="8" required>
+            </div>
+        </div>
+
+        <!-- Personal Details -->
+        <h6 class="form-section-title"><i class="bi bi-card-heading"></i>Personal Details</h6>
+        <div class="row gy-3 mb-4">
+            <div class="col-md-4">
+                <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                <input type="date" class="form-control" id="dateOfBirth" name="date_of_birth">
+            </div>
+            <div class="col-md-4">
+                <label for="gender" class="form-label">Gender</label>
+                <select class="form-select" id="gender" name="gender">
+                    <option value="" selected>Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="bloodGroup" class="form-label">Blood Group</label>
+                <select class="form-select" id="bloodGroup" name="blood_group">
+                    <option value="" selected>Select Blood Group</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Address -->
+        <h6 class="form-section-title"><i class="bi bi-geo-alt-fill"></i>Address Information</h6>
+        <div class="row gy-3 mb-4">
+            <div class="col-12">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" id="address" name="address" rows="2"></textarea>
+            </div>
+            <div class="col-md-4">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city">
+            </div>
+            <div class="col-md-4">
+                <label for="state" class="form-label">State</label>
+                <input type="text" class="form-control" id="state" name="state">
+            </div>
+            <div class="col-md-4">
+                <label for="pincode" class="form-label">Pincode</label>
+                <input type="text" class="form-control" id="pincode" name="pincode">
+            </div>
+        </div>
+
+        <!-- Emergency Contact -->
+        <h6 class="form-section-title"><i class="bi bi-telephone-plus-fill"></i>Emergency Contact</h6>
+        <div class="row gy-3 mb-4">
+            <div class="col-md-6">
+                <label for="emergencyContactName" class="form-label">Contact Name</label>
+                <input type="text" class="form-control" id="emergencyContactName" name="emergency_contact_name">
+            </div>
+            <div class="col-md-6">
+                <label for="emergencyContactNumber" class="form-label">Contact Number</label>
+                <input type="tel" class="form-control" id="emergencyContactNumber" name="emergency_contact_number">
+            </div>
+        </div>
+
+        <!-- Medical Information -->
+        <h6 class="form-section-title"><i class="bi bi-clipboard2-pulse-fill"></i>Medical Information</h6>
+        <div class="row gy-3 mb-4">
+            <div class="col-md-6">
+                <label for="allergies" class="form-label">Allergies</label>
+                <textarea class="form-control" id="allergies" name="allergies" rows="3"></textarea>
+            </div>
+            <div class="col-md-6">
+                <label for="medicalHistory" class="form-label">Medical History</label>
+                <textarea class="form-control" id="medicalHistory" name="medical_history" rows="3"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="bi bi-person-plus-fill me-2"></i>Register Patient
+            </button>
+            <a href="{% url 'receptionist_patient_list' %}" class="btn btn-outline-primary btn-lg">Cancel</a>
+        </div>
+    </form>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/receptionist/register_patient.js' %}"></script>
+{% endblock %}

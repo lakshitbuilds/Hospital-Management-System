@@ -60,10 +60,15 @@ def login(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
+        selected_role = request.POST.get('role')
 
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
+            if selected_role and user.role != selected_role:
+                messages.error(request, f'This account is not registered as {selected_role.capitalize()}. Please select the correct role and try again.')
+                return redirect('login')
+
             auth_login(request, user)
 
             role_redirects = {
@@ -177,7 +182,13 @@ def patient_profile(request):
         messages.success(request, 'Profile updated successfully.')
         return redirect('patient_profile')
 
-    return render(request, 'patient/profile.html', {'patient': patient})
+    context = {
+        'patient': patient,
+        'appointments_count': patient.appointments.count(),
+        'prescriptions_count': patient.prescriptions.count(),
+        'member_since_year': patient.created_at.year,
+    }
+    return render(request, 'patient/profile.html', context)
 
 
 # ================================================================

@@ -1,0 +1,123 @@
+/* ==========================================================================
+   BOOK APPOINTMENT PAGE (book_appointment.html) - PAGE SPECIFIC STYLES
+   Note: .form-section-title / .form-actions load from edit_profile.css.
+   Structure:
+   1. Time Slot Selector
+   2. Booking Summary Sidebar
+   3. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TIME SLOT SELECTOR
+   ========================================================================== */
+.time-slot-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.time-slot-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.time-slot-option {
+    display: block;
+    text-align: center;
+    padding: 0.6rem 0.4rem;
+    border: 1px solid var(--rec-border-color);
+    border-radius: var(--rec-radius-sm);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--rec-text-dark);
+    cursor: pointer;
+    transition: var(--rec-transition);
+}
+
+.time-slot-option:hover {
+    border-color: var(--rec-primary);
+    color: var(--rec-primary);
+}
+
+.time-slot-input:checked + .time-slot-option {
+    background-color: var(--rec-primary);
+    border-color: var(--rec-primary);
+    color: var(--rec-white);
+}
+
+
+/* ==========================================================================
+   2. BOOKING SUMMARY SIDEBAR
+   ========================================================================== */
+.booking-summary-card {
+    position: sticky;
+    top: 90px;
+}
+
+.summary-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.summary-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.summary-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--rec-border-color);
+}
+
+.summary-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.summary-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--rec-text-light);
+}
+
+.summary-label i {
+    color: var(--rec-primary);
+}
+
+.summary-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--rec-text-dark);
+    text-align: right;
+}
+
+
+/* ==========================================================================
+   3. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .time-slot-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 575.98px) {
+    .booking-summary-card {
+        position: static;
+    }
+
+    .time-slot-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

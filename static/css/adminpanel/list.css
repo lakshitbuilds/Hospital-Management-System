@@ -1,0 +1,163 @@
+/* ==========================================================================
+   SHARED LIST PAGE STYLES
+   Used by doctor_list.html, receptionist_list.html, patient_list.html,
+   appointment_list.html. Table-person-cell / table-actions / table-action-btn
+   live in the shared base.css.
+   Structure:
+   1. Toolbar
+   2. Table
+   3. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TOOLBAR
+   ========================================================================== */
+.list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.list-search-box {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--adm-background);
+    border: 1px solid var(--adm-border-color);
+    border-radius: var(--adm-radius-pill);
+    padding: 0.55rem 1.1rem;
+}
+
+.list-search-box i {
+    color: var(--adm-text-light);
+}
+
+.list-search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.apt-status-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.apt-filter-btn {
+    border: 1px solid var(--adm-border-color);
+    background-color: var(--adm-white);
+    color: var(--adm-text-light);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.45rem 1.1rem;
+    border-radius: var(--adm-radius-pill);
+    cursor: pointer;
+    transition: var(--adm-transition);
+}
+
+.apt-filter-btn:hover {
+    border-color: var(--adm-primary);
+    color: var(--adm-primary-dark);
+}
+
+.apt-filter-btn.active {
+    background-color: var(--adm-primary);
+    border-color: var(--adm-primary);
+    color: var(--adm-white);
+}
+
+
+/* ==========================================================================
+   2. TABLE
+   ========================================================================== */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--adm-text-light);
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--adm-border-color);
+    white-space: nowrap;
+}
+
+.data-table tbody td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--adm-border-color);
+    font-size: 0.85rem;
+    color: var(--adm-text-dark);
+    vertical-align: middle;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background-color: var(--adm-background);
+}
+
+
+/* ==========================================================================
+   3. STATUS TOGGLE MODAL
+   ========================================================================== */
+#statusToggleModal .modal-content {
+    border: none;
+    border-radius: var(--adm-radius);
+    padding: 1rem;
+}
+
+.modal-icon-circle {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--adm-primary-light);
+    color: var(--adm-primary-dark);
+    border-radius: 50%;
+    font-size: 1.5rem;
+    margin: 0.5rem auto 1.1rem;
+}
+
+#statusToggleModal p {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.85rem;
+}
+
+
+/* ==========================================================================
+   4. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .list-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .list-search-box {
+        max-width: none;
+    }
+}

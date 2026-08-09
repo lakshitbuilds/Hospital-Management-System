@@ -1,0 +1,730 @@
+/* ==========================================================================
+   ADMIN PANEL - SHARED THEME + LAYOUT
+   Deliberately a different structure from the doctor (dark teal sidebar)
+   and receptionist (dark indigo sidebar) portals: a LIGHT sidebar, warm
+   neutral background, and an amber/bronze accent for a "control tower"
+   feel, plus initials-avatars instead of stock photos.
+   Structure:
+   1. Root Variables
+   2. Reset / Typography
+   3. Shell Layout (Sidebar + Main Column)
+   4. Sidebar
+   5. Topbar
+   6. Content Area / Shared Components
+   7. Status Badges
+   8. Table Row / Action Components
+   9. Initials Avatar
+   10. Info Pills
+   11. Buttons (Admin Panel Overrides)
+   12. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. ROOT VARIABLES
+   ========================================================================== */
+:root {
+    --adm-primary: #b45309;
+    --adm-primary-dark: #92400e;
+    --adm-primary-light: #fef3c7;
+    --adm-sidebar-bg: #ffffff;
+    --adm-sidebar-bg-active: #fef3c7;
+    --adm-sidebar-text: #78716c;
+    --adm-sidebar-text-active: #1c1917;
+    --adm-background: #faf9f7;
+    --adm-white: #ffffff;
+    --adm-border-color: #e7e5e4;
+    --adm-text-dark: #1c1917;
+    --adm-text-light: #78716c;
+    --adm-success: #16a34a;
+    --adm-warning: #ea580c;
+    --adm-danger: #dc2626;
+    --adm-info: #2563eb;
+
+    --adm-radius: 0.85rem;
+    --adm-radius-sm: 0.5rem;
+    --adm-radius-pill: 50rem;
+
+    --adm-shadow-sm: 0 2px 10px rgba(28, 25, 23, 0.05);
+    --adm-shadow-md: 0 8px 24px rgba(28, 25, 23, 0.08);
+    --adm-transition: all 0.25s ease;
+}
+
+
+/* ==========================================================================
+   2. RESET / TYPOGRAPHY
+   ========================================================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    color: var(--adm-text-dark);
+    background-color: var(--adm-background);
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    color: var(--adm-text-dark);
+    line-height: 1.3;
+}
+
+p {
+    color: var(--adm-text-light);
+}
+
+
+/* ==========================================================================
+   3. SHELL LAYOUT
+   ========================================================================== */
+.admin-shell {
+    display: flex;
+    min-height: 100vh;
+}
+
+.admin-main {
+    flex: 1;
+    min-width: 0;
+    margin-left: 268px;
+    display: flex;
+    flex-direction: column;
+    transition: var(--adm-transition);
+}
+
+
+/* ==========================================================================
+   4. SIDEBAR
+   ========================================================================== */
+.admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 268px;
+    height: 100vh;
+    background-color: var(--adm-sidebar-bg);
+    border-right: 1px solid var(--adm-border-color);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    z-index: 1050;
+    transition: var(--adm-transition);
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.5rem 1.5rem 1.25rem;
+}
+
+.sidebar-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--adm-radius-sm);
+    object-fit: contain;
+    background-color: var(--adm-background);
+    padding: 4px;
+}
+
+.sidebar-brand-name {
+    display: block;
+    color: var(--adm-sidebar-text-active);
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+
+.sidebar-brand-tag {
+    display: block;
+    color: var(--adm-primary);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.sidebar-admin-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 1.25rem 1.5rem;
+    padding: 0.85rem 1rem;
+    background-color: var(--adm-background);
+    border: 1px solid var(--adm-border-color);
+    border-radius: var(--adm-radius-sm);
+}
+
+.sidebar-admin-card h6 {
+    color: var(--adm-sidebar-text-active);
+    font-size: 0.88rem;
+    margin-bottom: 0.1rem;
+}
+
+.sidebar-admin-card span {
+    color: var(--adm-primary);
+    font-size: 0.74rem;
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 0 1rem 1.5rem;
+}
+
+.sidebar-nav-label {
+    display: block;
+    color: #a8a29e;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0.9rem 0.75rem 0.4rem;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: var(--adm-radius-sm);
+    color: var(--adm-sidebar-text);
+    font-size: 0.88rem;
+    font-weight: 500;
+    margin-bottom: 0.15rem;
+    transition: var(--adm-transition);
+    position: relative;
+}
+
+.sidebar-link i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.sidebar-link:hover {
+    background-color: var(--adm-background);
+    color: var(--adm-text-dark);
+}
+
+.sidebar-link.active {
+    background-color: var(--adm-primary);
+    color: var(--adm-white);
+}
+
+.sidebar-badge {
+    margin-left: auto;
+    background-color: var(--adm-danger);
+    color: var(--adm-white);
+    font-size: 0.68rem;
+    font-weight: 600;
+    min-width: 18px;
+    height: 18px;
+    line-height: 18px;
+    text-align: center;
+    border-radius: 50%;
+}
+
+.sidebar-footer {
+    padding: 1rem 1.25rem 1.5rem;
+    border-top: 1px solid var(--adm-border-color);
+}
+
+.sidebar-logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+    background-color: transparent;
+    border: 1px solid var(--adm-border-color);
+    color: var(--adm-text-dark);
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 0.6rem;
+    border-radius: var(--adm-radius-sm);
+    transition: var(--adm-transition);
+}
+
+.sidebar-logout-btn:hover {
+    background-color: var(--adm-danger);
+    border-color: var(--adm-danger);
+    color: var(--adm-white);
+}
+
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background-color: rgba(28, 25, 23, 0.4);
+    z-index: 1040;
+}
+
+.sidebar-overlay.show {
+    display: block;
+}
+
+
+/* ==========================================================================
+   5. TOPBAR
+   ========================================================================== */
+.admin-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 1030;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--adm-white);
+    border-bottom: 1px solid var(--adm-border-color);
+    padding: 0.85rem 1.5rem;
+}
+
+.sidebar-toggle-btn {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    color: var(--adm-text-dark);
+}
+
+.topbar-search {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--adm-background);
+    border: 1px solid var(--adm-border-color);
+    border-radius: var(--adm-radius-pill);
+    padding: 0.55rem 1.1rem;
+}
+
+.topbar-search i {
+    color: var(--adm-text-light);
+}
+
+.topbar-search input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.88rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.topbar-date {
+    font-size: 0.85rem;
+    color: var(--adm-text-light);
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.topbar-icon-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--adm-background);
+    border: none;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    color: var(--adm-text-dark);
+    transition: var(--adm-transition);
+}
+
+.topbar-icon-btn:hover {
+    background-color: var(--adm-primary-light);
+    color: var(--adm-primary);
+}
+
+.topbar-notif-dot {
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 8px;
+    height: 8px;
+    background-color: var(--adm-danger);
+    border-radius: 50%;
+    border: 2px solid var(--adm-white);
+}
+
+.topbar-notif-menu {
+    min-width: 280px;
+    border: none;
+    box-shadow: var(--adm-shadow-md);
+    border-radius: var(--adm-radius-sm);
+    padding: 0.5rem 0;
+}
+
+.topbar-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    border-radius: var(--adm-radius-pill);
+}
+
+.topbar-profile-btn i {
+    font-size: 0.75rem;
+    color: var(--adm-text-light);
+}
+
+.admin-topbar .dropdown-menu {
+    border: none;
+    box-shadow: var(--adm-shadow-md);
+    border-radius: var(--adm-radius-sm);
+    padding: 0.5rem 0;
+}
+
+.admin-topbar .dropdown-item {
+    font-size: 0.88rem;
+    padding: 0.55rem 1.1rem;
+}
+
+.admin-topbar .dropdown-item:hover {
+    background-color: var(--adm-primary-light);
+    color: var(--adm-primary-dark);
+}
+
+
+/* ==========================================================================
+   6. CONTENT AREA / SHARED COMPONENTS
+   ========================================================================== */
+.admin-content {
+    padding: 1.75rem;
+}
+
+.adm-card {
+    background-color: var(--adm-white);
+    border-radius: var(--adm-radius);
+    box-shadow: var(--adm-shadow-sm);
+    padding: 1.5rem;
+}
+
+.adm-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.adm-card-header h6 {
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}
+
+.adm-card-header h6 i {
+    color: var(--adm-primary);
+}
+
+.adm-card-link {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--adm-primary);
+}
+
+.adm-card-link:hover {
+    text-decoration: underline;
+}
+
+.adm-page-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.3rem;
+}
+
+.adm-page-subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--adm-text-light);
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: var(--adm-primary);
+}
+
+
+/* ==========================================================================
+   7. STATUS BADGES
+   ========================================================================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--adm-radius-pill);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.status-confirmed {
+    background-color: rgba(37, 99, 235, 0.1);
+    color: var(--adm-info);
+}
+
+.status-pending {
+    background-color: rgba(234, 88, 12, 0.1);
+    color: var(--adm-warning);
+}
+
+.status-completed {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--adm-success);
+}
+
+.status-cancelled {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--adm-danger);
+}
+
+.status-active {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--adm-success);
+}
+
+.status-inactive {
+    background-color: rgba(120, 113, 108, 0.12);
+    color: var(--adm-text-light);
+}
+
+
+/* ==========================================================================
+   8. TABLE ROW / ACTION COMPONENTS
+   ========================================================================== */
+.table-person-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.table-person-cell h6 {
+    font-size: 0.86rem;
+    margin-bottom: 0.1rem;
+}
+
+.table-person-cell span {
+    font-size: 0.76rem;
+    color: var(--adm-text-light);
+}
+
+.table-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.table-action-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--adm-background);
+    color: var(--adm-text-dark);
+    border: none;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    transition: var(--adm-transition);
+}
+
+.table-action-btn:hover {
+    background-color: var(--adm-primary);
+    color: var(--adm-white);
+}
+
+.table-action-danger:hover {
+    background-color: var(--adm-danger);
+    color: var(--adm-white);
+}
+
+.table-action-success:hover {
+    background-color: var(--adm-success);
+    color: var(--adm-white);
+}
+
+.table-empty-state {
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+}
+
+.table-empty-state i {
+    font-size: 2.25rem;
+    color: var(--adm-border-color);
+    margin-bottom: 0.75rem;
+}
+
+.table-empty-state h6 {
+    margin-bottom: 0.3rem;
+}
+
+.table-empty-state p {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   9. INITIALS AVATAR
+   Used everywhere in the admin panel instead of stock placeholder photos.
+   ========================================================================== */
+.initials-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--adm-primary) 0%, var(--adm-primary-dark) 100%);
+    color: var(--adm-white);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.initials-avatar-sm {
+    width: 38px;
+    height: 38px;
+    font-size: 0.78rem;
+}
+
+.initials-avatar-md {
+    width: 44px;
+    height: 44px;
+    font-size: 0.85rem;
+}
+
+.initials-avatar-lg {
+    width: 76px;
+    height: 76px;
+    font-size: 1.5rem;
+}
+
+
+/* ==========================================================================
+   10. INFO PILLS
+   ========================================================================== */
+.info-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background-color: var(--adm-background);
+    color: var(--adm-text-dark);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--adm-radius-pill);
+}
+
+.info-pill-primary {
+    background-color: var(--adm-primary-light);
+    color: var(--adm-primary-dark);
+}
+
+.info-pill-blood {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: var(--adm-danger);
+}
+
+
+/* ==========================================================================
+   11. BUTTONS (Admin Panel Overrides)
+   ========================================================================== */
+.admin-content .btn-primary,
+.adm-card .btn-primary {
+    background-color: var(--adm-primary);
+    border-color: var(--adm-primary);
+}
+
+.admin-content .btn-primary:hover,
+.adm-card .btn-primary:hover {
+    background-color: var(--adm-primary-dark);
+    border-color: var(--adm-primary-dark);
+}
+
+.admin-content .btn-outline-primary,
+.adm-card .btn-outline-primary {
+    color: var(--adm-primary);
+    border-color: var(--adm-primary);
+}
+
+.admin-content .btn-outline-primary:hover,
+.adm-card .btn-outline-primary:hover {
+    background-color: var(--adm-primary);
+    color: var(--adm-white);
+}
+
+.admin-content .form-control:focus,
+.admin-content .form-select:focus {
+    border-color: var(--adm-primary);
+    box-shadow: 0 0 0 0.2rem rgba(180, 83, 9, 0.15);
+}
+
+
+/* ==========================================================================
+   12. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991.98px) {
+    .admin-sidebar {
+        left: -268px;
+    }
+
+    .admin-sidebar.show {
+        left: 0;
+    }
+
+    .admin-main {
+        margin-left: 0;
+    }
+
+    .sidebar-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .topbar-search {
+        max-width: 220px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .admin-content {
+        padding: 1.25rem;
+    }
+
+    .topbar-search {
+        display: none;
+    }
+
+    .topbar-date {
+        display: none;
+    }
+}

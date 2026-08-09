@@ -1,0 +1,187 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/adminpanel/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     WELCOME BANNER
+============================================================= -->
+<div class="welcome-banner">
+    <div>
+        <h4>Welcome back, {{ request.user.get_full_name }}</h4>
+        <p>System-wide overview for {% now "d M Y" %}.</p>
+    </div>
+    <a href="{% url 'admin_add_doctor' %}" class="btn btn-light">
+        <i class="bi bi-person-fill-add me-2"></i>Onboard Doctor
+    </a>
+</div>
+
+<!-- ============================================================
+     STATS CARDS
+============================================================= -->
+<div class="row gy-3 stats-row">
+    <div class="col-lg-2 col-md-4 col-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-primary"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <h3>{{ total_patients }}</h3>
+                <p>Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-info"><i class="bi bi-person-badge-fill"></i></div>
+            <div>
+                <h3>{{ total_doctors }}</h3>
+                <p>Doctors</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-success"><i class="bi bi-headset"></i></div>
+            <div>
+                <h3>{{ total_receptionists }}</h3>
+                <p>Receptionists</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-primary"><i class="bi bi-calendar-day-fill"></i></div>
+            <div>
+                <h3>{{ today_count }}</h3>
+                <p>Today's Appointments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-warning"><i class="bi bi-hourglass-split"></i></div>
+            <div>
+                <h3>{{ pending_count }}</h3>
+                <p>Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-4 col-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-success"><i class="bi bi-cash-coin"></i></div>
+            <div>
+                <h3>&#8377;{{ revenue_estimate }}</h3>
+                <p>Revenue (Completed)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     CHARTS
+============================================================= -->
+<div class="row gy-4 mt-1">
+    <div class="col-lg-7">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-graph-up-arrow me-2"></i>Patient Registrations</h6>
+                <span class="adm-card-sublabel">Last 6 months</span>
+            </div>
+            <div class="chart-wrap">
+                <canvas id="trendChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-5">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-pie-chart-fill me-2"></i>Appointment Status</h6>
+            </div>
+            <div class="chart-wrap chart-wrap-donut">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row gy-4 mt-1">
+    <div class="col-lg-12">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-bar-chart-fill me-2"></i>Appointments by Department</h6>
+            </div>
+            <div class="chart-wrap chart-wrap-bar">
+                <canvas id="departmentChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     RECENT ACTIVITY
+============================================================= -->
+<div class="row gy-4 mt-1">
+
+    <div class="col-lg-7">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-calendar-week-fill me-2"></i>Recent Appointments</h6>
+                <a href="{% url 'admin_appointment_list' %}" class="adm-card-link">View All <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            {% for appt in recent_appointments %}
+            <div class="adm-list-row">
+                <div class="initials-avatar initials-avatar-sm">{{ appt.patient.user.first_name|slice:":1" }}{{ appt.patient.user.last_name|slice:":1" }}</div>
+                <div class="adm-list-info">
+                    <h6>{{ appt.patient.user.get_full_name }}</h6>
+                    <p>with Dr. {{ appt.doctor.user.get_full_name }} &middot; {{ appt.appointment_date|date:"M d, Y" }}</p>
+                </div>
+                <span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0 py-3">No appointments yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-person-plus-fill me-2"></i>Recently Joined</h6>
+            </div>
+
+            {% for u in recent_users %}
+            <div class="adm-list-row">
+                <div class="initials-avatar initials-avatar-sm">{{ u.first_name|slice:":1" }}{{ u.last_name|slice:":1" }}</div>
+                <div class="adm-list-info">
+                    <h6>{{ u.get_full_name }}</h6>
+                    <p>{{ u.get_role_display }} &middot; {{ u.date_joined|date:"M d, Y" }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">No users yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+{{ department_labels|json_script:"departmentLabelsData" }}
+{{ department_data|json_script:"departmentValuesData" }}
+{{ status_labels|json_script:"statusLabelsData" }}
+{{ status_data|json_script:"statusValuesData" }}
+{{ status_colors|json_script:"statusColorsData" }}
+{{ trend_labels|json_script:"trendLabelsData" }}
+{{ trend_data|json_script:"trendValuesData" }}
+
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{% static 'js/adminpanel/dashboard.js' %}"></script>
+{% endblock %}

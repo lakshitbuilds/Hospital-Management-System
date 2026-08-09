@@ -26,6 +26,7 @@ class Patient(models.Model):
 
     patient_id = models.CharField(max_length=20, unique=True, blank=True)
     profile_image = models.ImageField(upload_to='patients/profile_images/', blank=True, null=True)
+    registered_by = models.ForeignKey('receptionist.Receptionist', on_delete=models.SET_NULL, null=True, blank=True, related_name='registered_patients')
 
     phone = models.CharField(max_length=15, blank=True)
     date_of_birth = models.DateField(blank=True, null=True)

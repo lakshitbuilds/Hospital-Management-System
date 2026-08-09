@@ -1,0 +1,149 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}Doctor Detail - Admin Panel{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/adminpanel/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/adminpanel/detail.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'admin_doctor_list' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Doctors</a>
+
+<div class="adm-card detail-header-card">
+    <div class="detail-header-main">
+        <div class="initials-avatar initials-avatar-lg">{{ doctor.user.first_name|slice:":1" }}{{ doctor.user.last_name|slice:":1" }}</div>
+        <div>
+            <h4>Dr. {{ doctor.user.get_full_name }}</h4>
+            <span class="detail-id-tag">
+                {% if doctor.user.is_active %}<span class="status-badge status-active">Active</span>{% else %}<span class="status-badge status-inactive">Inactive</span>{% endif %}
+            </span>
+            <div class="detail-header-badges">
+                {% if doctor.specialization %}<span class="info-pill info-pill-primary"><i class="bi bi-heart-pulse-fill"></i>{{ doctor.specialization }}</span>{% endif %}
+                <span class="info-pill"><i class="bi bi-building"></i>{{ doctor.get_department_display }}</span>
+                <span class="info-pill"><i class="bi bi-award-fill"></i>{{ doctor.experience_years }} yrs experience</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-header-contact">
+        {% if doctor.phone_number %}<a href="tel:{{ doctor.phone_number }}"><i class="bi bi-telephone-fill"></i>{{ doctor.phone_number }}</a>{% endif %}
+        <a href="mailto:{{ doctor.user.email }}"><i class="bi bi-envelope-fill"></i>{{ doctor.user.email }}</a>
+    </div>
+
+    <div class="detail-header-actions">
+        <button type="button" class="btn {% if doctor.user.is_active %}btn-outline-danger{% else %}btn-success{% endif %}"
+                data-bs-toggle="modal" data-bs-target="#statusToggleModal"
+                data-user-id="{{ doctor.user.id }}" data-user-name="Dr. {{ doctor.user.get_full_name }}"
+                data-is-active="{{ doctor.user.is_active|yesno:'true,false' }}">
+            <i class="bi {% if doctor.user.is_active %}bi-slash-circle{% else %}bi-check-circle{% endif %} me-2"></i>{% if doctor.user.is_active %}Deactivate{% else %}Activate{% endif %}
+        </button>
+    </div>
+</div>
+
+<div class="row gy-3 mt-1">
+    <div class="col-lg-4 col-md-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-primary"><i class="bi bi-calendar2-week-fill"></i></div>
+            <div>
+                <h3>{{ total_appointments }}</h3>
+                <p>Total Appointments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-success"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <h3>{{ total_patients }}</h3>
+                <p>Unique Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="adm-stat-card">
+            <div class="adm-stat-icon adm-stat-icon-info"><i class="bi bi-check2-circle"></i></div>
+            <div>
+                <h3>{{ completed_count }}</h3>
+                <p>Completed Visits</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row gy-4 mt-1">
+    <div class="col-lg-4">
+        <div class="adm-card mb-4">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-mortarboard-fill me-2"></i>Qualifications</h6>
+            </div>
+            <ul class="detail-list">
+                <li><span>Degree</span><span>{{ doctor.qualification|default:"Not provided" }}</span></li>
+                <li><span>License No.</span><span>{{ doctor.license_number|default:"Not provided" }}</span></li>
+                <li><span>Consultation Fee</span><span>&#8377;{{ doctor.consultation_fee }}</span></li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="adm-card">
+            <div class="adm-card-header">
+                <h6><i class="bi bi-calendar-week-fill me-2"></i>Recent Appointments</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Date &amp; Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appt in recent_appointments %}
+                        <tr>
+                            <td>{{ appt.patient.user.get_full_name }}</td>
+                            <td>{{ appt.appointment_date|date:"M d, Y" }} &middot; {{ appt.time_slot }}</td>
+                            <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-center text-muted">No appointments yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     STATUS TOGGLE MODAL
+============================================================= -->
+<form id="statusToggleForm" method="POST" action="">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+</form>
+<div class="modal fade" id="statusToggleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="modal-icon-circle">
+                    <i class="bi bi-person-gear"></i>
+                </div>
+                <h5>Change Account Status?</h5>
+                <p>Are you sure you want to <strong id="statusToggleAction">deactivate</strong> the account for <strong id="statusToggleName">this user</strong>?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmStatusToggleBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/adminpanel/toggle_status.js' %}"></script>
+{% endblock %}

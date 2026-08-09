@@ -82,6 +82,8 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'patient.context_processors.notifications',
                 'doctor.context_processors.notifications',
+                'receptionist.context_processors.notifications',
+                'adminpanel.context_processors.notifications',
             ],
         },
     },

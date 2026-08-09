@@ -1,0 +1,109 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}Patients - Admin Panel{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/adminpanel/list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="adm-page-title">Patients</h4>
+<p class="adm-page-subtitle">{{ patients|length }} patient{{ patients|length|pluralize }} registered in the system.</p>
+
+<div class="adm-card">
+
+    <div class="list-toolbar">
+        <form class="list-search-box" method="get">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by name, patient ID, or email...">
+        </form>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Patient ID</th>
+                    <th>Registered By</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>
+                        <div class="table-person-cell">
+                            <div class="initials-avatar initials-avatar-sm">{{ patient.user.first_name|slice:":1" }}{{ patient.user.last_name|slice:":1" }}</div>
+                            <div>
+                                <h6>{{ patient.user.get_full_name }}</h6>
+                                <span>{{ patient.user.email }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ patient.patient_id }}</td>
+                    <td>{% if patient.registered_by %}{{ patient.registered_by.user.get_full_name }}{% else %}Self-registered{% endif %}</td>
+                    <td>{{ patient.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        {% if patient.user.is_active %}
+                        <span class="status-badge status-active">Active</span>
+                        {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{% url 'admin_patient_detail' patient.id %}" class="table-action-btn" title="View Details"><i class="bi bi-eye"></i></a>
+                            <button type="button" class="table-action-btn {% if patient.user.is_active %}table-action-danger{% else %}table-action-success{% endif %}"
+                                    title="{% if patient.user.is_active %}Deactivate{% else %}Activate{% endif %}"
+                                    data-bs-toggle="modal" data-bs-target="#statusToggleModal"
+                                    data-user-id="{{ patient.user.id }}" data-user-name="{{ patient.user.get_full_name }}"
+                                    data-is-active="{{ patient.user.is_active|yesno:'true,false' }}">
+                                <i class="bi {% if patient.user.is_active %}bi-slash-circle{% else %}bi-check-circle{% endif %}"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No patients found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- ============================================================
+     STATUS TOGGLE MODAL
+============================================================= -->
+<form id="statusToggleForm" method="POST" action="">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.path }}">
+</form>
+<div class="modal fade" id="statusToggleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="modal-icon-circle">
+                    <i class="bi bi-person-gear"></i>
+                </div>
+                <h5>Change Account Status?</h5>
+                <p>Are you sure you want to <strong id="statusToggleAction">deactivate</strong> the account for <strong id="statusToggleName">this user</strong>?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmStatusToggleBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/adminpanel/toggle_status.js' %}"></script>
+{% endblock %}

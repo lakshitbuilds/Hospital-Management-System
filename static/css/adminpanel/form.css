@@ -1,0 +1,75 @@
+/* ==========================================================================
+   SHARED FORM PAGE STYLES
+   Used by add_doctor.html, add_receptionist.html, edit_profile.html.
+   Structure:
+   1. Form Section Title
+   2. Form Controls
+   3. Form Actions
+   4. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. FORM SECTION TITLE
+   ========================================================================== */
+.form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--adm-text-dark);
+    padding-bottom: 0.65rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid var(--adm-border-color);
+}
+
+.form-section-title i {
+    color: var(--adm-primary);
+    font-size: 1rem;
+}
+
+
+/* ==========================================================================
+   2. FORM CONTROLS
+   ========================================================================== */
+.adm-card .form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--adm-text-dark);
+    margin-bottom: 0.4rem;
+}
+
+.adm-card .form-control,
+.adm-card .form-select {
+    border: 1px solid var(--adm-border-color);
+    border-radius: var(--adm-radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.88rem;
+}
+
+
+/* ==========================================================================
+   3. FORM ACTIONS
+   ========================================================================== */
+.form-actions {
+    display: flex;
+    gap: 0.85rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--adm-border-color);
+    margin-top: 0.5rem;
+}
+
+
+/* ==========================================================================
+   4. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}

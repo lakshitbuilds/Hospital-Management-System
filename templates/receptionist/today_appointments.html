@@ -1,0 +1,70 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Today's Appointments - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/today_appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="today-header">
+    <div>
+        <h4 class="rec-page-title mb-0">Today's Appointments</h4>
+        <p class="rec-page-subtitle mb-0">{% now "l, d F Y" %}</p>
+    </div>
+    <div class="today-summary-pills">
+        <span class="summary-pill"><i class="bi bi-calendar-check"></i>{{ counts.total }} Total</span>
+        <span class="summary-pill summary-pill-primary"><i class="bi bi-check-circle"></i>{{ counts.confirmed }} Confirmed</span>
+        <span class="summary-pill summary-pill-warning"><i class="bi bi-hourglass-split"></i>{{ counts.pending }} Pending</span>
+        <span class="summary-pill summary-pill-success"><i class="bi bi-check2-all"></i>{{ counts.completed }} Completed</span>
+    </div>
+</div>
+
+<div class="today-timeline" id="todayTimeline">
+
+    {% for appt in appointments %}
+    <div class="timeline-slot {% if appt.status == 'completed' %}is-done{% endif %}" data-status="{{ appt.status }}">
+        <div class="timeline-time">{{ appt.time_slot }}</div>
+        <div class="rec-card timeline-card">
+            {% if appt.patient.profile_image %}
+            <img src="{{ appt.patient.profile_image.url }}" alt="{{ appt.patient.user.get_full_name }}" class="timeline-avatar">
+            {% else %}
+            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ appt.patient.user.get_full_name }}" class="timeline-avatar">
+            {% endif %}
+            <div class="timeline-info">
+                <h6>{{ appt.patient.user.get_full_name }}</h6>
+                <p>with Dr. {{ appt.doctor.user.get_full_name }} &middot; {{ appt.reason|truncatechars:40 }}</p>
+            </div>
+            <span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span>
+            <div class="timeline-actions">
+                {% if appt.status == 'pending' %}
+                <form action="{% url 'receptionist_confirm_appointment' appt.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="receptionist_today_appointments">
+                    <button type="submit" class="table-action-btn table-action-success" title="Confirm Appointment">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
+                {% endif %}
+                {% if appt.status == 'pending' or appt.status == 'confirmed' %}
+                <form action="{% url 'receptionist_cancel_appointment' appt.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="receptionist_today_appointments">
+                    <button type="submit" class="table-action-btn table-action-danger" title="Cancel Appointment">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'receptionist_patient_detail' appt.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-eye"></i></a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted py-4">No appointments scheduled for today.</p>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

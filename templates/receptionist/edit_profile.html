@@ -1,0 +1,100 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/edit_profile.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'receptionist_profile' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Profile</a>
+
+<h4 class="rec-page-title">Edit Profile</h4>
+<p class="rec-page-subtitle">Update your contact details and profile picture.</p>
+
+<div class="row gy-4">
+
+    <!-- Avatar -->
+    <div class="col-lg-4">
+        <div class="rec-card text-center avatar-card">
+            <div class="edit-avatar-wrap">
+                {% if receptionist.profile_picture %}
+                <img src="{{ receptionist.profile_picture.url }}" alt="{{ receptionist.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
+                {% else %}
+                <img src="{% static 'public/images/receptionist-1.jpg' %}" alt="{{ receptionist.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
+                {% endif %}
+                <button type="button" class="avatar-edit-btn" id="avatarEditBtn" aria-label="Change profile picture">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+                <input type="file" id="avatarInput" name="profile_picture" form="editProfileForm" accept="image/*" class="d-none">
+            </div>
+            <h6 class="mb-1">{{ receptionist.user.get_full_name }}</h6>
+            <p class="mb-0">{{ receptionist.employee_id }}</p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="col-lg-8">
+        <div class="rec-card">
+
+            <form id="editProfileForm" method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Basic Information -->
+                <h6 class="form-section-title"><i class="bi bi-person-fill"></i>Basic Information</h6>
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="first_name" value="{{ receptionist.user.first_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="last_name" value="{{ receptionist.user.last_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ receptionist.user.email }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" value="{{ receptionist.phone }}">
+                    </div>
+                </div>
+
+                <!-- Work Information -->
+                <h6 class="form-section-title"><i class="bi bi-briefcase-fill"></i>Work Information</h6>
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="shift" class="form-label">Shift</label>
+                        <select class="form-select" id="shift" name="shift">
+                            <option value="morning" {% if receptionist.shift == "morning" %}selected{% endif %}>Morning</option>
+                            <option value="evening" {% if receptionist.shift == "evening" %}selected{% endif %}>Evening</option>
+                            <option value="night" {% if receptionist.shift == "night" %}selected{% endif %}>Night</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Employee ID</label>
+                        <input type="text" class="form-control" value="{{ receptionist.employee_id }}" disabled>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check2-circle me-2"></i>Save Changes
+                    </button>
+                    <a href="{% url 'receptionist_profile' %}" class="btn btn-outline-primary btn-lg">Cancel</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/receptionist/edit_profile.js' %}"></script>
+{% endblock %}
