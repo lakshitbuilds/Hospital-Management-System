@@ -74,7 +74,7 @@
           <button
             class="navbar-toggler"
             type="button"
-            data-bs-toggle="collapse"
+            data-bs-toggle="offcanvas"
             data-bs-target="#navbarMain"
             aria-controls="navbarMain"
             aria-expanded="false"
@@ -83,8 +83,13 @@
             <span class="navbar-toggler-icon"></span>
           </button>
 
-          <!-- Collapsible Nav Content -->
-          <div class="collapse navbar-collapse" id="navbarMain">
+          <!-- Left-side Offcanvas Nav (inline on lg+ screens) -->
+          <div class="offcanvas offcanvas-start offcanvas-lg" tabindex="-1" id="navbarMain" aria-labelledby="navbarMainLabel">
+            <div class="offcanvas-header d-lg-none">
+              <span class="brand-name" id="navbarMainLabel">MediCare <span class="brand-highlight">Hospital</span></span>
+              <button type="button" class="btn-close" data-bs-dismiss="offcanvas" data-bs-target="#navbarMain" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body d-flex flex-column flex-lg-row w-100">
             <!-- Center Navigation -->
             <ul class="navbar-nav mx-auto text-center nav-center gap-lg-2">
               <li class="nav-item">
@@ -254,6 +259,7 @@
 
               {% endif %}
             </ul>
+            </div>
           </div>
         </div>
       </nav>

@@ -1,0 +1,145 @@
+/* ==========================================================================
+   EDIT PROFILE PAGE (edit_profile.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Back Link
+   2. Avatar Card
+   3. Form Section Title
+   4. Form Controls
+   5. Form Actions
+   6. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. BACK LINK
+   ========================================================================== */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--doc-text-light);
+    margin-bottom: 1.25rem;
+}
+
+.back-link:hover {
+    color: var(--doc-primary);
+}
+
+
+/* ==========================================================================
+   2. AVATAR CARD
+   ========================================================================== */
+.avatar-card {
+    padding-top: 2rem;
+}
+
+.edit-avatar-wrap {
+    position: relative;
+    width: 110px;
+    margin: 0 auto 1.25rem;
+}
+
+.edit-avatar-preview {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--doc-primary-light);
+}
+
+.avatar-edit-btn {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--doc-primary);
+    color: var(--doc-white);
+    border: 3px solid var(--doc-white);
+    border-radius: 50%;
+    font-size: 0.85rem;
+    transition: var(--doc-transition);
+}
+
+.avatar-edit-btn:hover {
+    background-color: var(--doc-primary-dark);
+    transform: scale(1.08);
+}
+
+.avatar-card h6 {
+    margin-bottom: 0.2rem;
+}
+
+.avatar-card p {
+    font-size: 0.85rem;
+}
+
+
+/* ==========================================================================
+   3. FORM SECTION TITLE
+   ========================================================================== */
+.form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--doc-text-dark);
+    padding-bottom: 0.65rem;
+    margin-bottom: 1.1rem;
+    border-bottom: 1px solid var(--doc-border-color);
+}
+
+.form-section-title i {
+    color: var(--doc-primary);
+    font-size: 1rem;
+}
+
+
+/* ==========================================================================
+   4. FORM CONTROLS
+   ========================================================================== */
+#editProfileForm .form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--doc-text-dark);
+    margin-bottom: 0.4rem;
+}
+
+#editProfileForm .form-control,
+#editProfileForm .form-select {
+    border: 1px solid var(--doc-border-color);
+    border-radius: var(--doc-radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.88rem;
+}
+
+
+/* ==========================================================================
+   5. FORM ACTIONS
+   ========================================================================== */
+.form-actions {
+    display: flex;
+    gap: 0.85rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--doc-border-color);
+    margin-top: 0.5rem;
+}
+
+
+/* ==========================================================================
+   6. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+}

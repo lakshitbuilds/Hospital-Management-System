@@ -1,0 +1,131 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Appointment List - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/appointment_list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="doc-page-title">Appointment List</h4>
+<p class="doc-page-subtitle">All appointments across every date.</p>
+
+<div class="doc-card">
+
+    <!-- Toolbar -->
+    <div class="appointment-list-toolbar">
+        <div class="apt-search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" id="patientSearchInput" placeholder="Search by patient name...">
+        </div>
+
+        <div class="apt-status-filters">
+            <button type="button" class="apt-filter-btn active" data-filter="all">All</button>
+            <button type="button" class="apt-filter-btn" data-filter="confirmed">Confirmed</button>
+            <button type="button" class="apt-filter-btn" data-filter="pending">Pending</button>
+            <button type="button" class="apt-filter-btn" data-filter="completed">Completed</button>
+            <button type="button" class="apt-filter-btn" data-filter="cancelled">Cancelled</button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="appointment-table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Date &amp; Time</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="appointmentTableBody">
+
+                {% for appt in appointments %}
+                <tr data-status="{{ appt.status }}" data-patient="{{ appt.patient.user.get_full_name|lower }}">
+                    <td>
+                        <div class="table-patient-cell">
+                            {% if appt.patient.profile_image %}
+                            <img src="{{ appt.patient.profile_image.url }}" alt="{{ appt.patient.user.get_full_name }}">
+                            {% else %}
+                            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ appt.patient.user.get_full_name }}">
+                            {% endif %}
+                            <div>
+                                <h6>{{ appt.patient.user.get_full_name }}</h6>
+                                <span>{{ appt.patient.phone }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ appt.appointment_date|date:"M d, Y" }} &middot; {{ appt.time_slot }}</td>
+                    <td>{{ appt.get_visit_type_display }}</td>
+                    <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{% url 'patient_details' appt.patient.id %}" class="table-action-btn" title="View Patient Details"><i class="bi bi-eye"></i></a>
+                            {% if appt.status != 'cancelled' %}
+                            <a href="{% url 'add_prescription' %}?patient={{ appt.patient.id }}&appointment={{ appt.id }}" class="table-action-btn" title="Add Prescription"><i class="bi bi-file-earmark-medical"></i></a>
+                            {% endif %}
+                            {% if appt.status == 'pending' or appt.status == 'confirmed' %}
+                            <button type="button" class="table-action-btn table-action-danger" title="Cancel"
+                                    data-bs-toggle="modal" data-bs-target="#cancelAptModal"
+                                    data-appointment-id="{{ appt.id }}" data-patient-name="{{ appt.patient.user.get_full_name }}">
+                                <i class="bi bi-x-circle"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No appointments found.</td></tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="table-empty-state d-none" id="tableEmptyState">
+        <i class="bi bi-calendar-x"></i>
+        <h6>No appointments found</h6>
+        <p>Try a different search term or filter.</p>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="appointment-pagination" aria-label="Appointment list pagination">
+        <span class="pagination-info">Showing {{ appointments|length }} of {{ appointments|length }} appointments</span>
+    </nav>
+
+</div>
+
+<!-- ============================================================
+     CANCEL CONFIRMATION MODAL
+============================================================= -->
+<form id="cancelAptForm" method="POST" action="">
+    {% csrf_token %}
+</form>
+<div class="modal fade" id="cancelAptModal" tabindex="-1" aria-labelledby="cancelAptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="modal-icon-circle">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                </div>
+                <h5 id="cancelAptModalLabel">Cancel Appointment?</h5>
+                <p>Are you sure you want to cancel the appointment with <strong id="cancelAptPatientName">this patient</strong>?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Keep Appointment</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancelAptBtn">Yes, Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/appointment_list.js' %}"></script>
+{% endblock %}

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-1azvpu0k_7^ck2jy738%xw(luxct=lin8_&jb)_n=3n0*=ax-s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '172.20.10.12']
 
 
 # Application definition
@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'patient.context_processors.notifications',
+                'doctor.context_processors.notifications',
             ],
         },
     },
@@ -80,6 +81,8 @@ STATICFILES_DIRS = [
 ]
 
 AUTH_USER_MODEL = "accounts.User"
+
+LOGIN_URL = 'login'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

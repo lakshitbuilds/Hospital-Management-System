@@ -1,0 +1,180 @@
+/* ==========================================================================
+   DOCTOR PROFILE PAGE (profile.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Profile Header Card
+   2. Stats Row
+   3. Detail List (Contact / Qualifications)
+   4. Copyable Fields
+   5. About / Bio
+   6. Availability Summary List
+   7. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. PROFILE HEADER CARD
+   ========================================================================== */
+.profile-header-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.profile-header-main {
+    display: flex;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.profile-header-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.profile-header-main h4 {
+    margin-bottom: 0.5rem;
+}
+
+.profile-header-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+
+/* ==========================================================================
+   2. STATS ROW
+   ========================================================================== */
+.profile-stats-row {
+    margin-top: 1.5rem;
+}
+
+
+/* ==========================================================================
+   3. DETAIL LIST (Contact / Qualifications)
+   ========================================================================== */
+.detail-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.detail-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid var(--doc-border-color);
+    font-size: 0.85rem;
+}
+
+.detail-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.detail-list li span:first-child {
+    color: var(--doc-text-light);
+    display: flex;
+    align-items: center;
+}
+
+.detail-list li span:last-child {
+    font-weight: 500;
+    color: var(--doc-text-dark);
+    text-align: right;
+}
+
+
+/* ==========================================================================
+   4. COPYABLE FIELDS
+   ========================================================================== */
+.copyable {
+    cursor: pointer;
+    transition: var(--doc-transition);
+}
+
+.copyable:hover {
+    color: var(--doc-primary);
+}
+
+.copy-icon {
+    font-size: 0.75rem;
+    color: var(--doc-text-light);
+    margin-left: 0.4rem;
+}
+
+.copyable:hover .copy-icon {
+    color: var(--doc-primary);
+}
+
+.copyable.is-copied span:last-child {
+    color: var(--doc-success);
+}
+
+
+/* ==========================================================================
+   5. ABOUT / BIO
+   ========================================================================== */
+.profile-bio {
+    font-size: 0.9rem;
+    line-height: 1.8;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   6. AVAILABILITY SUMMARY LIST
+   ========================================================================== */
+.availability-summary-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.availability-summary-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--doc-border-color);
+    font-size: 0.85rem;
+}
+
+.availability-summary-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.availability-summary-list li span:first-child {
+    font-weight: 500;
+    color: var(--doc-text-dark);
+}
+
+.availability-summary-list li span:last-child {
+    color: var(--doc-text-light);
+}
+
+.availability-summary-list li.is-off span:last-child {
+    color: var(--doc-danger);
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .profile-header-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .profile-header-card .btn {
+        width: 100%;
+    }
+}

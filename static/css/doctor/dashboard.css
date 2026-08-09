@@ -1,0 +1,298 @@
+/* ==========================================================================
+   DOCTOR DASHBOARD (dashboard.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Welcome Banner
+   2. Stats Cards
+   3. Doc Card Header (shared pattern, reused by other doctor pages)
+   4. Today's Appointments Preview
+   5. Quick Actions
+   6. Recent Patients
+   7. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. WELCOME BANNER
+   ========================================================================== */
+.welcome-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background: linear-gradient(135deg, var(--doc-primary) 0%, var(--doc-primary-dark) 100%);
+    border-radius: var(--doc-radius);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.welcome-banner h4 {
+    color: var(--doc-white);
+    margin-bottom: 0.3rem;
+}
+
+.welcome-banner p {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.welcome-banner .btn-light {
+    flex-shrink: 0;
+    font-weight: 500;
+    color: var(--doc-primary-dark);
+}
+
+
+/* ==========================================================================
+   2. STATS CARDS
+   ========================================================================== */
+.doc-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: var(--doc-white);
+    border-radius: var(--doc-radius);
+    box-shadow: var(--doc-shadow-sm);
+    padding: 1.25rem 1.5rem;
+    height: 100%;
+    transition: var(--doc-transition);
+}
+
+.doc-stat-card:hover {
+    box-shadow: var(--doc-shadow-md);
+    transform: translateY(-3px);
+}
+
+.doc-stat-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--doc-radius-sm);
+    font-size: 1.4rem;
+}
+
+.doc-stat-icon-primary {
+    background-color: var(--doc-primary-light);
+    color: var(--doc-primary);
+}
+
+.doc-stat-icon-success {
+    background-color: rgba(22, 163, 74, 0.1);
+    color: var(--doc-success);
+}
+
+.doc-stat-icon-warning {
+    background-color: rgba(217, 119, 6, 0.1);
+    color: var(--doc-warning);
+}
+
+.doc-stat-icon-info {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.doc-stat-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.1rem;
+}
+
+.doc-stat-card p {
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   3. DOC CARD HEADER (shared pattern across doctor pages)
+   ========================================================================== */
+.doc-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+}
+
+.doc-card-header h6 {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.doc-card-header h6 i {
+    color: var(--doc-primary);
+}
+
+.doc-card-link {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--doc-primary);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.doc-card-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   4. TODAY'S APPOINTMENTS PREVIEW
+   ========================================================================== */
+.doc-appointment-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--doc-border-color);
+}
+
+.doc-appointment-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.doc-appt-time {
+    flex-shrink: 0;
+    width: 72px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--doc-primary);
+}
+
+.doc-appt-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.doc-appt-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.doc-appt-info h6 {
+    font-size: 0.9rem;
+    margin-bottom: 0.1rem;
+}
+
+.doc-appt-info p {
+    font-size: 0.78rem;
+    margin: 0;
+}
+
+.doc-appt-action {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--doc-background);
+    border-radius: 50%;
+    color: var(--doc-text-light);
+    transition: var(--doc-transition);
+}
+
+.doc-appt-action:hover {
+    background-color: var(--doc-primary);
+    color: var(--doc-white);
+}
+
+
+/* ==========================================================================
+   5. QUICK ACTIONS
+   Note: .status-badge now lives in the shared doctor.css since
+   appointment_list.html uses it too.
+   ========================================================================== */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+}
+
+.quick-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    text-align: center;
+    background-color: var(--doc-background);
+    border-radius: var(--doc-radius-sm);
+    padding: 1rem 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--doc-text-dark);
+    transition: var(--doc-transition);
+}
+
+.quick-action-btn i {
+    font-size: 1.3rem;
+    color: var(--doc-primary);
+}
+
+.quick-action-btn:hover {
+    background-color: var(--doc-primary);
+    color: var(--doc-white);
+}
+
+.quick-action-btn:hover i {
+    color: var(--doc-white);
+}
+
+
+/* ==========================================================================
+   6. RECENT PATIENTS
+   ========================================================================== */
+.recent-patient-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--doc-border-color);
+}
+
+.recent-patient-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.recent-patient-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.recent-patient-row h6 {
+    font-size: 0.88rem;
+    margin-bottom: 0.1rem;
+}
+
+.recent-patient-row p {
+    font-size: 0.76rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   7. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .welcome-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .doc-appt-time {
+        width: 56px;
+        font-size: 0.75rem;
+    }
+}

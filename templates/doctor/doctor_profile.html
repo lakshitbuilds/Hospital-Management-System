@@ -1,0 +1,138 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}My Profile - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PROFILE HEADER
+============================================================= -->
+<div class="doc-card profile-header-card">
+    <div class="profile-header-main">
+        {% if doctor.profile_picture %}
+        <img src="{{ doctor.profile_picture.url }}" alt="Dr. {{ doctor.user.get_full_name }}" class="profile-header-avatar">
+        {% else %}
+        <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. {{ doctor.user.get_full_name }}" class="profile-header-avatar">
+        {% endif %}
+        <div>
+            <h4>Dr. {{ doctor.user.get_full_name }}</h4>
+            <div class="profile-header-badges">
+                {% if doctor.specialization %}<span class="info-pill info-pill-primary"><i class="bi bi-heart-pulse-fill"></i>{{ doctor.specialization }}</span>{% endif %}
+                <span class="info-pill"><i class="bi bi-building"></i>{{ doctor.get_department_display }} Department</span>
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'edit_profile' %}" class="btn btn-primary">
+        <i class="bi bi-pencil-square me-2"></i>Edit Profile
+    </a>
+</div>
+
+<!-- ============================================================
+     STATS ROW
+============================================================= -->
+<div class="row gy-3 profile-stats-row">
+    <div class="col-lg-4 col-md-6">
+        <div class="doc-stat-card">
+            <div class="doc-stat-icon doc-stat-icon-primary"><i class="bi bi-award-fill"></i></div>
+            <div>
+                <h3>{{ doctor.experience_years }} yrs</h3>
+                <p>Experience</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="doc-stat-card">
+            <div class="doc-stat-icon doc-stat-icon-success"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <h3>{{ total_patients }}</h3>
+                <p>Total Patients</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 col-md-6">
+        <div class="doc-stat-card">
+            <div class="doc-stat-icon doc-stat-icon-warning"><i class="bi bi-cash-coin"></i></div>
+            <div>
+                <h3>&#8377;{{ doctor.consultation_fee }}</h3>
+                <p>Consultation Fee</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row gy-4 mt-1">
+
+    <!-- Left Column -->
+    <div class="col-lg-4">
+
+        <div class="doc-card mb-4">
+            <div class="doc-card-header">
+                <h6><i class="bi bi-person-lines-fill me-2"></i>Contact Information</h6>
+            </div>
+            <ul class="detail-list">
+                <li class="copyable" data-copy-value="{{ doctor.user.email }}">
+                    <span><i class="bi bi-envelope-fill me-2"></i>Email</span>
+                    <span>{{ doctor.user.email }} <i class="bi bi-copy copy-icon"></i></span>
+                </li>
+                <li class="copyable" data-copy-value="{{ doctor.phone_number }}">
+                    <span><i class="bi bi-telephone-fill me-2"></i>Phone</span>
+                    <span>{{ doctor.phone_number|default:"Not provided" }} <i class="bi bi-copy copy-icon"></i></span>
+                </li>
+            </ul>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-card-header">
+                <h6><i class="bi bi-mortarboard-fill me-2"></i>Qualifications</h6>
+            </div>
+            <ul class="detail-list">
+                <li><span>Degree</span><span>{{ doctor.qualification|default:"Not provided" }}</span></li>
+                <li><span>License No.</span><span>{{ doctor.license_number|default:"Not provided" }}</span></li>
+                <li><span>Registered Since</span><span>{{ doctor.registered_since|default:"Not provided" }}</span></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-lg-8">
+
+        <div class="doc-card mb-4">
+            <div class="doc-card-header">
+                <h6><i class="bi bi-file-person-fill me-2"></i>About</h6>
+            </div>
+            <p class="profile-bio">
+                {{ doctor.bio|default:"No bio added yet." }}
+            </p>
+        </div>
+
+        <div class="doc-card">
+            <div class="doc-card-header">
+                <h6><i class="bi bi-calendar-week-fill me-2"></i>Weekly Availability</h6>
+                <a href="{% url 'availability' %}" class="doc-card-link">Edit Availability <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <ul class="availability-summary-list">
+                {% for day in weekly_schedule %}
+                <li {% if not day.is_available %}class="is-off"{% endif %}>
+                    <span>{{ day.label }}</span>
+                    <span>{% if day.is_available %}{{ day.start_time }} - {{ day.end_time }}{% else %}Unavailable{% endif %}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/profile.js' %}"></script>
+{% endblock %}

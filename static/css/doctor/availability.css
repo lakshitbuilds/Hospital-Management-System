@@ -1,0 +1,247 @@
+/* ==========================================================================
+   AVAILABILITY PAGE (availability.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Weekly Schedule Rows
+   2. Slot Settings
+   3. Blocked Dates
+   4. Save Bar
+   5. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. WEEKLY SCHEDULE ROWS
+   ========================================================================== */
+.schedule-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid var(--doc-border-color);
+    flex-wrap: wrap;
+}
+
+.schedule-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.schedule-day {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 150px;
+    flex-shrink: 0;
+}
+
+.schedule-day label {
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: var(--doc-text-dark);
+    margin-bottom: 0;
+}
+
+.schedule-day .form-check-input {
+    width: 2.6rem;
+    height: 1.4rem;
+    cursor: pointer;
+}
+
+.schedule-day .form-check-input:checked {
+    background-color: var(--doc-primary);
+    border-color: var(--doc-primary);
+}
+
+.schedule-time {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    flex: 1;
+    min-width: 220px;
+}
+
+.schedule-time input {
+    max-width: 140px;
+}
+
+.schedule-time span {
+    font-size: 0.82rem;
+    color: var(--doc-text-light);
+}
+
+.schedule-row.is-unavailable .schedule-time {
+    opacity: 0.45;
+}
+
+.schedule-row.is-unavailable .schedule-day label {
+    color: var(--doc-text-light);
+}
+
+.copy-hours-btn {
+    background: none;
+    border: none;
+    color: var(--doc-primary);
+    font-size: 0.78rem;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.copy-hours-btn:hover {
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   2. SLOT SETTINGS
+   ========================================================================== */
+#slotDuration, #bufferTime, #maxPerDay,
+.blocked-date-form input {
+    border: 1px solid var(--doc-border-color);
+    border-radius: var(--doc-radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.86rem;
+}
+
+.form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--doc-text-dark);
+    margin-bottom: 0.4rem;
+}
+
+
+/* ==========================================================================
+   3. BLOCKED DATES
+   ========================================================================== */
+.blocked-date-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.blocked-date-form input:first-child {
+    flex: 0 0 130px;
+}
+
+.blocked-date-form input:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+}
+
+.blocked-date-form .btn {
+    flex-shrink: 0;
+    padding: 0 0.9rem;
+}
+
+.blocked-date-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.blocked-date-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: var(--doc-background);
+    border-radius: var(--doc-radius-sm);
+    padding: 0.7rem 0.9rem;
+}
+
+.blocked-date-list li > div {
+    flex: 1;
+}
+
+.blocked-date-list h6 {
+    font-size: 0.85rem;
+    margin-bottom: 0.1rem;
+}
+
+.blocked-date-list p {
+    font-size: 0.76rem;
+    margin: 0;
+}
+
+.remove-blocked-date-btn {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--doc-white);
+    border: 1px solid var(--doc-border-color);
+    border-radius: 50%;
+    color: var(--doc-danger);
+    font-size: 0.8rem;
+    flex-shrink: 0;
+    transition: var(--doc-transition);
+}
+
+.remove-blocked-date-btn:hover {
+    background-color: var(--doc-danger);
+    color: var(--doc-white);
+    border-color: var(--doc-danger);
+}
+
+.blocked-date-empty {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--doc-text-light);
+    padding: 1rem 0 0;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   4. SAVE BAR
+   ========================================================================== */
+.availability-save-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.save-success {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--doc-success);
+    font-size: 0.88rem;
+    font-weight: 500;
+}
+
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .schedule-row {
+        align-items: flex-start;
+    }
+
+    .schedule-day {
+        width: 100%;
+    }
+
+    .copy-hours-btn {
+        width: 100%;
+        text-align: left;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .blocked-date-form {
+        flex-wrap: wrap;
+    }
+
+    .blocked-date-form input:first-child,
+    .blocked-date-form input:nth-child(2) {
+        flex: 1 1 100%;
+    }
+}

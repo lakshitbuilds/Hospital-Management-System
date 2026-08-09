@@ -1,0 +1,194 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Add Prescription - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/add_prescription.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="doc-page-title">Add Prescription</h4>
+<p class="doc-page-subtitle">Create a new prescription for your patient.</p>
+
+<div class="row gy-4">
+
+    <!-- Prescription Form -->
+    <div class="col-lg-8">
+        <div class="doc-card">
+
+            <form id="addPrescriptionForm" method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Patient + Appointment -->
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="patientSelect" class="form-label">Select Patient</label>
+                        <select class="form-select" id="patientSelect" name="patient_id" required>
+                            <option value="" {% if not preselected_patient_id %}selected{% endif %} disabled>Choose a patient</option>
+                            {% for p in patients %}
+                            <option value="{{ p.id }}"
+                                data-age="{{ p.date_of_birth|timesince }}"
+                                data-gender="{{ p.gender }}"
+                                data-blood-group="{{ p.blood_group }}"
+                                data-allergies="{{ p.allergies }}"
+                                data-avatar="{% if p.profile_image %}{{ p.profile_image.url }}{% else %}{% static 'public/images/patient-1.jpg' %}{% endif %}"
+                                {% if preselected_patient_id and preselected_patient_id|stringformat:"s" == p.id|stringformat:"s" %}selected{% endif %}>
+                                {{ p.user.get_full_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="appointmentSelect" class="form-label">Related Appointment</label>
+                        <select class="form-select" id="appointmentSelect" name="appointment_id">
+                            <option value="" selected>No linked appointment</option>
+                            {% for appt in appointments %}
+                            <option value="{{ appt.id }}" data-patient-id="{{ appt.patient.id }}"
+                                {% if preselected_appointment_id and preselected_appointment_id|stringformat:"s" == appt.id|stringformat:"s" %}selected{% endif %}>
+                                {{ appt.patient.user.get_full_name }} &middot; {{ appt.appointment_date|date:"M d, Y" }} &middot; {{ appt.time_slot }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Diagnosis -->
+                <div class="mb-4">
+                    <label for="diagnosis" class="form-label">Diagnosis</label>
+                    <textarea class="form-control" id="diagnosis" name="diagnosis" rows="2" placeholder="e.g. Acute viral fever with mild dehydration" required></textarea>
+                </div>
+
+                <!-- Medications -->
+                <div class="mb-2 d-flex justify-content-between align-items-center">
+                    <label class="form-label mb-0">Medications</label>
+                    <button type="button" class="add-medicine-btn" id="addMedicineBtn">
+                        <i class="bi bi-plus-circle-fill me-1"></i>Add Medicine
+                    </button>
+                </div>
+
+                <div id="medicineRows">
+
+                    <div class="medicine-row">
+                        <div class="medicine-row-header">
+                            <span class="medicine-row-index">#1</span>
+                            <button type="button" class="remove-medicine-btn" aria-label="Remove medicine" disabled>
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </div>
+                        <div class="row gy-2">
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" name="medicine_name[]" list="medicineSuggestions" placeholder="Medicine name" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control" name="dosage[]" placeholder="e.g. 500mg" required>
+                            </div>
+                            <div class="col-md-3">
+                                <select class="form-select" name="frequency[]" required>
+                                    <option value="" selected disabled>Frequency</option>
+                                    <option value="once_a_day">Once a day</option>
+                                    <option value="twice_a_day">Twice a day</option>
+                                    <option value="thrice_a_day">Thrice a day</option>
+                                    <option value="every_6_hours">Every 6 hours</option>
+                                    <option value="every_8_hours">Every 8 hours</option>
+                                    <option value="as_needed">As needed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" name="duration[]" placeholder="e.g. 5 days" required>
+                            </div>
+                            <div class="col-12">
+                                <input type="text" class="form-control" name="instructions[]" placeholder="Instructions (e.g. after food)">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <datalist id="medicineSuggestions">
+                    <option value="Paracetamol">
+                    <option value="Amoxicillin">
+                    <option value="Ibuprofen">
+                    <option value="Metformin">
+                    <option value="Atorvastatin">
+                    <option value="Omeprazole">
+                    <option value="Cetirizine">
+                    <option value="Azithromycin">
+                </datalist>
+
+                <!-- Additional Advice -->
+                <div class="mb-4 mt-4">
+                    <label for="advice" class="form-label">Additional Advice</label>
+                    <textarea class="form-control" id="advice" name="advice" rows="3" placeholder="e.g. Drink plenty of fluids, avoid oily food, rest for 3 days"></textarea>
+                </div>
+
+                <!-- Follow-up -->
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="followUpDate" class="form-label">Follow-up Date <span class="text-muted">(optional)</span></label>
+                        <input type="date" class="form-control" id="followUpDate" name="follow_up_date">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-file-earmark-check-fill me-2"></i>Save Prescription
+                    </button>
+                    <a href="#" class="btn btn-outline-primary btn-lg">Cancel</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- Patient Info Sidebar -->
+    <div class="col-lg-4">
+        <div class="doc-card patient-info-card">
+            <div class="doc-card-header">
+                <h6><i class="bi bi-person-lines-fill me-2"></i>Patient Information</h6>
+            </div>
+
+            <div id="patientInfoEmpty" class="patient-info-empty">
+                <i class="bi bi-person-circle"></i>
+                <p>Select a patient to see their details here.</p>
+            </div>
+
+            <div id="patientInfoContent" class="d-none">
+                <div class="patient-info-header">
+                    <img src="{% static 'public/images/patient-1.jpg' %}" alt="Patient" id="patientInfoAvatar" class="patient-info-avatar">
+                    <div>
+                        <h6 id="patientInfoName">Patient Name</h6>
+                        <span id="patientInfoMeta">Age &middot; Gender</span>
+                    </div>
+                </div>
+
+                <ul class="patient-info-list">
+                    <li>
+                        <span>Blood Group</span>
+                        <span id="patientInfoBloodGroup" class="badge-value">-</span>
+                    </li>
+                </ul>
+
+                <div id="patientAllergyAlert" class="patient-allergy-alert d-none">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <div>
+                        <h6>Known Allergies</h6>
+                        <p id="patientAllergyText">-</p>
+                    </div>
+                </div>
+
+                <div id="patientNoAllergyNote" class="patient-no-allergy-note d-none">
+                    <i class="bi bi-check-circle-fill"></i>No known allergies on record.
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/add_prescription.js' %}"></script>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse, NoReverseMatch
 
 from .models import Patient, Appointment, ContactMessage, Notification
 from doctor.models import Doctor
@@ -30,7 +31,10 @@ def department(request):
 
 
 def doctors(request):
-    return render(request, "patient/doctors.html")
+    doctor_list = list(Doctor.objects.select_related('user').all())
+    for index, doc in enumerate(doctor_list):
+        doc.photo_path = f'public/images/doctor-{(index % 8) + 1}.jpg'
+    return render(request, "patient/doctors.html", {'doctors': doctor_list})
 
 
 def contact(request):
@@ -62,14 +66,21 @@ def login(request):
         if user is not None:
             auth_login(request, user)
 
-            if user.role == 'admin':
-                return redirect('admin_dashboard')
-            elif user.role == 'doctor':
-                return redirect('doctor_dashboard')
-            elif user.role == 'receptionist':
-                return redirect('receptionist_dashboard')
-            else:
-                return redirect('home')
+            role_redirects = {
+                'admin': 'admin_dashboard',
+                'doctor': 'doctor_home',
+                'receptionist': 'receptionist_dashboard',
+            }
+            target = role_redirects.get(user.role)
+
+            if target:
+                try:
+                    return redirect(reverse(target))
+                except NoReverseMatch:
+                    messages.info(request, f'{user.role.capitalize()} dashboard is not available yet.')
+                    return redirect('home')
+
+            return redirect('home')
         else:
             messages.error(request, 'Invalid email or password.')
             return redirect('login')
@@ -192,7 +203,7 @@ def book_appointment(request):
         visit_type = request.POST.get('visit_type')
         reason = request.POST.get('reason')
 
-        if Appointment.objects.filter(doctor=doctor, appointment_date=appointment_date, time_slot=time_slot).exists():
+        if Appointment.objects.filter(doctor=doctor, appointment_date=appointment_date, time_slot=time_slot).exclude(status='cancelled').exists():
             messages.error(request, 'This slot is already booked.')
             return redirect('book_appointment')
 

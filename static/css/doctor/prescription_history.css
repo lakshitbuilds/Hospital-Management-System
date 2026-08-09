@@ -1,0 +1,260 @@
+/* ==========================================================================
+   PRESCRIPTION HISTORY PAGE (prescription_history.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Toolbar
+   2. Table
+   3. Empty State
+   4. View Prescription Modal
+   5. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TOOLBAR
+   ========================================================================== */
+.rx-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.rx-search-box {
+    flex: 1;
+    max-width: 320px;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background-color: var(--doc-background);
+    border: 1px solid var(--doc-border-color);
+    border-radius: var(--doc-radius-pill);
+    padding: 0.55rem 1.1rem;
+}
+
+.rx-search-box i {
+    color: var(--doc-text-light);
+}
+
+.rx-search-box input {
+    flex: 1;
+    border: none;
+    background: none;
+    outline: none;
+    font-size: 0.85rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.rx-sort-select {
+    max-width: 180px;
+    border: 1px solid var(--doc-border-color);
+    border-radius: var(--doc-radius-sm);
+    padding: 0.55rem 0.9rem;
+    font-size: 0.85rem;
+}
+
+
+/* ==========================================================================
+   2. TABLE
+   ========================================================================== */
+.rx-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rx-table thead th {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--doc-text-light);
+    padding: 0.85rem 1rem;
+    border-bottom: 2px solid var(--doc-border-color);
+    white-space: nowrap;
+}
+
+.rx-table tbody td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--doc-border-color);
+    font-size: 0.85rem;
+    color: var(--doc-text-dark);
+    vertical-align: middle;
+}
+
+.rx-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.rx-table tbody tr:hover {
+    background-color: var(--doc-background);
+}
+
+.table-patient-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.table-patient-cell img {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.table-patient-cell h6 {
+    font-size: 0.86rem;
+    margin: 0;
+}
+
+.medicine-count-badge {
+    background-color: var(--doc-primary-light);
+    color: var(--doc-primary);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: var(--doc-radius-pill);
+}
+
+.table-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+}
+
+.table-action-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--doc-background);
+    color: var(--doc-text-dark);
+    border: none;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    transition: var(--doc-transition);
+}
+
+.table-action-btn:hover {
+    background-color: var(--doc-primary);
+    color: var(--doc-white);
+}
+
+
+/* ==========================================================================
+   3. EMPTY STATE
+   ========================================================================== */
+.table-empty-state {
+    text-align: center;
+    padding: 3.5rem 1.5rem;
+}
+
+.table-empty-state i {
+    font-size: 2.25rem;
+    color: var(--doc-border-color);
+    margin-bottom: 0.75rem;
+}
+
+.table-empty-state h6 {
+    margin-bottom: 0.3rem;
+}
+
+.table-empty-state p {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+
+/* ==========================================================================
+   4. VIEW PRESCRIPTION MODAL
+   ========================================================================== */
+.rx-modal-patient {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid var(--doc-border-color);
+}
+
+.rx-modal-patient img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.rx-modal-patient h6 {
+    margin-bottom: 0.15rem;
+}
+
+.rx-modal-patient span {
+    font-size: 0.8rem;
+    color: var(--doc-text-light);
+}
+
+.rx-modal-section {
+    margin-bottom: 1.25rem;
+}
+
+.rx-modal-section:last-child {
+    margin-bottom: 0;
+}
+
+.rx-modal-section h6 {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: var(--doc-text-light);
+    margin-bottom: 0.5rem;
+}
+
+.rx-modal-section p {
+    font-size: 0.9rem;
+    color: var(--doc-text-dark);
+    margin: 0;
+}
+
+.rx-modal-medicine-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rx-modal-medicine-table thead th {
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--doc-text-light);
+    padding: 0.55rem 0.6rem;
+    background-color: var(--doc-background);
+}
+
+.rx-modal-medicine-table tbody td {
+    padding: 0.6rem 0.6rem;
+    font-size: 0.83rem;
+    border-bottom: 1px solid var(--doc-border-color);
+}
+
+.rx-modal-medicine-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+
+/* ==========================================================================
+   5. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 767.98px) {
+    .rx-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .rx-search-box,
+    .rx-sort-select {
+        max-width: none;
+    }
+}

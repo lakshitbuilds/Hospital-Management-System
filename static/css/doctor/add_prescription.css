@@ -1,0 +1,249 @@
+/* ==========================================================================
+   ADD PRESCRIPTION PAGE (add_prescription.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Form Labels / Controls
+   2. Add Medicine Button
+   3. Medicine Row
+   4. Form Actions
+   5. Patient Info Sidebar
+   6. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. FORM LABELS / CONTROLS
+   ========================================================================== */
+#addPrescriptionForm .form-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--doc-text-dark);
+    margin-bottom: 0.4rem;
+}
+
+#addPrescriptionForm .form-control,
+#addPrescriptionForm .form-select {
+    border: 1px solid var(--doc-border-color);
+    border-radius: var(--doc-radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.88rem;
+}
+
+
+/* ==========================================================================
+   2. ADD MEDICINE BUTTON
+   ========================================================================== */
+.add-medicine-btn {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--doc-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.add-medicine-btn:hover {
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   3. MEDICINE ROW
+   ========================================================================== */
+#medicineRows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.medicine-row {
+    background-color: var(--doc-background);
+    border: 1px solid var(--doc-border-color);
+    border-radius: var(--doc-radius-sm);
+    padding: 1rem;
+}
+
+.medicine-row-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.65rem;
+}
+
+.medicine-row-index {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--doc-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.remove-medicine-btn {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--doc-white);
+    border: 1px solid var(--doc-border-color);
+    border-radius: 50%;
+    color: var(--doc-danger);
+    font-size: 0.8rem;
+    transition: var(--doc-transition);
+}
+
+.remove-medicine-btn:hover:not(:disabled) {
+    background-color: var(--doc-danger);
+    color: var(--doc-white);
+    border-color: var(--doc-danger);
+}
+
+.remove-medicine-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+
+/* ==========================================================================
+   4. FORM ACTIONS
+   ========================================================================== */
+.form-actions {
+    display: flex;
+    gap: 0.85rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--doc-border-color);
+    margin-top: 0.5rem;
+}
+
+
+/* ==========================================================================
+   5. PATIENT INFO SIDEBAR
+   ========================================================================== */
+.patient-info-card {
+    position: sticky;
+    top: 90px;
+}
+
+.patient-info-empty {
+    text-align: center;
+    padding: 2.5rem 1rem;
+}
+
+.patient-info-empty i {
+    font-size: 2.25rem;
+    color: var(--doc-border-color);
+    margin-bottom: 0.75rem;
+}
+
+.patient-info-empty p {
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.patient-info-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.25rem;
+}
+
+.patient-info-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.patient-info-header h6 {
+    margin-bottom: 0.15rem;
+}
+
+.patient-info-header span {
+    font-size: 0.8rem;
+    color: var(--doc-text-light);
+}
+
+.patient-info-list {
+    margin-bottom: 1.25rem;
+}
+
+.patient-info-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid var(--doc-border-color);
+    font-size: 0.85rem;
+    color: var(--doc-text-light);
+}
+
+.patient-info-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.badge-value {
+    background-color: var(--doc-primary-light);
+    color: var(--doc-primary);
+    font-weight: 600;
+    font-size: 0.78rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: var(--doc-radius-pill);
+}
+
+.patient-allergy-alert {
+    display: flex;
+    gap: 0.75rem;
+    background-color: rgba(220, 38, 38, 0.08);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: var(--doc-radius-sm);
+    padding: 1rem;
+}
+
+.patient-allergy-alert i {
+    color: var(--doc-danger);
+    font-size: 1.1rem;
+    margin-top: 0.1rem;
+}
+
+.patient-allergy-alert h6 {
+    color: var(--doc-danger);
+    font-size: 0.85rem;
+    margin-bottom: 0.2rem;
+}
+
+.patient-allergy-alert p {
+    font-size: 0.82rem;
+    margin: 0;
+    color: var(--doc-text-dark);
+}
+
+.patient-no-allergy-note {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--doc-success);
+    background-color: rgba(22, 163, 74, 0.08);
+    border-radius: var(--doc-radius-sm);
+    padding: 0.75rem 1rem;
+}
+
+
+/* ==========================================================================
+   6. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+    }
+
+    .patient-info-card {
+        position: static;
+    }
+}

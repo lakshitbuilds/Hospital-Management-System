@@ -917,6 +917,76 @@ p {
     }
 }
 
+/* --- Offcanvas mobile nav (left slide-in) --- */
+#navbarMain {
+    --bs-offcanvas-width: min(78vw, 280px) !important;
+}
+
+@media (max-width: 991.98px) {
+    #navbarMain .offcanvas-body {
+        padding: 1rem 1.25rem 1.5rem;
+        gap: 0.25rem;
+    }
+
+    #navbarMain .nav-center {
+        align-items: stretch !important;
+        text-align: left !important;
+        margin-top: 0 !important;
+    }
+
+    #navbarMain .nav-center .nav-item {
+        width: 100%;
+    }
+
+    #navbarMain .nav-center .nav-link {
+        text-align: left;
+        display: block;
+        width: 100%;
+    }
+
+    #navbarMain .nav-underline::after {
+        display: none !important;
+        content: none !important;
+    }
+
+    #navbarMain .nav-link.active {
+        background-color: var(--primary-light) !important;
+        border-radius: var(--border-radius-sm);
+        color: var(--primary) !important;
+    }
+}
+
+/* --- Doctor cards: tighter layout on phones (2-col grid) --- */
+@media (max-width: 767.98px) {
+    #doctorsGrid,
+    .row.gy-4 {
+        --bs-gutter-x: 0.9rem;
+    }
+
+    .doctor-info {
+        padding: 0.85rem 0.6rem;
+    }
+
+    .doctor-info h6 {
+        font-size: 0.88rem;
+    }
+
+    .doctor-info p {
+        font-size: 0.72rem;
+    }
+
+    .doctor-social {
+        bottom: 0;
+        padding: 0.5rem 0;
+    }
+
+    .doctor-social a {
+        width: 28px;
+        height: 28px;
+        font-size: 0.75rem;
+    }
+}
+
 .nav-link.active {
     color: #0d6efd;
     font-weight: 600;

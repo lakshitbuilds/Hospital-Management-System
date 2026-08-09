@@ -51,141 +51,26 @@
         <!-- Doctors Grid -->
         <div class="row gy-4" id="doctorsGrid">
 
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="cardiology">
+            {% for doc in doctors %}
+            <div class="col-lg-3 col-md-6 col-6 doctor-item" data-category="{{ doc.department }}">
                 <div class="doctor-card">
                     <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. Sarah Mitchell">
+                        <img src="{% static doc.photo_path %}" alt="Dr. {{ doc.user.get_full_name }}">
                         <div class="doctor-social">
                             <a href="#"><i class="bi bi-facebook"></i></a>
                             <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
+                            <a href="mailto:{{ doc.user.email }}"><i class="bi bi-envelope-fill"></i></a>
                         </div>
                     </div>
                     <div class="doctor-info">
-                        <h6>Dr. Sarah Mitchell</h6>
-                        <p>Cardiologist</p>
+                        <h6>Dr. {{ doc.user.get_full_name }}</h6>
+                        <p>{{ doc.specialization|default:doc.get_department_display }}</p>
                     </div>
                 </div>
             </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="neurology">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-2.jpg' %}" alt="Dr. James Carter">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. James Carter</h6>
-                        <p>Neurologist</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="pediatrics">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-3.jpg' %}" alt="Dr. Emily Chen">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. Emily Chen</h6>
-                        <p>Pediatrician</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="orthopedics">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-4.jpg' %}" alt="Dr. Michael Reyes">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. Michael Reyes</h6>
-                        <p>Orthopedic Surgeon</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="dermatology">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-5.jpg' %}" alt="Dr. Laura Simmons">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. Laura Simmons</h6>
-                        <p>Dermatologist</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="cardiology">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-6.jpg' %}" alt="Dr. Arjun Rao">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. Arjun Rao</h6>
-                        <p>Interventional Cardiologist</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="neurology">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-7.jpg' %}" alt="Dr. Meera Iyer">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. Meera Iyer</h6>
-                        <p>Neurosurgeon</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 doctor-item" data-category="orthopedics">
-                <div class="doctor-card">
-                    <div class="doctor-photo">
-                        <img src="{% static 'public/images/doctor-8.jpg' %}" alt="Dr. Karan Malhotra">
-                        <div class="doctor-social">
-                            <a href="#"><i class="bi bi-facebook"></i></a>
-                            <a href="#"><i class="bi bi-linkedin"></i></a>
-                            <a href="#"><i class="bi bi-envelope-fill"></i></a>
-                        </div>
-                    </div>
-                    <div class="doctor-info">
-                        <h6>Dr. Karan Malhotra</h6>
-                        <p>Joint Replacement Surgeon</p>
-                    </div>
-                </div>
-            </div>
+            {% empty %}
+            <p class="text-center no-results">No doctors registered yet.</p>
+            {% endfor %}
 
         </div>
 

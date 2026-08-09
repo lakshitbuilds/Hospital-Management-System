@@ -1,0 +1,78 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/notifications.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="doc-page-title">Notifications</h4>
+<p class="doc-page-subtitle">Stay updated on appointments, prescriptions, and patient activity.</p>
+
+<div class="doc-card notifications-card">
+
+    <!-- Toolbar -->
+    <div class="notifications-toolbar">
+        <div class="notif-filters">
+            <button type="button" class="notif-filter-btn active" data-filter="all">All</button>
+            <button type="button" class="notif-filter-btn" data-filter="unread">
+                Unread <span class="unread-count-badge" id="unreadCountBadge">{{ unread_count }}</span>
+            </button>
+        </div>
+        <form action="{% url 'doctor_mark_all_read' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="mark-all-read-btn" id="markAllReadBtn">
+                <i class="bi bi-check2-all me-1"></i>Mark all as read
+            </button>
+        </form>
+    </div>
+
+    <!-- Notification List -->
+    <ul class="notification-list" id="notificationList">
+
+        {% for note in notifications %}
+        <li class="notification-item {% if not note.is_read %}is-unread{% endif %}" data-status="{% if note.is_read %}read{% else %}unread{% endif %}">
+            <div class="notif-icon {% if note.notification_type == 'cancelled' %}notif-icon-danger{% elif note.notification_type == 'confirmed' %}notif-icon-success{% elif note.notification_type == 'reminder' %}notif-icon-warning{% else %}notif-icon-primary{% endif %}">
+                {% if note.notification_type == 'cancelled' %}
+                <i class="bi bi-calendar-x"></i>
+                {% elif note.notification_type == 'confirmed' %}
+                <i class="bi bi-calendar-plus"></i>
+                {% elif note.notification_type == 'reminder' %}
+                <i class="bi bi-clock-history"></i>
+                {% else %}
+                <i class="bi bi-bell"></i>
+                {% endif %}
+            </div>
+            <div class="notif-body">
+                <h6>{{ note.get_notification_type_display }}</h6>
+                <p>{{ note.message }}</p>
+                <span class="notif-time">{{ note.created_at|timesince }} ago</span>
+            </div>
+            <form action="{% url 'doctor_dismiss_notification' note.id %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="notif-dismiss" aria-label="Dismiss notification">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </form>
+        </li>
+        {% endfor %}
+
+    </ul>
+
+    <!-- Empty State -->
+    <div class="notif-empty-state {% if notifications %}d-none{% endif %}" id="notifEmptyState">
+        <i class="bi bi-bell-slash"></i>
+        <h6>You're all caught up!</h6>
+        <p>No notifications to show right now.</p>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/notifications.js' %}"></script>
+{% endblock %}

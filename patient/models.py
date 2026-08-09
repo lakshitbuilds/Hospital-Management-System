@@ -67,16 +67,24 @@ class Appointment(models.Model):
         ('new', 'New Visit'),
         ('follow-up', 'Follow-up Visit'),
     )
+    DEPARTMENT_CHOICES = (
+        ('cardiology', 'Cardiology'),
+        ('neurology', 'Neurology'),
+        ('orthopedics', 'Orthopedics'),
+        ('pediatrics', 'Pediatrics'),
+        ('dermatology', 'Dermatology'),
+        ('general', 'General Medicine'),
+    )
 
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
-    doctor = models.ForeignKey('doctor.Doctor', on_delete=models.CASCADE, related_name='appointments') 
+    doctor = models.ForeignKey('doctor.Doctor', on_delete=models.CASCADE, related_name='appointments')
     appointment_date = models.DateField()
     time_slot = models.CharField(max_length=20)
     visit_type = models.CharField(max_length=20, choices=VISIT_TYPE_CHOICES, default='new')
     reason = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
-    department = models.CharField(max_length=30, default='general')
+    department = models.CharField(max_length=30, choices=DEPARTMENT_CHOICES, default='general')
 
     class Meta:
         unique_together = ('doctor', 'appointment_date', 'time_slot')

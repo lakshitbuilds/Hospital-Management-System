@@ -1,0 +1,122 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/edit_profile.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<a href="{% url 'doctor_profile' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Profile</a>
+
+<h4 class="doc-page-title">Edit Profile</h4>
+<p class="doc-page-subtitle">Update your professional details and profile picture.</p>
+
+<div class="row gy-4">
+
+    <!-- Avatar -->
+    <div class="col-lg-4">
+        <div class="doc-card text-center avatar-card">
+            <div class="edit-avatar-wrap">
+                {% if doctor.profile_picture %}
+                <img src="{{ doctor.profile_picture.url }}" alt="Dr. {{ doctor.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
+                {% else %}
+                <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. {{ doctor.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
+                {% endif %}
+                <button type="button" class="avatar-edit-btn" id="avatarEditBtn" aria-label="Change profile picture">
+                    <i class="bi bi-camera-fill"></i>
+                </button>
+                <input type="file" id="avatarInput" name="profile_picture" form="editProfileForm" accept="image/*" class="d-none">
+            </div>
+            <h6 class="mb-1">Dr. {{ doctor.user.get_full_name }}</h6>
+            <p class="mb-0">{{ doctor.specialization|default:doctor.get_department_display }}</p>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="col-lg-8">
+        <div class="doc-card">
+
+            <form id="editProfileForm" method="POST" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+
+                <!-- Basic Information -->
+                <h6 class="form-section-title"><i class="bi bi-person-fill"></i>Basic Information</h6>
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="first_name" value="{{ doctor.user.first_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="last_name" value="{{ doctor.user.last_name }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ doctor.user.email }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phone" name="phone_number" value="{{ doctor.phone_number }}" required>
+                    </div>
+                </div>
+
+                <!-- Professional Information -->
+                <h6 class="form-section-title"><i class="bi bi-briefcase-fill"></i>Professional Information</h6>
+                <div class="row gy-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="department" class="form-label">Department</label>
+                        <select class="form-select" id="department" name="department" required>
+                            <option value="cardiology" {% if doctor.department == "cardiology" %}selected{% endif %}>Cardiology</option>
+                            <option value="neurology" {% if doctor.department == "neurology" %}selected{% endif %}>Neurology</option>
+                            <option value="orthopedics" {% if doctor.department == "orthopedics" %}selected{% endif %}>Orthopedics</option>
+                            <option value="pediatrics" {% if doctor.department == "pediatrics" %}selected{% endif %}>Pediatrics</option>
+                            <option value="dermatology" {% if doctor.department == "dermatology" %}selected{% endif %}>Dermatology</option>
+                            <option value="general" {% if doctor.department == "general" %}selected{% endif %}>General Medicine</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="specialization" class="form-label">Specialization</label>
+                        <input type="text" class="form-control" id="specialization" name="specialization" value="{{ doctor.specialization }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="qualification" class="form-label">Qualification</label>
+                        <input type="text" class="form-control" id="qualification" name="qualification" value="{{ doctor.qualification }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="experienceYears" class="form-label">Experience (Years)</label>
+                        <input type="number" class="form-control" id="experienceYears" name="experience_years" value="{{ doctor.experience_years }}" min="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="consultationFee" class="form-label">Consultation Fee (&#8377;)</label>
+                        <input type="number" class="form-control" id="consultationFee" name="consultation_fee" value="{{ doctor.consultation_fee }}" min="0">
+                    </div>
+                </div>
+
+                <!-- About -->
+                <h6 class="form-section-title"><i class="bi bi-file-person-fill"></i>About</h6>
+                <div class="mb-4">
+                    <label for="bio" class="form-label">Bio</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="4">{{ doctor.bio }}</textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check2-circle me-2"></i>Save Changes
+                    </button>
+                    <a href="{% url 'doctor_profile' %}" class="btn btn-outline-primary btn-lg">Cancel</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/edit_profile.js' %}"></script>
+{% endblock %}

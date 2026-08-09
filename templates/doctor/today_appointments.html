@@ -1,0 +1,64 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Today's Appointments - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/today_appointments.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="today-header">
+    <div>
+        <h4 class="doc-page-title mb-0">Today's Appointments</h4>
+        <p class="doc-page-subtitle mb-0">{% now "l, d F Y" %}</p>
+    </div>
+    <div class="today-summary-pills">
+        <span class="summary-pill"><i class="bi bi-calendar-check"></i>{{ counts.total }} Total</span>
+        <span class="summary-pill summary-pill-success"><i class="bi bi-check-circle"></i>{{ counts.completed }} Completed</span>
+        <span class="summary-pill summary-pill-warning"><i class="bi bi-hourglass-split"></i>{{ counts.pending }} Pending</span>
+        <span class="summary-pill summary-pill-primary"><i class="bi bi-clock"></i>{{ counts.upcoming }} Upcoming</span>
+    </div>
+</div>
+
+<div class="today-timeline" id="todayTimeline">
+
+    {% for appt in appointments %}
+    <div class="timeline-slot {% if appt.status == 'completed' %}is-done{% endif %}" data-status="{{ appt.status }}">
+        <div class="timeline-time">{{ appt.time_slot }}</div>
+        <div class="doc-card timeline-card">
+            {% if appt.patient.profile_image %}
+            <img src="{{ appt.patient.profile_image.url }}" alt="{{ appt.patient.user.get_full_name }}" class="timeline-avatar">
+            {% else %}
+            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ appt.patient.user.get_full_name }}" class="timeline-avatar">
+            {% endif %}
+            <div class="timeline-info">
+                <h6>{{ appt.patient.user.get_full_name }}</h6>
+                <p>{{ appt.get_visit_type_display }} &middot; {{ appt.reason|truncatechars:40 }}</p>
+            </div>
+            <span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span>
+            <div class="timeline-actions">
+                {% if appt.status == 'pending' or appt.status == 'confirmed' %}
+                <form action="{% url 'mark_appointment_complete' appt.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="table-action-btn table-action-success" title="Mark as Completed">
+                        <i class="bi bi-check-lg"></i>
+                    </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'patient_details' appt.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-eye"></i></a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted py-4">No appointments scheduled for today.</p>
+    {% endfor %}
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/today_appointments.js' %}"></script>
+{% endblock %}

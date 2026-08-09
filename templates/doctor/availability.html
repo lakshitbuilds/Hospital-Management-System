@@ -1,0 +1,140 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Availability - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/availability.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="doc-page-title">Availability</h4>
+<p class="doc-page-subtitle">Manage your weekly working hours and time off.</p>
+
+<form id="availabilityForm" method="POST" novalidate>
+    {% csrf_token %}
+
+    <div class="row gy-4">
+
+        <!-- Weekly Schedule -->
+        <div class="col-lg-8">
+            <div class="doc-card">
+                <div class="doc-card-header">
+                    <h6><i class="bi bi-calendar-week-fill me-2"></i>Weekly Schedule</h6>
+                </div>
+
+                <div class="schedule-list">
+
+                    {% for day in weekly_schedule %}
+                    <div class="schedule-row" data-day="{{ day.day }}">
+                        <div class="schedule-day">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input day-toggle" type="checkbox" id="toggle_{{ day.day }}" name="available_{{ day.day }}" {% if day.is_available %}checked{% endif %}>
+                            </div>
+                            <label for="toggle_{{ day.day }}">{{ day.label }}</label>
+                        </div>
+                        <div class="schedule-time">
+                            <input type="time" class="form-control" name="start_{{ day.day }}" value="{{ day.start_time }}" {% if not day.is_available %}disabled{% endif %}>
+                            <span>to</span>
+                            <input type="time" class="form-control" name="end_{{ day.day }}" value="{{ day.end_time }}" {% if not day.is_available %}disabled{% endif %}>
+                        </div>
+                        {% if day.day == 'monday' %}
+                        <button type="button" class="copy-hours-btn" title="Copy these hours to all weekdays">
+                            <i class="bi bi-copy me-1"></i>Copy to weekdays
+                        </button>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar: Slot Settings + Blocked Dates -->
+        <div class="col-lg-4">
+
+            <div class="doc-card mb-4">
+                <div class="doc-card-header">
+                    <h6><i class="bi bi-clock-history me-2"></i>Slot Settings</h6>
+                </div>
+
+                <div class="mb-3">
+                    <label for="slotDuration" class="form-label">Appointment Duration</label>
+                    <select class="form-select" id="slotDuration" name="slot_duration">
+                        <option value="15">15 minutes</option>
+                        <option value="20">20 minutes</option>
+                        <option value="30" selected>30 minutes</option>
+                        <option value="45">45 minutes</option>
+                        <option value="60">60 minutes</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="bufferTime" class="form-label">Buffer Between Appointments</label>
+                    <select class="form-select" id="bufferTime" name="buffer_time">
+                        <option value="0">None</option>
+                        <option value="5" selected>5 minutes</option>
+                        <option value="10">10 minutes</option>
+                        <option value="15">15 minutes</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="maxPerDay" class="form-label">Max Appointments Per Day <span class="text-muted">(optional)</span></label>
+                    <input type="number" class="form-control" id="maxPerDay" name="max_per_day" min="1" placeholder="No limit">
+                </div>
+            </div>
+
+            <div class="doc-card">
+                <div class="doc-card-header">
+                    <h6><i class="bi bi-calendar-x-fill me-2"></i>Blocked Dates</h6>
+                </div>
+
+                <div class="blocked-date-form">
+                    <input type="date" class="form-control" id="blockedDateInput" aria-label="Date">
+                    <input type="text" class="form-control" id="blockedReasonInput" placeholder="Reason (e.g. Conference)" aria-label="Reason">
+                    <button type="button" class="btn btn-primary" id="addBlockedDateBtn">
+                        <i class="bi bi-plus-lg"></i>
+                    </button>
+                </div>
+
+                <ul class="blocked-date-list" id="blockedDateList">
+                    {% for b in blocked_dates %}
+                    <li data-date="{{ b.date|date:'Y-m-d' }}">
+                        <div>
+                            <h6>{{ b.date|date:"M d, Y" }}</h6>
+                            <p>{{ b.reason|default:"No reason given" }}</p>
+                        </div>
+                        <button type="button" class="remove-blocked-date-btn" aria-label="Remove blocked date">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        <input type="hidden" name="blocked_date[]" value="{{ b.date|date:'Y-m-d' }}">
+                        <input type="hidden" name="blocked_reason[]" value="{{ b.reason }}">
+                    </li>
+                    {% endfor %}
+                </ul>
+
+                <p class="blocked-date-empty {% if blocked_dates %}d-none{% endif %}" id="blockedDateEmpty">No blocked dates added yet.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="availability-save-bar">
+        <button type="submit" class="btn btn-primary btn-lg">
+            <i class="bi bi-check2-circle me-2"></i>Save Availability
+        </button>
+        <span class="save-success d-none" id="availabilitySuccess">
+            <i class="bi bi-check-circle-fill"></i>Availability updated
+        </span>
+    </div>
+
+</form>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/doctor/availability.js' %}"></script>
+{% endblock %}

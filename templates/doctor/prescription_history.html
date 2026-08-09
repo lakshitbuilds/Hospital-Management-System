@@ -1,0 +1,166 @@
+{% extends 'doctor/base.html' %}
+{% load static %}
+
+{% block title %}Prescription History - Doctor Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/prescription_history.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="doc-page-title">Prescription History</h4>
+<p class="doc-page-subtitle">All prescriptions you've issued to patients.</p>
+
+<div class="doc-card">
+
+    <!-- Toolbar -->
+    <div class="rx-toolbar">
+        <div class="rx-search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" id="rxSearchInput" placeholder="Search by patient or diagnosis...">
+        </div>
+        <select class="form-select rx-sort-select" id="rxSortSelect">
+            <option value="newest" selected>Newest First</option>
+            <option value="oldest">Oldest First</option>
+        </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="rx-table" id="rxTable">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Diagnosis</th>
+                    <th>Medicines</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="rxTableBody">
+
+                {% for rx in prescriptions %}
+                <tr data-rx="rx{{ rx.id }}" data-timestamp="{{ rx.created_at|date:'YmdHi' }}" data-search="{{ rx.patient.user.get_full_name|lower }} {{ rx.diagnosis|lower }}">
+                    <td>
+                        <div class="table-patient-cell">
+                            {% if rx.patient.profile_image %}
+                            <img src="{{ rx.patient.profile_image.url }}" alt="{{ rx.patient.user.get_full_name }}">
+                            {% else %}
+                            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ rx.patient.user.get_full_name }}">
+                            {% endif %}
+                            <h6>{{ rx.patient.user.get_full_name }}</h6>
+                        </div>
+                    </td>
+                    <td>{{ rx.created_at|date:"M d, Y" }}</td>
+                    <td>{{ rx.diagnosis|truncatechars:40 }}</td>
+                    <td><span class="medicine-count-badge">{{ rx.medicines.count }} medicine{{ rx.medicines.count|pluralize }}</span></td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <button type="button" class="table-action-btn" title="View" data-bs-toggle="modal" data-bs-target="#viewRxModal" data-rx-id="rx{{ rx.id }}"
+                                data-patient-name="{{ rx.patient.user.get_full_name }}"
+                                data-patient-avatar="{% if rx.patient.profile_image %}{{ rx.patient.profile_image.url }}{% else %}{% static 'public/images/patient-1.jpg' %}{% endif %}"
+                                data-date="{{ rx.created_at|date:'M d, Y' }}"
+                                data-diagnosis="{{ rx.diagnosis }}"
+                                data-advice="{{ rx.advice|default:'-' }}"
+                                data-follow-up="{{ rx.follow_up_date|date:'M d, Y'|default:'' }}"
+                                data-medicines='[{% for m in rx.medicines.all %}{"name":"{{ m.name|escapejs }}","dosage":"{{ m.dosage|escapejs }}","frequency":"{{ m.get_frequency_display|default:m.frequency|escapejs }}","duration":"{{ m.duration|escapejs }}","instructions":"{{ m.instructions|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button type="button" class="table-action-btn" title="Print" onclick="window.print()">
+                                <i class="bi bi-printer"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No prescriptions issued yet.</td></tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="table-empty-state d-none" id="rxEmptyState">
+        <i class="bi bi-file-earmark-x"></i>
+        <h6>No prescriptions found</h6>
+        <p>Try a different search term.</p>
+    </div>
+
+</div>
+
+<!-- ============================================================
+     VIEW PRESCRIPTION MODAL
+============================================================= -->
+<div class="modal fade" id="viewRxModal" tabindex="-1" aria-labelledby="viewRxModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewRxModalLabel">Prescription Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                <div class="rx-modal-patient">
+                    <img src="{% static 'public/images/patient-1.jpg' %}" alt="Patient" id="rxModalAvatar">
+                    <div>
+                        <h6 id="rxModalPatientName">Patient Name</h6>
+                        <span id="rxModalDate">Date</span>
+                    </div>
+                </div>
+
+                <div class="rx-modal-section">
+                    <h6>Diagnosis</h6>
+                    <p id="rxModalDiagnosis">-</p>
+                </div>
+
+                <div class="rx-modal-section">
+                    <h6>Medications</h6>
+                    <div class="table-responsive">
+                        <table class="rx-modal-medicine-table">
+                            <thead>
+                                <tr>
+                                    <th>Medicine</th>
+                                    <th>Dosage</th>
+                                    <th>Frequency</th>
+                                    <th>Duration</th>
+                                    <th>Instructions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rxModalMedicineBody">
+                                <!-- populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="rx-modal-section">
+                    <h6>Additional Advice</h6>
+                    <p id="rxModalAdvice">-</p>
+                </div>
+
+                <div class="rx-modal-section" id="rxModalFollowUpSection">
+                    <h6>Follow-up Date</h6>
+                    <p id="rxModalFollowUp">-</p>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary"><i class="bi bi-printer-fill me-2"></i>Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    // prescription_history.js builds patient avatar paths client-side,
+    // so it needs the real static URL prefix instead of guessing '/static/'.
+    window.STATIC_URL_PREFIX = "{% static '' %}";
+</script>
+<script src="{% static 'js/doctor/prescription_history.js' %}"></script>
+{% endblock %}
