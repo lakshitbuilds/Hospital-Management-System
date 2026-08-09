@@ -1,0 +1,10 @@
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+media/
+staticfiles/
+.env
+seed_doctors.py
+seed_patients.py
+generate_placeholder_images.py
