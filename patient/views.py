@@ -1,13 +1,66 @@
+import secrets
+from datetime import timedelta
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse, NoReverseMatch
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils import timezone
 
 from .models import Patient, Appointment, ContactMessage, Notification
 from doctor.models import Doctor
 
 User = get_user_model()
+
+
+ROLE_REDIRECTS = {
+    'admin': 'admin_dashboard',
+    'doctor': 'doctor_home',
+    'receptionist': 'receptionist_dashboard',
+}
+
+
+def _send_otp_email(user):
+    otp = f'{secrets.randbelow(1000000):06d}'
+    user.otp_code = otp
+    user.otp_created_at = timezone.now()
+    user.save(update_fields=['otp_code', 'otp_created_at'])
+
+    context = {
+        'otp': otp,
+        'valid_minutes': settings.OTP_VALID_MINUTES,
+        'first_name': user.first_name,
+        'current_year': user.otp_created_at.year,
+    }
+    text_body = (
+        f'Hi {user.first_name or "there"}, your MediCare Hospital login code is {otp}. '
+        f'It expires in {settings.OTP_VALID_MINUTES} minutes.'
+    )
+    html_body = render_to_string('patient/emails/otp_email.html', context)
+
+    email = EmailMultiAlternatives(
+        subject='Your MediCare Hospital login code',
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+    )
+    email.attach_alternative(html_body, 'text/html')
+    email.send(fail_silently=False)
+
+
+def _redirect_for_role(request, user):
+    target = ROLE_REDIRECTS.get(user.role)
+    if target:
+        try:
+            return redirect(reverse(target))
+        except NoReverseMatch:
+            messages.info(request, f'{user.role.capitalize()} dashboard is not available yet.')
+            return redirect('home')
+    return redirect('home')
 
 
 # ================================================================
@@ -69,28 +122,59 @@ def login(request):
                 messages.error(request, f'This account is not registered as {selected_role.capitalize()}. Please select the correct role and try again.')
                 return redirect('login')
 
-            auth_login(request, user)
+            _send_otp_email(user)
+            request.session['pending_otp_user_id'] = user.id
 
-            role_redirects = {
-                'admin': 'admin_dashboard',
-                'doctor': 'doctor_home',
-                'receptionist': 'receptionist_dashboard',
-            }
-            target = role_redirects.get(user.role)
-
-            if target:
-                try:
-                    return redirect(reverse(target))
-                except NoReverseMatch:
-                    messages.info(request, f'{user.role.capitalize()} dashboard is not available yet.')
-                    return redirect('home')
-
-            return redirect('home')
+            messages.success(request, f'A verification code has been sent to {user.email}.')
+            return redirect('verify_otp')
         else:
             messages.error(request, 'Invalid email or password.')
             return redirect('login')
 
     return render(request, "patient/login.html")
+
+
+def verify_otp(request):
+    user_id = request.session.get('pending_otp_user_id')
+    if not user_id:
+        messages.error(request, 'Please login again.')
+        return redirect('login')
+
+    user = get_object_or_404(User, id=user_id)
+
+    if request.method == 'POST':
+        entered_code = request.POST.get('otp_code', '').strip()
+        expiry = user.otp_created_at + timedelta(minutes=settings.OTP_VALID_MINUTES) if user.otp_created_at else None
+
+        if not user.otp_code or not expiry or timezone.now() > expiry:
+            messages.error(request, 'This code has expired. Please request a new one.')
+            return redirect('verify_otp')
+
+        if entered_code != user.otp_code:
+            messages.error(request, 'Incorrect verification code.')
+            return redirect('verify_otp')
+
+        user.otp_code = None
+        user.otp_created_at = None
+        user.save(update_fields=['otp_code', 'otp_created_at'])
+        del request.session['pending_otp_user_id']
+
+        auth_login(request, user)
+        return _redirect_for_role(request, user)
+
+    return render(request, 'patient/verify_otp.html', {'email': user.email})
+
+
+def resend_otp(request):
+    user_id = request.session.get('pending_otp_user_id')
+    if not user_id:
+        messages.error(request, 'Please login again.')
+        return redirect('login')
+
+    user = get_object_or_404(User, id=user_id)
+    _send_otp_email(user)
+    messages.success(request, f'A new verification code has been sent to {user.email}.')
+    return redirect('verify_otp')
 
 
 def register(request):
@@ -131,8 +215,11 @@ def register(request):
             gender=gender.capitalize()
         )
 
-        messages.success(request, 'Account created successfully. Please login.')
-        return redirect('login')
+        _send_otp_email(user)
+        request.session['pending_otp_user_id'] = user.id
+
+        messages.success(request, f'Account created. A verification code has been sent to {user.email}.')
+        return redirect('verify_otp')
 
     return render(request, 'patient/register.html')
 

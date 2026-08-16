@@ -1,0 +1,27 @@
+# /etc/systemd/system/hms-gunicorn.service
+# Runs the Django app via Gunicorn behind a unix socket, managed by systemd.
+#
+# Replace <DEPLOY_USER> and <PROJECT_PATH> below, then:
+#   sudo cp deploy/gunicorn.service /etc/systemd/system/hms-gunicorn.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now hms-gunicorn
+
+[Unit]
+Description=Gunicorn daemon for Hospital Management System
+After=network.target
+
+[Service]
+User=<DEPLOY_USER>
+Group=www-data
+WorkingDirectory=<PROJECT_PATH>
+EnvironmentFile=<PROJECT_PATH>/.env
+ExecStart=<PROJECT_PATH>/venv/bin/gunicorn \
+    --workers 3 \
+    --bind unix:<PROJECT_PATH>/hms.sock \
+    config.wsgi:application
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

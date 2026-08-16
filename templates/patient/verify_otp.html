@@ -1,0 +1,94 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Verify Code - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     VERIFY OTP SECTION
+============================================================= -->
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-wrapper">
+
+            <!-- Left Brand Panel -->
+            <div class="brand-panel d-none d-lg-flex">
+                <div class="brand-panel-content">
+                    <img src="{% static 'public/images/logo.png' %}" alt="MediCare Hospital Logo" class="brand-panel-logo">
+                    <h3>Almost There</h3>
+                    <p>We take account security seriously — confirm it's really you before we let you in.</p>
+
+                    <ul class="brand-feature-list">
+                        <li><i class="bi bi-check-circle-fill"></i>One-time code sent to your email</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Expires after {{ otp_valid_minutes|default:5 }} minutes</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Didn't get it? Request a new one</li>
+                    </ul>
+                </div>
+                <div class="brand-panel-shape shape-one"></div>
+                <div class="brand-panel-shape shape-two"></div>
+            </div>
+
+            <!-- Verify Form Card -->
+            <div class="auth-card">
+                <div class="auth-header">
+                    <span class="section-tag">Verify Email</span>
+                    <h2 class="section-title">Enter Verification Code</h2>
+                    <p class="section-text">We sent a 6-digit code to <strong>{{ email }}</strong>.</p>
+                </div>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert
+                            {% if message.tags == 'success' %}alert-success
+                            {% elif message.tags == 'error' %}alert-danger
+                            {% elif message.tags == 'warning' %}alert-warning
+                            {% else %}alert-info
+                            {% endif %}
+                            alert-dismissible fade show mb-3"
+                            role="alert">
+
+                            {{ message }}
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="alert"
+                                    aria-label="Close">
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                <form id="verifyOtpForm" class="auth-form" action="{% url 'verify_otp' %}" method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- OTP Code -->
+                    <div class="mb-3">
+                        <label for="otpCode" class="form-label">Verification Code</label>
+                        <div class="input-icon-group">
+                            <i class="bi bi-shield-lock-fill"></i>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="form-control" id="otpCode" name="otp_code" placeholder="Enter 6-digit code" required autofocus>
+                        </div>
+                        <div class="invalid-feedback">Please enter the 6-digit code sent to your email.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                        <i class="bi bi-check-circle-fill me-2"></i>Verify &amp; Login
+                    </button>
+                </form>
+
+                <form action="{% url 'resend_otp' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <p class="auth-footer-text mb-0">
+                        Didn't receive the code? <button type="submit" class="btn btn-link auth-link fw-semibold p-0 border-0 align-baseline">Resend code</button>
+                    </p>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
