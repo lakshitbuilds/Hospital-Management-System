@@ -1,5 +1,5 @@
 import secrets
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -10,9 +10,11 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
+from django.http import JsonResponse
 
-from .models import Patient, Appointment, ContactMessage, Notification
+from .models import Patient, Appointment, Billing, ContactMessage, Notification
 from doctor.models import Doctor
+from accounts.models import SystemSettings
 
 User = get_user_model()
 
@@ -28,7 +30,8 @@ def _send_otp_email(user):
     otp = f'{secrets.randbelow(1000000):06d}'
     user.otp_code = otp
     user.otp_created_at = timezone.now()
-    user.save(update_fields=['otp_code', 'otp_created_at'])
+    user.otp_attempts = 0
+    user.save(update_fields=['otp_code', 'otp_created_at', 'otp_attempts'])
 
     context = {
         'otp': otp,
@@ -36,9 +39,10 @@ def _send_otp_email(user):
         'first_name': user.first_name,
         'current_year': user.otp_created_at.year,
     }
+    minute_word = 'minute' if settings.OTP_VALID_MINUTES == 1 else 'minutes'
     text_body = (
         f'Hi {user.first_name or "there"}, your MediCare Hospital login code is {otp}. '
-        f'It expires in {settings.OTP_VALID_MINUTES} minutes.'
+        f'It expires in {settings.OTP_VALID_MINUTES} {minute_word}.'
     )
     html_body = render_to_string('patient/emails/otp_email.html', context)
 
@@ -122,6 +126,15 @@ def login(request):
                 messages.error(request, f'This account is not registered as {selected_role.capitalize()}. Please select the correct role and try again.')
                 return redirect('login')
 
+            if user.otp_locked_until and timezone.now() < user.otp_locked_until:
+                minutes_left = int((user.otp_locked_until - timezone.now()).total_seconds() // 60) + 1
+                messages.error(request, f'Too many incorrect attempts. Please try again in {minutes_left} minute{"s" if minutes_left != 1 else ""}.')
+                return redirect('login')
+
+            if not SystemSettings.get_solo().otp_login_enabled:
+                auth_login(request, user)
+                return _redirect_for_role(request, user)
+
             _send_otp_email(user)
             request.session['pending_otp_user_id'] = user.id
 
@@ -151,18 +164,45 @@ def verify_otp(request):
             return redirect('verify_otp')
 
         if entered_code != user.otp_code:
-            messages.error(request, 'Incorrect verification code.')
+            user.otp_attempts += 1
+
+            if user.otp_attempts >= settings.OTP_MAX_ATTEMPTS:
+                user.otp_code = None
+                user.otp_created_at = None
+                user.otp_attempts = 0
+                user.otp_locked_until = timezone.now() + timedelta(minutes=settings.OTP_LOCKOUT_MINUTES)
+                user.save(update_fields=['otp_code', 'otp_created_at', 'otp_attempts', 'otp_locked_until'])
+                del request.session['pending_otp_user_id']
+                messages.error(request, f'Too many incorrect attempts. Your account is locked for {settings.OTP_LOCKOUT_MINUTES} minutes.')
+                return redirect('login')
+
+            user.save(update_fields=['otp_attempts'])
+            remaining = settings.OTP_MAX_ATTEMPTS - user.otp_attempts
+            messages.error(request, f'Incorrect verification code. {remaining} attempt{"s" if remaining != 1 else ""} remaining.')
             return redirect('verify_otp')
 
         user.otp_code = None
         user.otp_created_at = None
-        user.save(update_fields=['otp_code', 'otp_created_at'])
+        user.otp_attempts = 0
+        user.save(update_fields=['otp_code', 'otp_created_at', 'otp_attempts'])
         del request.session['pending_otp_user_id']
 
         auth_login(request, user)
         return _redirect_for_role(request, user)
 
-    return render(request, 'patient/verify_otp.html', {'email': user.email})
+    seconds_remaining = 0
+    if user.otp_created_at:
+        expiry = user.otp_created_at + timedelta(minutes=settings.OTP_VALID_MINUTES)
+        seconds_remaining = max(0, int((expiry - timezone.now()).total_seconds()))
+
+    return render(request, 'patient/verify_otp.html', {
+        'email': user.email,
+        'otp_valid_minutes': settings.OTP_VALID_MINUTES,
+        'seconds_remaining': seconds_remaining,
+        'resend_cooldown_seconds': 30,
+        'attempts_remaining': max(0, settings.OTP_MAX_ATTEMPTS - user.otp_attempts),
+        'otp_lockout_minutes': settings.OTP_LOCKOUT_MINUTES,
+    })
 
 
 def resend_otp(request):
@@ -214,6 +254,11 @@ def register(request):
             date_of_birth=dob,
             gender=gender.capitalize()
         )
+
+        if not SystemSettings.get_solo().otp_login_enabled:
+            auth_login(request, user)
+            messages.success(request, 'Account created successfully.')
+            return _redirect_for_role(request, user)
 
         _send_otp_email(user)
         request.session['pending_otp_user_id'] = user.id
@@ -283,6 +328,20 @@ def patient_profile(request):
 # ================================================================
 
 @login_required
+def get_doctor_slots(request):
+    doctor_id = request.GET.get('doctor')
+    date_str = request.GET.get('date')
+
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    try:
+        appointment_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        return JsonResponse({'available': False, 'reason': 'Invalid date.', 'slots': []}, status=400)
+
+    return JsonResponse(doctor.get_available_slots(appointment_date))
+
+
+@login_required
 def book_appointment(request):
     doctors = Doctor.objects.select_related('user').all()
 
@@ -301,18 +360,69 @@ def book_appointment(request):
         visit_type = request.POST.get('visit_type')
         reason = request.POST.get('reason')
 
-        if Appointment.objects.filter(doctor=doctor, appointment_date=appointment_date, time_slot=time_slot).exclude(status='cancelled').exists():
+        try:
+            parsed_date = datetime.strptime(appointment_date, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            messages.error(request, 'Please select a valid date.')
+            return redirect('book_appointment')
+
+        availability = doctor.get_available_slots(parsed_date)
+        if not availability['available']:
+            messages.error(request, availability['reason'] or 'Doctor is unavailable on this date.')
+            return redirect('book_appointment')
+
+        matching_slot = next((s for s in availability['slots'] if s['time'] == time_slot), None)
+        if matching_slot is None or matching_slot['booked']:
             messages.error(request, 'This slot is already booked.')
             return redirect('book_appointment')
 
-        Appointment.objects.create(
+        request.session['pending_appointment'] = {
+            'doctor_id': doctor.id,
+            'department': department,
+            'appointment_date': appointment_date,
+            'time_slot': time_slot,
+            'visit_type': visit_type,
+            'reason': reason,
+        }
+        return redirect('confirm_appointment_billing')
+
+    return render(request, 'patient/book_appointment.html', {'doctors': doctors})
+
+
+@login_required
+def confirm_appointment_billing(request):
+    pending = request.session.get('pending_appointment')
+    if not pending:
+        messages.error(request, 'Please choose a doctor, date, and time slot first.')
+        return redirect('book_appointment')
+
+    doctor = get_object_or_404(Doctor, id=pending['doctor_id'])
+    patient = Patient.objects.get(user=request.user)
+    parsed_date = datetime.strptime(pending['appointment_date'], '%Y-%m-%d').date()
+
+    if request.method == 'POST':
+        availability = doctor.get_available_slots(parsed_date)
+        matching_slot = next((s for s in availability['slots'] if s['time'] == pending['time_slot']), None)
+        if not availability['available'] or matching_slot is None or matching_slot['booked']:
+            messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
+            del request.session['pending_appointment']
+            return redirect('book_appointment')
+
+        appointment = Appointment.objects.create(
             patient=patient,
             doctor=doctor,
-            department=department,
-            appointment_date=appointment_date,
-            time_slot=time_slot,
-            visit_type=visit_type,
-            reason=reason,
+            department=pending['department'],
+            appointment_date=pending['appointment_date'],
+            time_slot=pending['time_slot'],
+            visit_type=pending['visit_type'],
+            reason=pending['reason'],
+        )
+
+        Billing.objects.create(
+            appointment=appointment,
+            patient=patient,
+            bill_type='consultation',
+            amount=doctor.consultation_fee,
         )
 
         Notification.objects.create(
@@ -321,10 +431,25 @@ def book_appointment(request):
             message=f'Your appointment with Dr. {doctor.user.get_full_name()} has been requested.'
         )
 
+        del request.session['pending_appointment']
         messages.success(request, 'Appointment request sent successfully.')
         return redirect('my_appointments')
 
-    return render(request, 'patient/book_appointment.html', {'doctors': doctors})
+    return render(request, 'patient/confirm_billing.html', {
+        'doctor': doctor,
+        'department': dict(Appointment.DEPARTMENT_CHOICES).get(pending['department'], pending['department']),
+        'appointment_date': parsed_date,
+        'time_slot': pending['time_slot'],
+        'visit_type': dict(Appointment.VISIT_TYPE_CHOICES).get(pending['visit_type'], pending['visit_type']),
+        'reason': pending['reason'],
+        'consultation_fee': doctor.consultation_fee,
+    })
+
+
+@login_required
+def cancel_pending_appointment(request):
+    request.session.pop('pending_appointment', None)
+    return redirect('book_appointment')
 
 
 @login_required
@@ -332,6 +457,16 @@ def my_appointments(request):
     patient = Patient.objects.get(user=request.user)
     appointments = Appointment.objects.filter(patient=patient).select_related('doctor__user').order_by('-appointment_date')
     return render(request, 'patient/my_appointments.html', {'appointments': appointments})
+
+
+@login_required
+def my_billing(request):
+    patient = Patient.objects.get(user=request.user)
+    bills = Billing.objects.filter(patient=patient).select_related('appointment__doctor__user').order_by('-created_at')
+    return render(request, 'patient/my_billing.html', {
+        'bills': bills,
+        'pending_total': sum(b.amount for b in bills if b.status == 'pending'),
+    })
 
 
 @login_required

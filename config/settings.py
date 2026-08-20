@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 import os
 from pathlib import Path
+from pickle import TRUE
 from decouple import config, Csv
 import dj_database_url
 
@@ -120,8 +121,8 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.parse(
-        config('DATABASE_URL', default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+    'default': dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
     )
 }
@@ -169,4 +170,16 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 
-OTP_VALID_MINUTES = 5
+OTP_VALID_MINUTES = 1
+
+# Maximum wrong-code guesses allowed against a single OTP before it's
+# invalidated, the account is locked, and the user is sent back to log in
+# again (anti-brute-force).
+OTP_MAX_ATTEMPTS = 3
+
+# How long a login is blocked after hitting OTP_MAX_ATTEMPTS.
+OTP_LOCKOUT_MINUTES = 10
+
+# Set to False to skip email OTP verification on login/registration and sign
+# users in immediately. Set back to True to require it again.
+OTP_LOGIN_ENABLED = True

@@ -4,20 +4,17 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Sum
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from doctor.models import Doctor, DoctorAvailability
-from patient.models import Appointment, Notification, Patient
+from patient.models import Appointment, Billing, Notification, Patient
 
 from .models import Receptionist
 
 User = get_user_model()
-
-TIME_SLOTS = [
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-    '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM',
-]
 
 
 def receptionist_required(view_func):
@@ -189,6 +186,20 @@ def today_appointments(request):
 
 
 @receptionist_required
+def get_doctor_slots(request):
+    doctor_id = request.GET.get('doctor')
+    date_str = request.GET.get('date')
+
+    doctor = get_object_or_404(Doctor, id=doctor_id)
+    try:
+        appointment_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except (TypeError, ValueError):
+        return JsonResponse({'available': False, 'reason': 'Invalid date.', 'slots': []}, status=400)
+
+    return JsonResponse(doctor.get_available_slots(appointment_date))
+
+
+@receptionist_required
 def book_appointment(request):
     patients = Patient.objects.select_related('user').order_by('user__first_name')
     doctors = Doctor.objects.select_related('user').all()
@@ -211,7 +222,19 @@ def book_appointment(request):
         doctor = get_object_or_404(Doctor, id=doctor_id)
         appointment_date = request.POST.get('appointment_date')
 
-        if Appointment.objects.filter(doctor=doctor, appointment_date=appointment_date, time_slot=time_slot).exclude(status='cancelled').exists():
+        try:
+            parsed_date = datetime.strptime(appointment_date, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            messages.error(request, 'Please select a valid date.')
+            return redirect('receptionist_book_appointment')
+
+        availability = doctor.get_available_slots(parsed_date)
+        if not availability['available']:
+            messages.error(request, availability['reason'] or 'Doctor is unavailable on this date.')
+            return redirect('receptionist_book_appointment')
+
+        matching_slot = next((s for s in availability['slots'] if s['time'] == time_slot), None)
+        if matching_slot is None or matching_slot['booked']:
             messages.error(request, 'This slot is already booked.')
             return redirect('receptionist_book_appointment')
 
@@ -226,6 +249,13 @@ def book_appointment(request):
             status='confirmed',
         )
 
+        Billing.objects.create(
+            appointment=appointment,
+            patient=patient,
+            bill_type='consultation',
+            amount=doctor.consultation_fee,
+        )
+
         Notification.objects.create(
             user=patient.user,
             notification_type='confirmed',
@@ -238,7 +268,6 @@ def book_appointment(request):
     return render(request, 'receptionist/book_appointment.html', {
         'patients': patients,
         'doctors': doctors,
-        'time_slots': TIME_SLOTS,
         'preselected_patient_id': preselected_patient_id,
     })
 
@@ -271,6 +300,70 @@ def cancel_appointment(request, appointment_id):
         )
         messages.success(request, 'Appointment cancelled.')
     return redirect(request.POST.get('next') or 'receptionist_appointment_list')
+
+
+@receptionist_required
+def mark_no_show(request, appointment_id):
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST':
+        if appointment.status in ('cancelled', 'completed', 'no_show'):
+            messages.error(request, 'This appointment cannot be marked as a no-show.')
+        else:
+            appointment.status = 'no_show'
+            appointment.save()
+
+            Billing.objects.create(
+                appointment=appointment,
+                patient=appointment.patient,
+                bill_type='no_show_fee',
+                amount=appointment.doctor.consultation_fee,
+            )
+
+            Notification.objects.create(
+                user=appointment.patient.user,
+                notification_type='general',
+                message=(
+                    f'You missed your appointment with Dr. {appointment.doctor.user.get_full_name()} '
+                    f'on {appointment.appointment_date}. A no-show fee of Rs.{appointment.doctor.consultation_fee} '
+                    f'has been added to your billing.'
+                ),
+            )
+            messages.success(request, 'Appointment marked as a no-show and a fee has been billed to the patient.')
+    return redirect(request.POST.get('next') or 'receptionist_appointment_list')
+
+
+# ================================================================
+# Billing
+# ================================================================
+
+@receptionist_required
+def billing_list(request):
+    query = request.GET.get('q', '').strip()
+    bills = Billing.objects.select_related('patient__user', 'appointment__doctor__user').order_by('-created_at')
+
+    if query:
+        bills = bills.filter(
+            Q(patient__user__first_name__icontains=query)
+            | Q(patient__user__last_name__icontains=query)
+            | Q(patient__patient_id__icontains=query)
+        )
+
+    return render(request, 'receptionist/billing_list.html', {
+        'bills': bills,
+        'query': query,
+        'pending_total': Billing.objects.filter(status='pending').aggregate(total=Sum('amount'))['total'] or 0,
+    })
+
+
+@receptionist_required
+def mark_bill_paid(request, bill_id):
+    bill = get_object_or_404(Billing, id=bill_id)
+    if request.method == 'POST':
+        bill.status = 'paid'
+        bill.paid_at = timezone.now()
+        bill.save()
+        messages.success(request, 'Bill marked as paid.')
+    return redirect(request.POST.get('next') or 'receptionist_billing_list')
 
 
 # ================================================================
@@ -350,7 +443,6 @@ def edit_profile(request):
         user.save()
 
         receptionist.phone = request.POST.get('phone', '')
-        receptionist.shift = request.POST.get('shift', 'morning')
 
         if request.FILES.get('profile_picture'):
             receptionist.profile_picture = request.FILES['profile_picture']

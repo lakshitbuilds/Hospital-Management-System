@@ -4,11 +4,13 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
+from accounts.models import SystemSettings
 from doctor.models import Doctor
-from patient.models import Appointment, Notification, Patient
+from patient.models import Appointment, Billing, Notification, Patient
 from receptionist.models import Receptionist
 
 User = get_user_model()
@@ -20,6 +22,7 @@ STATUS_COLORS = {
     'confirmed': '#2563eb',
     'completed': '#16a34a',
     'cancelled': '#dc2626',
+    'no_show': '#78716c',
 }
 
 
@@ -57,6 +60,7 @@ def admin_dashboard(request):
 
     completed_appointments = Appointment.objects.filter(status='completed').select_related('doctor')
     revenue_estimate = sum(a.doctor.consultation_fee for a in completed_appointments)
+    outstanding_bills = Billing.objects.filter(status='pending').aggregate(total=Sum('amount'))['total'] or 0
 
     department_counts = (
         Appointment.objects.values('department')
@@ -86,6 +90,7 @@ def admin_dashboard(request):
         'today_count': Appointment.objects.filter(appointment_date=today).count(),
         'pending_count': Appointment.objects.filter(status='pending').count(),
         'revenue_estimate': revenue_estimate,
+        'outstanding_bills': outstanding_bills,
         'department_labels': department_labels,
         'department_data': department_data,
         'status_labels': status_labels,
@@ -230,6 +235,18 @@ def add_receptionist(request):
     return render(request, 'adminpanel/add_receptionist.html')
 
 
+@admin_required
+def update_receptionist_shift(request, receptionist_id):
+    receptionist = get_object_or_404(Receptionist, id=receptionist_id)
+    if request.method == 'POST':
+        shift = request.POST.get('shift')
+        if shift in dict(Receptionist.SHIFT_CHOICES):
+            receptionist.shift = shift
+            receptionist.save()
+            messages.success(request, f'{receptionist.user.get_full_name()}\'s shift has been updated to {receptionist.get_shift_display()}.')
+    return redirect(request.POST.get('next') or 'admin_receptionist_list')
+
+
 # ================================================================
 # Patients
 # ================================================================
@@ -275,6 +292,58 @@ def patient_detail(request, patient_id):
 def appointment_list(request):
     appointments = Appointment.objects.select_related('patient__user', 'doctor__user').order_by('-appointment_date')
     return render(request, 'adminpanel/appointment_list.html', {'appointments': appointments})
+
+
+# ================================================================
+# Billing
+# ================================================================
+
+@admin_required
+def billing_list(request):
+    query = request.GET.get('q', '').strip()
+    bills = Billing.objects.select_related('patient__user', 'appointment__doctor__user').order_by('-created_at')
+
+    if query:
+        bills = bills.filter(
+            Q(patient__user__first_name__icontains=query)
+            | Q(patient__user__last_name__icontains=query)
+            | Q(patient__patient_id__icontains=query)
+        )
+
+    return render(request, 'adminpanel/billing_list.html', {
+        'bills': bills,
+        'query': query,
+        'pending_total': Billing.objects.filter(status='pending').aggregate(total=Sum('amount'))['total'] or 0,
+    })
+
+
+@admin_required
+def mark_bill_paid(request, bill_id):
+    bill = get_object_or_404(Billing, id=bill_id)
+    if request.method == 'POST':
+        bill.status = 'paid'
+        bill.paid_at = timezone.now()
+        bill.save()
+        messages.success(request, 'Bill marked as paid.')
+    return redirect(request.POST.get('next') or 'admin_billing_list')
+
+
+# ================================================================
+# Security Settings
+# ================================================================
+
+@admin_required
+def security_settings(request):
+    settings_obj = SystemSettings.get_solo()
+
+    if request.method == 'POST':
+        settings_obj.otp_login_enabled = 'otp_login_enabled' in request.POST
+        settings_obj.save()
+        state = 'enabled' if settings_obj.otp_login_enabled else 'disabled'
+        messages.success(request, f'Two-step (OTP) login verification has been {state}.')
+        return redirect('admin_security_settings')
+
+    return render(request, 'adminpanel/security_settings.html', {'settings': settings_obj})
 
 
 # ================================================================

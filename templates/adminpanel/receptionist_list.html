@@ -53,7 +53,17 @@
                         </div>
                     </td>
                     <td>{{ receptionist.employee_id }}</td>
-                    <td>{{ receptionist.get_shift_display }}</td>
+                    <td>
+                        <form action="{% url 'admin_update_receptionist_shift' receptionist.id %}" method="post" class="shift-select-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <select name="shift" class="form-select form-select-sm" onchange="this.form.submit()">
+                                <option value="morning" {% if receptionist.shift == "morning" %}selected{% endif %}>Morning</option>
+                                <option value="evening" {% if receptionist.shift == "evening" %}selected{% endif %}>Evening</option>
+                                <option value="night" {% if receptionist.shift == "night" %}selected{% endif %}>Night</option>
+                            </select>
+                        </form>
+                    </td>
                     <td>{{ receptionist.phone|default:"Not provided" }}</td>
                     <td>
                         {% if receptionist.user.is_active %}

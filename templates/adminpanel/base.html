@@ -68,6 +68,10 @@
                     <i class="bi bi-calendar2-week-fill"></i>All Appointments
                 </a>
 
+                <a href="{% url 'admin_billing_list' %}" class="sidebar-link">
+                    <i class="bi bi-receipt"></i>Billing
+                </a>
+
                 <span class="sidebar-nav-label">Staff</span>
 
                 <a href="{% url 'admin_doctor_list' %}" class="sidebar-link">
@@ -104,6 +108,10 @@
 
                 <a href="{% url 'admin_change_password' %}" class="sidebar-link">
                     <i class="bi bi-shield-lock-fill"></i>Change Password
+                </a>
+
+                <a href="{% url 'admin_security_settings' %}" class="sidebar-link">
+                    <i class="bi bi-toggle-on"></i>Security Settings
                 </a>
 
                 <a href="{% url 'admin_notifications' %}" class="sidebar-link">

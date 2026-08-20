@@ -1,0 +1,63 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}My Billing - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/my_billing.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>My Billing</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">My Billing</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     BILLING SECTION
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+
+        {% if pending_total %}
+        <div class="billing-summary-banner">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <div>
+                <h6>You have an outstanding balance of &#8377;{{ pending_total }}</h6>
+                <p>Please clear pending dues at the front desk before your next visit.</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="billing-list">
+            {% for bill in bills %}
+            <div class="billing-card">
+                <div class="billing-icon {% if bill.bill_type == 'no_show_fee' %}billing-icon-warning{% else %}billing-icon-primary{% endif %}">
+                    <i class="bi {% if bill.bill_type == 'no_show_fee' %}bi-calendar-x{% else %}bi-receipt{% endif %}"></i>
+                </div>
+                <div class="billing-info">
+                    <h6>{{ bill.get_bill_type_display }}</h6>
+                    <p>Dr. {{ bill.appointment.doctor.user.get_full_name }} &middot; {{ bill.appointment.appointment_date|date:"M d, Y" }} &middot; {{ bill.appointment.time_slot }}</p>
+                </div>
+                <div class="billing-amount">&#8377;{{ bill.amount }}</div>
+                <span class="status-badge status-{{ bill.status }}">{{ bill.get_status_display }}</span>
+            </div>
+            {% empty %}
+            <p>You have no bills yet.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

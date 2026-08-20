@@ -61,11 +61,8 @@
                 </div>
 
                 <label class="form-label d-block">Time Slot</label>
-                <div class="time-slot-grid" id="timeSlotGrid">
-                    {% for slot in time_slots %}
-                    <input type="radio" name="time_slot" id="slot_{{ forloop.counter }}" value="{{ slot }}" class="time-slot-input" required>
-                    <label for="slot_{{ forloop.counter }}" class="time-slot-option">{{ slot }}</label>
-                    {% endfor %}
+                <div class="time-slot-grid" id="timeSlotGrid" data-slots-url="{% url 'receptionist_get_doctor_slots' %}">
+                    <p class="time-slot-empty">Choose a doctor and date above to see available times.</p>
                 </div>
 
                 <h6 class="form-section-title mt-4"><i class="bi bi-card-text"></i>Reason for Visit</h6>

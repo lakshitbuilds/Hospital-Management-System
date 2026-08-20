@@ -48,6 +48,31 @@
     color: var(--rec-white);
 }
 
+.time-slot-option.is-booked {
+    background-color: var(--rec-background);
+    color: var(--rec-text-light);
+    text-decoration: line-through;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.time-slot-option.is-booked:hover {
+    border-color: var(--rec-border-color);
+    color: var(--rec-text-light);
+}
+
+.time-slot-empty {
+    grid-column: 1 / -1;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    background-color: var(--rec-background);
+    border: 1px dashed var(--rec-border-color);
+    border-radius: var(--rec-radius-sm);
+    font-size: 0.85rem;
+    color: var(--rec-text-light);
+    text-align: center;
+}
+
 
 /* ==========================================================================
    2. BOOKING SUMMARY SIDEBAR

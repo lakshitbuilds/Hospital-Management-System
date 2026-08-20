@@ -2,9 +2,28 @@
    DOCTORS PAGE (doctors.html) - PAGE SPECIFIC STYLES
    Structure:
    1. Filter Tabs
-   2. No Results State
-   3. Responsive
+   2. Doctor Fee
+   3. No Results State
+   4. Responsive
    ========================================================================== */
+
+
+/* ==========================================================================
+   2. DOCTOR FEE
+   ========================================================================== */
+.doctor-fee {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-light);
+    margin-top: 0.35rem;
+}
+
+.doctor-fee i {
+    color: var(--primary);
+}
 
 
 /* ==========================================================================

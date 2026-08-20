@@ -57,6 +57,15 @@
                     </button>
                 </form>
                 {% endif %}
+                {% if appt.status == 'confirmed' %}
+                <form action="{% url 'receptionist_mark_no_show' appt.id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="receptionist_today_appointments">
+                    <button type="submit" class="table-action-btn table-action-danger" title="Mark as No-Show &amp; Bill">
+                        <i class="bi bi-calendar-x"></i>
+                    </button>
+                </form>
+                {% endif %}
                 <a href="{% url 'receptionist_patient_detail' appt.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-eye"></i></a>
             </div>
         </div>

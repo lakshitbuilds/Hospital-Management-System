@@ -42,6 +42,7 @@
                 {% if appt.status == 'pending' or appt.status == 'confirmed' %}
                 <form action="{% url 'mark_appointment_complete' appt.id %}" method="post" class="d-inline">
                     {% csrf_token %}
+                    <input type="hidden" name="next" value="today_appointments">
                     <button type="submit" class="table-action-btn table-action-success" title="Mark as Completed">
                         <i class="bi bi-check-lg"></i>
                     </button>

@@ -115,39 +115,8 @@
                             </div>
 
                             <label class="form-label d-block">Available Time Slots</label>
-                            <div class="time-slot-grid" id="timeSlotGrid">
-                                <input type="radio" name="time_slot" id="slot_0900" value="09:00 AM" class="time-slot-input">
-                                <label for="slot_0900" class="time-slot-option">09:00 AM</label>
-
-                                <input type="radio" name="time_slot" id="slot_0930" value="09:30 AM" class="time-slot-input">
-                                <label for="slot_0930" class="time-slot-option">09:30 AM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1000" value="10:00 AM" class="time-slot-input" disabled>
-                                <label for="slot_1000" class="time-slot-option is-booked">10:00 AM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1030" value="10:30 AM" class="time-slot-input">
-                                <label for="slot_1030" class="time-slot-option">10:30 AM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1100" value="11:00 AM" class="time-slot-input">
-                                <label for="slot_1100" class="time-slot-option">11:00 AM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1130" value="11:30 AM" class="time-slot-input">
-                                <label for="slot_1130" class="time-slot-option">11:30 AM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1400" value="02:00 PM" class="time-slot-input">
-                                <label for="slot_1400" class="time-slot-option">02:00 PM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1430" value="02:30 PM" class="time-slot-input">
-                                <label for="slot_1430" class="time-slot-option">02:30 PM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1500" value="03:00 PM" class="time-slot-input" disabled>
-                                <label for="slot_1500" class="time-slot-option is-booked">03:00 PM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1530" value="03:30 PM" class="time-slot-input">
-                                <label for="slot_1530" class="time-slot-option">03:30 PM</label>
-
-                                <input type="radio" name="time_slot" id="slot_1600" value="04:00 PM" class="time-slot-input">
-                                <label for="slot_1600" class="time-slot-option">04:00 PM</label>
+                            <div class="time-slot-grid" id="timeSlotGrid" data-slots-url="{% url 'get_doctor_slots' %}">
+                                <p class="time-slot-empty">Choose a doctor and date above to see available times.</p>
                             </div>
                             <p class="time-slot-hint"><i class="bi bi-square-fill is-booked-dot"></i>Booked slots are unavailable</p>
                         </div>

@@ -1,0 +1,137 @@
+/* ==========================================================================
+   MY BILLING PAGE (my_billing.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Outstanding Balance Banner
+   2. Billing Card
+   3. Status Badges (paid / waived on top of shared pending)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. OUTSTANDING BALANCE BANNER
+   ========================================================================== */
+.billing-summary-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: rgba(255, 193, 7, 0.12);
+    border: 1px solid rgba(255, 193, 7, 0.35);
+    color: #8a6400;
+    border-radius: var(--border-radius);
+    padding: 1.1rem 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.billing-summary-banner i {
+    font-size: 1.6rem;
+}
+
+.billing-summary-banner h6 {
+    margin-bottom: 0.2rem;
+    color: #8a6400;
+}
+
+.billing-summary-banner p {
+    margin: 0;
+    font-size: 0.85rem;
+}
+
+
+/* ==========================================================================
+   2. BILLING CARD
+   ========================================================================== */
+.billing-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.billing-card {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    background-color: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1.25rem 1.5rem;
+    transition: var(--transition);
+}
+
+.billing-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.billing-icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 1.2rem;
+}
+
+.billing-icon-primary {
+    background-color: var(--primary-light);
+    color: var(--primary);
+}
+
+.billing-icon-warning {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #b8860b;
+}
+
+.billing-info {
+    flex: 1;
+    min-width: 160px;
+}
+
+.billing-info h6 {
+    margin-bottom: 0.3rem;
+}
+
+.billing-info p {
+    font-size: 0.85rem;
+    margin: 0;
+    color: var(--text-light);
+}
+
+.billing-amount {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    flex-shrink: 0;
+}
+
+
+/* ==========================================================================
+   3. STATUS BADGES
+   ========================================================================== */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: var(--border-radius-pill);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.status-pending {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #b8860b;
+}
+
+.status-paid {
+    background-color: rgba(25, 135, 84, 0.12);
+    color: var(--success);
+}
+
+.status-waived {
+    background-color: rgba(108, 117, 125, 0.12);
+    color: var(--text-light);
+}

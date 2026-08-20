@@ -2,20 +2,20 @@ from accounts.models import User
 from doctor.models import Doctor
 
 DOCTORS = [
-    ('dr.arjun@example.com', 'Arjun', 'Rao', 'cardiology', 'Interventional Cardiologist'),
-    ('dr.james@example.com', 'James', 'Carter', 'neurology', 'Neurologist'),
-    ('dr.meera@example.com', 'Meera', 'Iyer', 'neurology', 'Neurosurgeon'),
-    ('dr.michael@example.com', 'Michael', 'Reyes', 'orthopedics', 'Orthopedic Surgeon'),
-    ('dr.karan@example.com', 'Karan', 'Malhotra', 'orthopedics', 'Joint Replacement Surgeon'),
-    ('dr.emily@example.com', 'Emily', 'Chen', 'pediatrics', 'Pediatrician'),
-    ('dr.laura@example.com', 'Laura', 'Simmons', 'dermatology', 'Dermatologist'),
-    ('dr.neha@example.com', 'Neha', 'Kapoor', 'general', 'General Physician'),
-    ('dr.rohan@example.com', 'Rohan', 'Verma', 'general', 'Family Medicine Specialist'),
+    ('dr.arjun@example.com', 'Arjun', 'Rao', 'cardiology', 'Interventional Cardiologist', 1000),
+    ('dr.james@example.com', 'James', 'Carter', 'neurology', 'Neurologist', 1100),
+    ('dr.meera@example.com', 'Meera', 'Iyer', 'neurology', 'Neurosurgeon', 1500),
+    ('dr.michael@example.com', 'Michael', 'Reyes', 'orthopedics', 'Orthopedic Surgeon', 900),
+    ('dr.karan@example.com', 'Karan', 'Malhotra', 'orthopedics', 'Joint Replacement Surgeon', 1300),
+    ('dr.emily@example.com', 'Emily', 'Chen', 'pediatrics', 'Pediatrician', 700),
+    ('dr.laura@example.com', 'Laura', 'Simmons', 'dermatology', 'Dermatologist', 800),
+    ('dr.neha@example.com', 'Neha', 'Kapoor', 'general', 'General Physician', 500),
+    ('dr.rohan@example.com', 'Rohan', 'Verma', 'general', 'Family Medicine Specialist', 500),
 ]
 
 created_count = 0
 
-for email, first_name, last_name, department, specialization in DOCTORS:
+for email, first_name, last_name, department, specialization, consultation_fee in DOCTORS:
     if User.objects.filter(email=email).exists():
         print('Skipped (already exists):', email)
         continue
@@ -32,7 +32,8 @@ for email, first_name, last_name, department, specialization in DOCTORS:
     Doctor.objects.create(
         user=user,
         department=department,
-        specialization=specialization
+        specialization=specialization,
+        consultation_fee=consultation_fee,
     )
 
     created_count += 1

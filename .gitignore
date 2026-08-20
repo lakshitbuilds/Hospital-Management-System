@@ -6,3 +6,5 @@ media/
 staticfiles/
 .env
 generate_placeholder_images.py
+CREDENTIALS.md
+db.sqlite3.backup-*

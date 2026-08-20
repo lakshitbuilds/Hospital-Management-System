@@ -1,0 +1,87 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Billing - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/billing_list.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+    <div>
+        <h4 class="rec-page-title">Billing</h4>
+        <p class="rec-page-subtitle mb-0">Consultation fees and no-show charges across every patient.</p>
+    </div>
+    <span class="summary-pill summary-pill-warning">
+        <i class="bi bi-hourglass-split"></i>&#8377;{{ pending_total }} Pending
+    </span>
+</div>
+
+<div class="rec-card">
+
+    <!-- Toolbar -->
+    <div class="list-toolbar">
+        <form class="list-search-box" method="get">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by patient name or patient ID...">
+        </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="billing-table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Type</th>
+                    <th>Appointment</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bill in bills %}
+                <tr>
+                    <td>
+                        <div class="table-patient-cell">
+                            {% if bill.patient.profile_image %}
+                            <img src="{{ bill.patient.profile_image.url }}" alt="{{ bill.patient.user.get_full_name }}">
+                            {% else %}
+                            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ bill.patient.user.get_full_name }}">
+                            {% endif %}
+                            <div>
+                                <h6>{{ bill.patient.user.get_full_name }}</h6>
+                                <span>{{ bill.patient.patient_id }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ bill.get_bill_type_display }}</td>
+                    <td>Dr. {{ bill.appointment.doctor.user.get_full_name }} &middot; {{ bill.appointment.appointment_date|date:"M d, Y" }}</td>
+                    <td>&#8377;{{ bill.amount }}</td>
+                    <td><span class="status-badge status-{{ bill.status }}">{{ bill.get_status_display }}</span></td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{% url 'receptionist_patient_detail' bill.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-eye"></i></a>
+                            {% if bill.status == 'pending' %}
+                            <form action="{% url 'receptionist_mark_bill_paid' bill.id %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="receptionist_billing_list">
+                                <button type="submit" class="table-action-btn table-action-success" title="Mark Paid"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center text-muted py-4">No bills yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

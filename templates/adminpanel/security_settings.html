@@ -1,0 +1,43 @@
+{% extends 'adminpanel/base.html' %}
+{% load static %}
+
+{% block title %}Security Settings - Admin Panel{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/adminpanel/security_settings.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<h4 class="adm-page-title">Security Settings</h4>
+<p class="adm-page-subtitle">Hospital-wide login security controls.</p>
+
+<div class="adm-card">
+    <div class="adm-card-header">
+        <h6><i class="bi bi-shield-lock-fill me-2"></i>Two-Step Login Verification (OTP)</h6>
+    </div>
+
+    <p class="text-muted">
+        When enabled, everyone (admins, doctors, receptionists, and patients) must enter a one-time
+        code emailed to them after their password before they can sign in. Turn this off temporarily
+        if outgoing email is not working, so no one gets locked out &mdash; turn it back on once email
+        is fixed.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-check form-switch otp-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="otpLoginEnabled" name="otp_login_enabled"
+                   {% if settings.otp_login_enabled %}checked{% endif %} onchange="this.form.submit()">
+            <label class="form-check-label" for="otpLoginEnabled">
+                {% if settings.otp_login_enabled %}
+                    <strong>OTP required at login</strong> &mdash; every login needs an emailed code.
+                {% else %}
+                    <strong>OTP disabled</strong> &mdash; everyone signs in with just their password.
+                {% endif %}
+            </label>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

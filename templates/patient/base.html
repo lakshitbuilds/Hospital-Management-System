@@ -228,6 +228,11 @@
                       <i class="bi bi-calendar2-week me-2"></i>My Appointments
                     </a>
                   </li>
+                  <li>
+                    <a class="dropdown-item" href="{% url 'my_billing' %}">
+                      <i class="bi bi-receipt me-2"></i>My Billing
+                    </a>
+                  </li>
                   <li><hr class="dropdown-divider" /></li>
                   <li>
                     <form action="{% url 'logout' %}" method="post">

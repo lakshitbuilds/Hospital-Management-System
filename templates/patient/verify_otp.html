@@ -5,6 +5,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/patient/auth.css' %}">
+<link rel="stylesheet" href="{% static 'css/patient/verify_otp.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -25,7 +26,7 @@
 
                     <ul class="brand-feature-list">
                         <li><i class="bi bi-check-circle-fill"></i>One-time code sent to your email</li>
-                        <li><i class="bi bi-check-circle-fill"></i>Expires after {{ otp_valid_minutes|default:5 }} minutes</li>
+                        <li><i class="bi bi-check-circle-fill"></i>Expires after {{ otp_valid_minutes }} minute{{ otp_valid_minutes|pluralize }}</li>
                         <li><i class="bi bi-check-circle-fill"></i>Didn't get it? Request a new one</li>
                     </ul>
                 </div>
@@ -65,24 +66,45 @@
                     {% csrf_token %}
 
                     <!-- OTP Code -->
-                    <div class="mb-3">
-                        <label for="otpCode" class="form-label">Verification Code</label>
-                        <div class="input-icon-group">
-                            <i class="bi bi-shield-lock-fill"></i>
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" class="form-control" id="otpCode" name="otp_code" placeholder="Enter 6-digit code" required autofocus>
+                    <div class="mb-2">
+                        <label class="form-label">Verification Code</label>
+                        <div class="otp-box-group" id="otpBoxGroup">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" data-otp-index="0" autofocus>
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" data-otp-index="1">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" data-otp-index="2">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" data-otp-index="3">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" data-otp-index="4">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-box" data-otp-index="5">
                         </div>
-                        <div class="invalid-feedback">Please enter the 6-digit code sent to your email.</div>
+                        <input type="hidden" name="otp_code" id="otpCodeHidden">
+                        <div class="invalid-feedback" id="otpInvalidFeedback">Please enter the 6-digit code sent to your email.</div>
+                        <p class="otp-attempts-note">
+                            {{ attempts_remaining }} attempt{{ attempts_remaining|pluralize }} remaining before your account is locked for {{ otp_lockout_minutes }} minutes.
+                        </p>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                    <div class="otp-timer-row" id="otpTimerRow" data-seconds-remaining="{{ seconds_remaining }}">
+                        <span class="otp-timer" id="otpTimerActive">
+                            <i class="bi bi-clock-history"></i>
+                            Code expires in <strong id="otpTimerValue">--:--</strong>
+                        </span>
+                        <span class="otp-timer otp-timer-expired d-none" id="otpTimerExpired">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                            This code has expired &mdash; request a new one below.
+                        </span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100 mb-3" id="verifyOtpSubmit">
                         <i class="bi bi-check-circle-fill me-2"></i>Verify &amp; Login
                     </button>
                 </form>
 
-                <form action="{% url 'resend_otp' %}" method="post" class="d-inline">
+                <form action="{% url 'resend_otp' %}" method="post" class="d-inline" id="resendOtpForm">
                     {% csrf_token %}
                     <p class="auth-footer-text mb-0">
-                        Didn't receive the code? <button type="submit" class="btn btn-link auth-link fw-semibold p-0 border-0 align-baseline">Resend code</button>
+                        Didn't receive the code?
+                        <button type="submit" class="btn btn-link auth-link fw-semibold p-0 border-0 align-baseline" id="resendOtpBtn"
+                                data-cooldown-seconds="{{ resend_cooldown_seconds }}">Resend code</button>
                     </p>
                 </form>
             </div>
@@ -91,4 +113,8 @@
     </div>
 </section>
 
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/verify_otp.js' %}"></script>
 {% endblock %}

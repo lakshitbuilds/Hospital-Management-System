@@ -102,7 +102,7 @@ def mark_appointment_complete(request, appointment_id):
     if request.method == 'POST':
         appointment.status = 'completed'
         appointment.save()
-    return redirect('today_appointments')
+    return redirect(request.POST.get('next') or 'today_appointments')
 
 
 @doctor_required

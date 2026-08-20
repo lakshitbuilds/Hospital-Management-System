@@ -34,6 +34,7 @@
             <button type="button" class="apt-filter-btn" data-filter="confirmed">Confirmed</button>
             <button type="button" class="apt-filter-btn" data-filter="completed">Completed</button>
             <button type="button" class="apt-filter-btn" data-filter="cancelled">Cancelled</button>
+            <button type="button" class="apt-filter-btn" data-filter="no_show">No Show</button>
         </div>
     </div>
 
@@ -77,6 +78,13 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="next" value="receptionist_appointment_list">
                                 <button type="submit" class="table-action-btn table-action-success" title="Confirm"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                            {% endif %}
+                            {% if appt.status == 'confirmed' %}
+                            <form action="{% url 'receptionist_mark_no_show' appt.id %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="receptionist_appointment_list">
+                                <button type="submit" class="table-action-btn table-action-danger" title="Mark as No-Show &amp; Bill"><i class="bi bi-calendar-x"></i></button>
                             </form>
                             {% endif %}
                             {% if appt.status == 'pending' or appt.status == 'confirmed' %}

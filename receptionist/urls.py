@@ -15,9 +15,15 @@ urlpatterns = [
     # ===== Appointments =====
     path('appointments/today/', views.today_appointments, name='receptionist_today_appointments'),
     path('appointments/book/', views.book_appointment, name='receptionist_book_appointment'),
+    path('appointments/book/available-slots/', views.get_doctor_slots, name='receptionist_get_doctor_slots'),
     path('appointments/<int:appointment_id>/confirm/', views.confirm_appointment, name='receptionist_confirm_appointment'),
     path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='receptionist_cancel_appointment'),
+    path('appointments/<int:appointment_id>/no-show/', views.mark_no_show, name='receptionist_mark_no_show'),
     path('appointments/', views.appointment_list, name='receptionist_appointment_list'),
+
+    # ===== Billing =====
+    path('billing/', views.billing_list, name='receptionist_billing_list'),
+    path('billing/<int:bill_id>/mark-paid/', views.mark_bill_paid, name='receptionist_mark_bill_paid'),
 
     # ===== Doctors =====
     path('doctors/', views.doctor_list, name='receptionist_doctor_list'),

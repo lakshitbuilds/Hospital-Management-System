@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, time as time_cls
+
 from django.db import models
 from django.conf import settings
 
@@ -31,6 +33,51 @@ class Doctor(models.Model):
 
     def __str__(self):
         return f"Dr. {self.user.get_full_name()} - {self.department}"
+
+    def get_available_slots(self, appointment_date):
+        """
+        Single source of truth for bookable time slots on a given date, used by
+        both the patient and receptionist booking flows. Honors the doctor's
+        blocked (holiday) dates and weekly availability/day-off settings, and
+        generates slots from start_time/end_time using slot_duration + buffer_time.
+
+        Returns {'available': bool, 'reason': str|None, 'slots': [{'time': '09:00 AM', 'booked': bool}, ...]}
+        """
+        if self.blocked_dates.filter(date=appointment_date).exists():
+            return {'available': False, 'reason': 'Doctor is on leave (holiday) on this date.', 'slots': []}
+
+        day_key = appointment_date.strftime('%A').lower()
+        day_schedule = self.availability.filter(day=day_key).first()
+
+        if day_schedule is None:
+            # No explicit schedule saved yet for this weekday -- fall back to the
+            # model's own defaults (09:00-17:00, available) rather than treating
+            # an unconfigured day as closed.
+            start_time, end_time = time_cls(9, 0), time_cls(17, 0)
+        elif not day_schedule.is_available:
+            return {'available': False, 'reason': 'Doctor does not see patients on this day of the week.', 'slots': []}
+        else:
+            start_time, end_time = day_schedule.start_time, day_schedule.end_time
+
+        booked_slots = set(
+            self.appointments.filter(appointment_date=appointment_date)
+            .exclude(status='cancelled')
+            .values_list('time_slot', flat=True)
+        )
+
+        step_minutes = max(self.slot_duration, 1) + max(self.buffer_time, 0)
+        current = datetime.combine(appointment_date, start_time)
+        end = datetime.combine(appointment_date, end_time)
+
+        slots = []
+        while current + timedelta(minutes=self.slot_duration) <= end:
+            label = current.strftime('%I:%M %p')
+            slots.append({'time': label, 'booked': label in booked_slots})
+            if self.max_per_day and len(slots) >= self.max_per_day:
+                break
+            current += timedelta(minutes=step_minutes)
+
+        return {'available': True, 'reason': None, 'slots': slots}
 
 
 class DoctorAvailability(models.Model):

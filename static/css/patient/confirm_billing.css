@@ -1,0 +1,55 @@
+/* ==========================================================================
+   CONFIRM & PAY PAGE (confirm_billing.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Notice
+   2. Bill Line Items
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. NOTICE
+   ========================================================================== */
+.bill-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-light);
+    background-color: var(--primary-light);
+    border-radius: var(--border-radius-sm);
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 1.75rem;
+}
+
+.bill-notice i {
+    color: var(--primary);
+    font-size: 1rem;
+    margin-top: 0.1rem;
+}
+
+
+/* ==========================================================================
+   2. BILL LINE ITEMS
+   ========================================================================== */
+.bill-line-items {
+    margin-bottom: 1.75rem;
+}
+
+.bill-line-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.95rem;
+    color: var(--text-dark);
+}
+
+.bill-total {
+    border-bottom: none;
+    padding-top: 1.1rem;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary);
+}

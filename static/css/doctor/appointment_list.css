@@ -172,6 +172,11 @@
     color: var(--doc-white);
 }
 
+.table-action-success:hover {
+    background-color: var(--doc-success);
+    color: var(--doc-white);
+}
+
 
 /* ==========================================================================
    4. EMPTY STATE

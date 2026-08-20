@@ -1,0 +1,82 @@
+/* ==========================================================================
+   VERIFY OTP PAGE (verify_otp.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Digit Box Group
+   2. Expiry Timer
+   3. Responsive
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DIGIT BOX GROUP
+   ========================================================================== */
+.otp-box-group {
+    display: flex;
+    gap: 0.6rem;
+}
+
+.otp-box {
+    width: 100%;
+    max-width: 56px;
+    height: 58px;
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    transition: var(--transition-fast);
+}
+
+.otp-box:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.otp-attempts-note {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-top: 0.6rem;
+    margin-bottom: 0;
+}
+
+
+/* ==========================================================================
+   2. EXPIRY TIMER
+   ========================================================================== */
+.otp-timer-row {
+    margin-bottom: 1.25rem;
+}
+
+.otp-timer {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-light);
+}
+
+.otp-timer strong {
+    color: var(--text-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.otp-timer-expired {
+    color: var(--danger);
+}
+
+
+/* ==========================================================================
+   3. RESPONSIVE
+   ========================================================================== */
+@media (max-width: 575.98px) {
+    .otp-box-group {
+        gap: 0.4rem;
+    }
+
+    .otp-box {
+        height: 50px;
+        font-size: 1.2rem;
+    }
+}

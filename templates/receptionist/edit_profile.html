@@ -67,12 +67,9 @@
                 <h6 class="form-section-title"><i class="bi bi-briefcase-fill"></i>Work Information</h6>
                 <div class="row gy-3 mb-4">
                     <div class="col-md-6">
-                        <label for="shift" class="form-label">Shift</label>
-                        <select class="form-select" id="shift" name="shift">
-                            <option value="morning" {% if receptionist.shift == "morning" %}selected{% endif %}>Morning</option>
-                            <option value="evening" {% if receptionist.shift == "evening" %}selected{% endif %}>Evening</option>
-                            <option value="night" {% if receptionist.shift == "night" %}selected{% endif %}>Night</option>
-                        </select>
+                        <label class="form-label">Shift</label>
+                        <input type="text" class="form-control" value="{{ receptionist.get_shift_display }}" disabled>
+                        <div class="form-text">Set by the admin. Contact your administrator to change your shift.</div>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label">Employee ID</label>

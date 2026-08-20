@@ -65,6 +65,7 @@
                     <div class="doctor-info">
                         <h6>Dr. {{ doc.user.get_full_name }}</h6>
                         <p>{{ doc.specialization|default:doc.get_department_display }}</p>
+                        <span class="doctor-fee"><i class="bi bi-cash-coin"></i>&#8377;{{ doc.consultation_fee }} consultation</span>
                     </div>
                 </div>
             </div>

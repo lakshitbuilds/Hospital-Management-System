@@ -509,6 +509,11 @@ p {
     color: var(--rec-danger);
 }
 
+.status-no_show {
+    background-color: rgba(120, 113, 108, 0.15);
+    color: var(--rec-text-dark);
+}
+
 
 /* ==========================================================================
    8. TABLE ROW / ACTION COMPONENTS (shared across list + detail pages)

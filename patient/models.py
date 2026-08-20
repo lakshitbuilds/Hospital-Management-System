@@ -63,6 +63,7 @@ class Appointment(models.Model):
         ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'),
         ('completed', 'Completed'),
+        ('no_show', 'No Show'),
     )
     VISIT_TYPE_CHOICES = (
         ('new', 'New Visit'),
@@ -93,6 +94,32 @@ class Appointment(models.Model):
     def __str__(self):
         return f"{self.patient} with {self.doctor} on {self.appointment_date} {self.time_slot}"
     
+class Billing(models.Model):
+    BILL_TYPE_CHOICES = (
+        ('consultation', 'Consultation Fee'),
+        ('no_show_fee', 'No-Show Fee'),
+    )
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('waived', 'Waived'),
+    )
+
+    appointment = models.ForeignKey(Appointment, on_delete=models.CASCADE, related_name='bills')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='bills')
+    bill_type = models.CharField(max_length=20, choices=BILL_TYPE_CHOICES, default='consultation')
+    amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.get_bill_type_display()} - {self.patient} - Rs.{self.amount}"
+
+
 class ContactMessage(models.Model):
     full_name = models.CharField(max_length=150)
     email = models.EmailField()
