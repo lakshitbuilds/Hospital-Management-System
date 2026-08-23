@@ -1,3 +1,13 @@
+"""
+Domain models for the doctor-side portal.
+
+This module defines the Doctor profile itself (linked one-to-one to the
+shared accounts.User account for users with role='doctor'), the doctor's
+weekly availability and one-off blocked (holiday) dates used to compute
+bookable appointment slots, and the prescriptions (with their medicine line
+items) that a doctor writes for a patient, usually while working through a
+specific appointment.
+"""
 from datetime import datetime, timedelta, time as time_cls
 
 from django.db import models
@@ -5,6 +15,21 @@ from django.conf import settings
 
 
 class Doctor(models.Model):
+    """
+    A doctor's professional profile, extending the base accounts.User account
+    (one-to-one) with hospital-specific details: department/specialization,
+    consultation fee, qualifications, and scheduling settings.
+
+    The `consultation_fee` field is read elsewhere in the project when a
+    patient/receptionist books an appointment, to auto-create the matching
+    Billing record for that appointment.
+
+    Related from other models via reverse FKs: `availability`
+    (DoctorAvailability), `blocked_dates` (BlockedDate), `appointments`
+    (patient.Appointment), and `prescriptions` (Prescription).
+    """
+    # Departments this doctor can be assigned to; shown as a dropdown
+    # wherever the doctor's profile is edited.
     DEPARTMENT_CHOICES = (
         ('cardiology', 'Cardiology'),
         ('neurology', 'Neurology'),
@@ -14,19 +39,30 @@ class Doctor(models.Model):
         ('general', 'General Medicine'),
     )
 
+    # Links this profile to the shared accounts.User row for the doctor
+    # (that User's role should be 'doctor'). One doctor <-> one User.
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='doctor_profile')
+    # Which hospital department the doctor belongs to (see DEPARTMENT_CHOICES above).
     department = models.CharField(max_length=30, choices=DEPARTMENT_CHOICES)
     specialization = models.CharField(max_length=100, blank=True)
 
     phone_number = models.CharField(max_length=20, blank=True)
     qualification = models.CharField(max_length=150, blank=True)
     experience_years = models.PositiveIntegerField(default=0)
+    # Fee charged per consultation. Used elsewhere in the project (the
+    # appointment booking flow) to auto-create the corresponding Billing
+    # record when a patient or receptionist books with this doctor.
     consultation_fee = models.PositiveIntegerField(default=0)
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='doctors/profile_pictures/', blank=True, null=True)
     license_number = models.CharField(max_length=50, blank=True)
     registered_since = models.PositiveIntegerField(blank=True, null=True)
 
+    # Scheduling settings used together by get_available_slots() below to
+    # generate this doctor's bookable time slots for a given day:
+    # slot_duration = length of one appointment slot (minutes),
+    # buffer_time = gap left between consecutive slots (minutes),
+    # max_per_day = optional cap on how many slots to offer per day.
     slot_duration = models.PositiveIntegerField(default=30)
     buffer_time = models.PositiveIntegerField(default=5)
     max_per_day = models.PositiveIntegerField(blank=True, null=True)
@@ -46,6 +82,9 @@ class Doctor(models.Model):
         if self.blocked_dates.filter(date=appointment_date).exists():
             return {'available': False, 'reason': 'Doctor is on leave (holiday) on this date.', 'slots': []}
 
+        # Convert the date to a lowercase weekday name ('monday', 'tuesday',
+        # ...) matching the DAY_CHOICES keys used by DoctorAvailability, so
+        # we can look up this doctor's saved schedule for that weekday.
         day_key = appointment_date.strftime('%A').lower()
         day_schedule = self.availability.filter(day=day_key).first()
 
@@ -59,16 +98,25 @@ class Doctor(models.Model):
         else:
             start_time, end_time = day_schedule.start_time, day_schedule.end_time
 
+        # Collect the time-slot labels already taken by this doctor on this
+        # date (ignoring cancelled appointments, since a cancelled slot frees
+        # back up) so they can be flagged as booked below.
         booked_slots = set(
             self.appointments.filter(appointment_date=appointment_date)
             .exclude(status='cancelled')
             .values_list('time_slot', flat=True)
         )
 
+        # Each slot is slot_duration minutes long, followed by a buffer_time
+        # gap before the next slot starts.
         step_minutes = max(self.slot_duration, 1) + max(self.buffer_time, 0)
         current = datetime.combine(appointment_date, start_time)
         end = datetime.combine(appointment_date, end_time)
 
+        # Walk forward from start_time to end_time in step_minutes
+        # increments, emitting one slot per iteration (marked booked/free)
+        # until there's no more room for a full slot_duration block before
+        # end_time, or the optional max_per_day cap is reached.
         slots = []
         while current + timedelta(minutes=self.slot_duration) <= end:
             label = current.strftime('%I:%M %p')
@@ -81,6 +129,13 @@ class Doctor(models.Model):
 
 
 class DoctorAvailability(models.Model):
+    """
+    One doctor's recurring weekly schedule for a single day of the week
+    (e.g. "Dr. X is available Monday 09:00-17:00"). There is exactly one row
+    per (doctor, day) pair -- enforced by unique_together below. This is
+    read by Doctor.get_available_slots() to know the working hours (or
+    day-off status) to generate bookable slots from.
+    """
     DAY_CHOICES = (
         ('monday', 'Monday'),
         ('tuesday', 'Tuesday'),
@@ -91,13 +146,18 @@ class DoctorAvailability(models.Model):
         ('sunday', 'Sunday'),
     )
 
+    # The doctor this weekly schedule entry belongs to; the reverse accessor
+    # `doctor.availability` is what get_available_slots() queries.
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='availability')
     day = models.CharField(max_length=10, choices=DAY_CHOICES)
+    # Whether the doctor sees patients at all on this weekday (unchecked in
+    # the availability form means a day off).
     is_available = models.BooleanField(default=True)
     start_time = models.TimeField(default='09:00')
     end_time = models.TimeField(default='17:00')
 
     class Meta:
+        # At most one schedule row per doctor per weekday.
         unique_together = ('doctor', 'day')
         ordering = ['id']
 
@@ -106,6 +166,14 @@ class DoctorAvailability(models.Model):
 
 
 class BlockedDate(models.Model):
+    """
+    A single specific date on which a doctor is unavailable (e.g. holiday or
+    leave), overriding their normal weekly availability for just that one
+    date. Checked first by Doctor.get_available_slots() before it falls
+    back to the regular weekly schedule.
+    """
+    # The doctor who is unavailable on `date`; the reverse accessor
+    # `doctor.blocked_dates` is what get_available_slots() queries.
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='blocked_dates')
     date = models.DateField()
     reason = models.CharField(max_length=150, blank=True)
@@ -119,8 +187,22 @@ class BlockedDate(models.Model):
 
 
 class Prescription(models.Model):
+    """
+    A prescription written by a doctor for a patient: a diagnosis plus
+    advice and an optional follow-up date, with the actual medicines stored
+    separately as PrescriptionMedicine rows (see `medicines` reverse
+    relation). Usually created while the doctor is working through a
+    specific appointment, but `appointment` is optional so a prescription
+    can still exist without one.
+    """
+    # Doctor who wrote this prescription.
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name='prescriptions')
+    # The patient (patient.Patient profile, not the raw User) this
+    # prescription is for.
     patient = models.ForeignKey('patient.Patient', on_delete=models.CASCADE, related_name='prescriptions')
+    # Optional link to the specific appointment this was written during.
+    # SET_NULL means if that appointment is ever deleted, this prescription
+    # is kept but simply loses the link, rather than being deleted too.
     appointment = models.ForeignKey('patient.Appointment', on_delete=models.SET_NULL, related_name='prescriptions', blank=True, null=True)
     diagnosis = models.TextField()
     advice = models.TextField(blank=True)
@@ -135,6 +217,12 @@ class Prescription(models.Model):
 
 
 class PrescriptionMedicine(models.Model):
+    """
+    A single medicine line item belonging to a Prescription (name, dosage,
+    frequency, duration, instructions). A Prescription typically has several
+    of these -- accessible via its `medicines` reverse relation -- one per
+    medicine the doctor prescribed.
+    """
     FREQUENCY_CHOICES = (
         ('once_a_day', 'Once a day'),
         ('twice_a_day', 'Twice a day'),
@@ -144,6 +232,7 @@ class PrescriptionMedicine(models.Model):
         ('as_needed', 'As needed'),
     )
 
+    # The parent prescription this medicine line item belongs to.
     prescription = models.ForeignKey(Prescription, on_delete=models.CASCADE, related_name='medicines')
     name = models.CharField(max_length=100)
     dosage = models.CharField(max_length=50, blank=True)
