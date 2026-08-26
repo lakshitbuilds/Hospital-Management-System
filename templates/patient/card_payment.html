@@ -1,0 +1,140 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+
+{% block title %}Payment - MediCare Hospital{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/patient/book_appointment.css' %}?v=2">
+<link rel="stylesheet" href="{% static 'css/patient/confirm_billing.css' %}">
+<link rel="stylesheet" href="{% static 'css/patient/card_payment.css' %}?v=2">
+{% endblock %}
+
+{% block content %}
+
+<!-- ============================================================
+     PAGE HEADER
+============================================================= -->
+<section class="page-header">
+    <div class="container">
+        <h1>Payment</h1>
+        <nav class="breadcrumb-nav">
+            <a href="#">Home</a>
+            <i class="bi bi-chevron-right"></i>
+            <span class="current">Payment</span>
+        </nav>
+    </div>
+</section>
+
+<!-- ============================================================
+     PAYMENT SECTION
+============================================================= -->
+<section class="section-padding">
+    <div class="container">
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row gy-4">
+
+            <!-- Card Checkout -->
+            <div class="col-lg-8">
+                <div class="booking-form-card">
+                    <h6 class="bill-notice">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        Demo checkout only &mdash; no real payment gateway is connected. Card details below are
+                        never validated, charged, or stored.
+                    </h6>
+
+                    <!-- Live Card Preview -->
+                    <div class="fake-card-preview" id="fakeCardPreview">
+                        <div class="fake-card-top">
+                            <i class="bi bi-cpu-fill fake-card-chip"></i>
+                            <i class="bi bi-credit-card-2-front fake-card-brand"></i>
+                        </div>
+                        <div class="fake-card-number" id="previewCardNumber">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull;</div>
+                        <div class="fake-card-bottom">
+                            <div>
+                                <span class="fake-card-label">Card Holder</span>
+                                <span class="fake-card-value" id="previewCardName">YOUR NAME</span>
+                            </div>
+                            <div>
+                                <span class="fake-card-label">Expires</span>
+                                <span class="fake-card-value" id="previewCardExpiry">MM/YY</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form method="post" id="cardPaymentForm" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="cardName" class="form-label">Cardholder Name</label>
+                            <input type="text" class="form-control" id="cardName" placeholder="John Doe" autocomplete="off" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cardNumber" class="form-label">Card Number</label>
+                            <input type="text" class="form-control" id="cardNumber" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19" autocomplete="off" required>
+                        </div>
+
+                        <div class="row gy-3">
+                            <div class="col-6">
+                                <label for="cardExpiry" class="form-label">Expiry (MM/YY)</label>
+                                <input type="text" class="form-control" id="cardExpiry" placeholder="MM/YY" inputmode="numeric" maxlength="5" autocomplete="off" required>
+                            </div>
+                            <div class="col-6">
+                                <label for="cardCvv" class="form-label">CVV</label>
+                                <input type="text" class="form-control" id="cardCvv" placeholder="123" inputmode="numeric" maxlength="4" autocomplete="off" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mt-4">
+                            <i class="bi bi-lock-fill me-2"></i>Pay &#8377;{{ consultation_fee }} (Demo)
+                        </button>
+                    </form>
+                    <a href="{% url 'confirm_appointment_billing' %}" class="btn btn-outline-secondary w-100 mt-2">Back to Review</a>
+                </div>
+            </div>
+
+            <!-- Order Summary Sidebar -->
+            <div class="col-lg-4">
+                <div class="booking-summary-card">
+                    <h6 class="summary-title"><i class="bi bi-clipboard2-check-fill me-2"></i>Appointment Summary</h6>
+
+                    <ul class="summary-list">
+                        <li>
+                            <span class="summary-label"><i class="bi bi-hospital"></i>Department</span>
+                            <span class="summary-value">{{ department }}</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-person-badge"></i>Doctor</span>
+                            <span class="summary-value">Dr. {{ doctor.user.get_full_name }}</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-calendar3"></i>Date</span>
+                            <span class="summary-value">{{ appointment_date|date:"M d, Y" }}</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-clock"></i>Time</span>
+                            <span class="summary-value">{{ time_slot }}</span>
+                        </li>
+                        <li>
+                            <span class="summary-label"><i class="bi bi-cash-coin"></i>Amount Due</span>
+                            <span class="summary-value">&#8377;{{ consultation_fee }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/card_payment.js' %}?v=2"></script>
+{% endblock %}

@@ -11,6 +11,15 @@
     />
     <meta name="author" content="MediCare Hospital" />
 
+    <!-- ===== Theme (applied before CSS paints to avoid a light/dark flash) ===== -->
+    <script>
+      (function () {
+        var theme = localStorage.getItem('hms-theme') ||
+          (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
+
     <!-- ===== Title Block ===== -->
     <title>{% block title %}MediCare Hospital{% endblock %}</title>
 
@@ -151,6 +160,19 @@
             <ul
               class="navbar-nav align-items-lg-center gap-2 nav-right mt-3 mt-lg-0"
             >
+              <!-- Dark / Light Mode Toggle -->
+              <li class="nav-item">
+                <button
+                  type="button"
+                  class="nav-link icon-btn theme-toggle-btn"
+                  id="themeToggleBtn"
+                  aria-label="Toggle dark mode"
+                  title="Toggle dark mode"
+                >
+                  <i class="bi bi-moon-stars-fill" id="themeToggleIcon"></i>
+                </button>
+              </li>
+
               {% if user.is_authenticated %}
 
               <!-- Notification Icon -->

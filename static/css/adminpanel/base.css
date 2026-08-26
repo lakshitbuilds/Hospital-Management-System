@@ -50,6 +50,29 @@
     --adm-transition: all 0.25s ease;
 }
 
+/* ===== Dark Mode Palette (activated via <html data-theme="dark">) ===== */
+[data-theme="dark"] {
+    --adm-primary: #fbbf24;
+    --adm-primary-dark: #f59e0b;
+    --adm-primary-light: #3a2a0f;
+    --adm-sidebar-bg: #1c1917;
+    --adm-sidebar-bg-active: #292524;
+    --adm-sidebar-text: #a8a29e;
+    --adm-sidebar-text-active: #fde68a;
+    --adm-background: #121110;
+    --adm-white: #1c1a18;
+    --adm-border-color: #2e2b28;
+    --adm-text-dark: #ede9e5;
+    --adm-text-light: #a39d97;
+    --adm-success: #22c55e;
+    --adm-warning: #fb923c;
+    --adm-danger: #ef4444;
+    --adm-info: #60a5fa;
+
+    --adm-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --adm-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
 
 /* ==========================================================================
    2. RESET / TYPOGRAPHY
@@ -64,6 +87,7 @@ body {
     font-family: 'Poppins', sans-serif;
     color: var(--adm-text-dark);
     background-color: var(--adm-background);
+    transition: background-color 0.25s ease, color 0.25s ease;
     line-height: 1.6;
 }
 
@@ -742,4 +766,65 @@ p {
     .topbar-date {
         display: none;
     }
+}
+
+
+/* ==========================================================================
+   13. DARK MODE — BOOTSTRAP COMPONENT OVERRIDES
+   (base layout/sidebar/cards already re-theme via the CSS vars above;
+   these cover CDN Bootstrap chrome that ships with hardcoded light colors)
+   ========================================================================== */
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--adm-white);
+    border-color: var(--adm-border-color);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--adm-text-dark);
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+    background-color: var(--adm-primary-light);
+    color: var(--adm-primary);
+}
+
+[data-theme="dark"] .dropdown-header {
+    color: var(--adm-text-light);
+}
+
+[data-theme="dark"] .dropdown-divider {
+    border-color: var(--adm-border-color);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--adm-white);
+    border-color: var(--adm-border-color);
+    color: var(--adm-text-dark);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    background-color: var(--adm-white);
+    color: var(--adm-text-dark);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--adm-white);
+    color: var(--adm-text-dark);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: var(--adm-border-color);
+}
+
+[data-theme="dark"] .table {
+    color: var(--adm-text-dark);
+    border-color: var(--adm-border-color);
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }

@@ -147,6 +147,10 @@ class Appointment(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     department = models.CharField(max_length=30, choices=DEPARTMENT_CHOICES, default='general')
+    # Set by the send_appointment_reminders management command once a
+    # "tomorrow" reminder email has gone out, so re-running the command
+    # (e.g. if it's triggered more than once a day) never double-sends.
+    reminder_sent = models.BooleanField(default=False)
 
     class Meta:
         # Prevents double-booking: the same doctor can't have two

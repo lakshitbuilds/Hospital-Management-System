@@ -6,6 +6,7 @@
    3. Active Navigation Highlight
    4. Smooth Scroll for In-Page Anchor Links
    5. Auto-Close Mobile Menu on Link Click
+   6. Dark / Light Mode Toggle
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -110,16 +111,46 @@ document.addEventListener('DOMContentLoaded', function () {
        tapped on mobile, so users don't have to manually close it.
     ---------------------------------------------------------------------- */
     var navbarCollapse = document.getElementById('navbarMain');
-    var mobileNavLinks = document.querySelectorAll('#navbarMain .nav-link, #navbarMain .dropdown-item');
+    var mobileNavLinks = document.querySelectorAll(
+        '#navbarMain .nav-link:not([data-bs-toggle="dropdown"]), #navbarMain .dropdown-item'
+    );
 
     if (navbarCollapse) {
         mobileNavLinks.forEach(function (link) {
             link.addEventListener('click', function () {
                 if (window.innerWidth < 992 && navbarCollapse.classList.contains('show')) {
-                    var bsCollapse = bootstrap.Collapse.getOrCreateInstance(navbarCollapse);
-                    bsCollapse.hide();
+                    var bsOffcanvas = bootstrap.Offcanvas.getOrCreateInstance(navbarCollapse);
+                    bsOffcanvas.hide();
                 }
             });
+        });
+    }
+
+
+    /* ----------------------------------------------------------------------
+       6. Dark / Light Mode Toggle
+       Theme itself is applied pre-paint by an inline script in base.html;
+       this just wires up the button, syncs the icon, and persists the choice.
+    ---------------------------------------------------------------------- */
+    var themeToggleBtn = document.getElementById('themeToggleBtn');
+    var themeToggleIcon = document.getElementById('themeToggleIcon');
+
+    function syncThemeIcon() {
+        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        if (themeToggleIcon) {
+            themeToggleIcon.classList.toggle('bi-moon-stars-fill', !isDark);
+            themeToggleIcon.classList.toggle('bi-sun-fill', isDark);
+        }
+    }
+
+    syncThemeIcon();
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', function () {
+            var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('hms-theme', next);
+            syncThemeIcon();
         });
     }
 

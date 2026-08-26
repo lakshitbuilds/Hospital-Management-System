@@ -5,7 +5,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/patient/auth.css' %}">
-<link rel="stylesheet" href="{% static 'css/patient/verify_otp.css' %}">
+<link rel="stylesheet" href="{% static 'css/patient/verify_otp.css' %}?v=3">
 {% endblock %}
 
 {% block content %}
@@ -78,7 +78,8 @@
                         </div>
                         <input type="hidden" name="otp_code" id="otpCodeHidden">
                         <div class="invalid-feedback" id="otpInvalidFeedback">Please enter the 6-digit code sent to your email.</div>
-                        <p class="otp-attempts-note">
+                        <p class="otp-inline-error d-none" id="otpInlineError"></p>
+                        <p class="otp-attempts-note" id="otpAttemptsNote" data-attempts-remaining="{{ attempts_remaining }}" data-lockout-minutes="{{ otp_lockout_minutes }}">
                             {{ attempts_remaining }} attempt{{ attempts_remaining|pluralize }} remaining before your account is locked for {{ otp_lockout_minutes }} minutes.
                         </p>
                     </div>
@@ -113,8 +114,36 @@
     </div>
 </section>
 
+<!-- ============================================================
+     VERIFYING / SUCCESS / LOCKED OVERLAY (see verify_otp.js).
+     Wrong-code retries never show this overlay -- they update the
+     form inline -- this is only for "checking", "verified, taking you
+     in", and the lockout hand-off to the login page.
+============================================================= -->
+<div class="otp-overlay d-none" id="otpOverlay">
+    <div class="otp-overlay-content">
+        <div class="otp-spinner" id="otpSpinner"></div>
+
+        <div class="otp-result-icon otp-result-success d-none" id="otpSuccessIcon">
+            <svg viewBox="0 0 52 52" class="otp-result-svg">
+                <circle class="otp-result-circle" cx="26" cy="26" r="26"/>
+                <path class="otp-result-tick" fill="none" d="M14 27l7 7 16-16"/>
+            </svg>
+        </div>
+        <div class="otp-result-icon otp-result-locked d-none" id="otpLockedIcon">
+            <svg viewBox="0 0 52 52" class="otp-result-svg">
+                <circle class="otp-result-circle" cx="26" cy="26" r="26"/>
+                <path class="otp-result-cross" fill="none" d="M18 18l16 16M34 18L18 34"/>
+            </svg>
+        </div>
+
+        <p class="otp-overlay-title" id="otpOverlayTitle">Verifying&hellip;</p>
+        <p class="otp-overlay-subtitle d-none" id="otpOverlaySubtitle"></p>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'js/patient/verify_otp.js' %}"></script>
+<script src="{% static 'js/patient/verify_otp.js' %}?v=4"></script>
 {% endblock %}

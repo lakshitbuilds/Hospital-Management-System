@@ -4,9 +4,11 @@
    1. Live Booking Summary (Department / Doctor / Date / Time)
    2. Filter Doctor List by Selected Department
    3. Minimum Selectable Date = Today
-   4. Form Validation + Success Banner
+   4. Form Validation + Success Banner + Submit Loading State
    5. Load real available time slots from the backend (doctor's weekly
-      availability, blocked/holiday dates, and existing bookings)
+      availability, blocked/holiday dates, and existing bookings), kept
+      fresh with background polling so a slot taken by another patient
+      closes automatically, and one freed up by a cancellation reopens
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -115,14 +117,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ----------------------------------------------------------------------
-       5. Load real available time slots from the backend
+       5. Load real available time slots from the backend, kept fresh via
+          background polling (see startSlotPolling below)
     ---------------------------------------------------------------------- */
+    var slotNotice = document.getElementById('slotNotice');
+    var slotPollTimer = null;
+    var SLOT_POLL_INTERVAL_MS = 8000;
+
     function renderSlotMessage(text) {
         timeSlotGrid.innerHTML = '';
         var msg = document.createElement('p');
         msg.className = 'time-slot-empty';
         msg.textContent = text;
         timeSlotGrid.appendChild(msg);
+    }
+
+    function renderSlotLoader() {
+        timeSlotGrid.innerHTML = '';
+        var loader = document.createElement('div');
+        loader.className = 'slot-loader';
+        var spinner = document.createElement('span');
+        spinner.className = 'slot-loader-spinner';
+        var text = document.createElement('span');
+        text.className = 'slot-loader-text';
+        text.textContent = 'Loading available times…';
+        loader.appendChild(spinner);
+        loader.appendChild(text);
+        timeSlotGrid.appendChild(loader);
     }
 
     function renderSlots(slots) {
@@ -148,40 +169,121 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function loadTimeSlots() {
+    function showSlotNotice(text) {
+        if (!slotNotice) return;
+        slotNotice.textContent = text;
+        slotNotice.classList.remove('d-none');
+        clearTimeout(slotNotice._hideTimer);
+        slotNotice._hideTimer = setTimeout(function () {
+            slotNotice.classList.add('d-none');
+        }, 6000);
+    }
+
+    // Applied on background polls: syncs each already-rendered slot's
+    // booked/free state against fresh server data in place, instead of
+    // wiping and rebuilding the grid, so the patient's current selection
+    // survives a refresh -- unless that exact slot just got taken by
+    // someone else, in which case it's unchecked, disabled ("closed"),
+    // and the patient is told. A slot someone else cancelled re-enables
+    // ("opens") the same way, with no notice needed since nothing of
+    // the patient's own was affected.
+    function syncSlotsInPlace(slots) {
+        var currentInputs = timeSlotGrid.querySelectorAll('.time-slot-input');
+        if (currentInputs.length !== slots.length) {
+            // Slot layout itself changed (e.g. doctor's availability was
+            // edited) -- safest to just do a full re-render.
+            renderSlots(slots);
+            return;
+        }
+
+        var lostSelection = false;
+        for (var index = 0; index < slots.length; index++) {
+            var slot = slots[index];
+            var input = currentInputs[index];
+            if (!input || input.value !== slot.time) {
+                // Same layout mismatch as the length check above, just
+                // caught mid-loop -- bail out to a full re-render instead
+                // of continuing to compare against the wrong slots.
+                renderSlots(slots);
+                return;
+            }
+            var label = timeSlotGrid.querySelector('label[for="' + input.id + '"]');
+            var wasChecked = input.checked;
+            input.disabled = slot.booked;
+            if (label) label.classList.toggle('is-booked', slot.booked);
+            if (slot.booked && wasChecked) {
+                input.checked = false;
+                lostSelection = true;
+            }
+        }
+
+        if (lostSelection) {
+            updateSummary();
+            showSlotNotice('That time slot was just booked by another patient — please choose a different time.');
+        }
+    }
+
+    function loadTimeSlots(options) {
         if (!timeSlotGrid) return;
+        var background = options && options.background;
 
         var slotsUrl = timeSlotGrid.getAttribute('data-slots-url');
         var doctorId = doctorSelect ? doctorSelect.value : '';
         var date = dateInput ? dateInput.value : '';
 
         if (!slotsUrl || !doctorId || !date) {
+            stopSlotPolling();
             renderSlotMessage('Choose a doctor and date above to see available times.');
             updateSummary();
             return;
         }
 
-        renderSlotMessage('Loading available times…');
+        if (!background) {
+            renderSlotLoader();
+        }
 
         fetch(slotsUrl + '?doctor=' + encodeURIComponent(doctorId) + '&date=' + encodeURIComponent(date))
             .then(function (response) { return response.json(); })
             .then(function (data) {
                 if (!data.available) {
+                    stopSlotPolling();
                     renderSlotMessage(data.reason || 'Doctor is unavailable on this date.');
                     return;
                 }
                 if (!data.slots || !data.slots.length) {
+                    stopSlotPolling();
                     renderSlotMessage('No time slots configured for this doctor on this date.');
                     return;
                 }
-                renderSlots(data.slots);
+                if (background) {
+                    syncSlotsInPlace(data.slots);
+                } else {
+                    renderSlots(data.slots);
+                    startSlotPolling();
+                }
             })
             .catch(function () {
-                renderSlotMessage('Could not load time slots. Please try again.');
+                if (!background) {
+                    renderSlotMessage('Could not load time slots. Please try again.');
+                }
             })
             .finally(function () {
                 updateSummary();
             });
+    }
+
+    function startSlotPolling() {
+        stopSlotPolling();
+        slotPollTimer = setInterval(function () {
+            loadTimeSlots({ background: true });
+        }, SLOT_POLL_INTERVAL_MS);
+    }
+
+    function stopSlotPolling() {
+        if (slotPollTimer) {
+            clearInterval(slotPollTimer);
+            slotPollTimer = null;
+        }
     }
 
 
@@ -198,8 +300,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ----------------------------------------------------------------------
-       4. Form Validation + Success Banner
+       4. Form Validation + Success Banner + Submit Loading State
     ---------------------------------------------------------------------- */
+    var submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
     if (form) {
         form.addEventListener('submit', function (event) {
             event.preventDefault();
@@ -212,6 +316,11 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             form.classList.remove('was-validated');
+            stopSlotPolling();
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="btn-spinner"></span>Booking&hellip;';
+            }
             form.submit();   // <-- actually send the form to Django
         });
     }

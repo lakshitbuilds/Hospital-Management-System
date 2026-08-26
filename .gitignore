@@ -8,3 +8,4 @@ staticfiles/
 generate_placeholder_images.py
 CREDENTIALS.md
 db.sqlite3.backup-*
+data_dump_sqlite.json

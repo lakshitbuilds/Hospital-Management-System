@@ -7,6 +7,7 @@
    4. Time Slot Selector
    5. Booking Summary Sidebar
    6. Responsive
+   7. Slot Loader / Button Spinner
    ========================================================================== */
 
 
@@ -238,6 +239,44 @@
     font-size: 0.55rem;
     color: var(--light-gray);
     -webkit-text-stroke: 1px var(--border-color);
+}
+
+.slot-loader {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.4rem 1rem;
+    color: var(--text-light);
+    font-size: 0.85rem;
+}
+
+.slot-loader-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid var(--primary-light);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: btnSpin 0.7s linear infinite;
+}
+
+/* Small inline spinner reused on any submit button's "processing" state
+   (book_appointment.js, card_payment.js). */
+.btn-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    vertical-align: -2px;
+    animation: btnSpin 0.7s linear infinite;
+}
+
+@keyframes btnSpin {
+    to { transform: rotate(360deg); }
 }
 
 

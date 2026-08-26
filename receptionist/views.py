@@ -24,6 +24,7 @@ from django.utils import timezone
 
 from doctor.models import Doctor, DoctorAvailability
 from patient.models import Appointment, Billing, Notification, Patient
+from patient.emails import send_appointment_booked_email, send_appointment_cancelled_email
 
 from .models import Receptionist
 
@@ -383,6 +384,7 @@ def book_appointment(request):
             notification_type='confirmed',
             message=f'Your appointment with Dr. {doctor.user.get_full_name()} on {appointment.appointment_date} at {time_slot} has been confirmed by the front desk.',
         )
+        send_appointment_booked_email(appointment)
 
         messages.success(request, 'Appointment booked successfully.')
         return redirect('receptionist_appointment_list')
@@ -437,6 +439,7 @@ def cancel_appointment(request, appointment_id):
             notification_type='cancelled',
             message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} on {appointment.appointment_date} was cancelled by the front desk.',
         )
+        send_appointment_cancelled_email(appointment, cancelled_by='the front desk')
         messages.success(request, 'Appointment cancelled.')
     return redirect(request.POST.get('next') or 'receptionist_appointment_list')
 

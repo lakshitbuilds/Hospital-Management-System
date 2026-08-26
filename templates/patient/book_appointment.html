@@ -4,7 +4,7 @@
 {% block title %}Book Appointment - MediCare Hospital{% endblock %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/patient/book_appointment.css' %}">
+<link rel="stylesheet" href="{% static 'css/patient/book_appointment.css' %}?v=2">
 {% endblock %}
 
 
@@ -115,10 +115,11 @@
                             </div>
 
                             <label class="form-label d-block">Available Time Slots</label>
+                            <div class="alert alert-warning d-none" id="slotNotice" role="alert"></div>
                             <div class="time-slot-grid" id="timeSlotGrid" data-slots-url="{% url 'get_doctor_slots' %}">
                                 <p class="time-slot-empty">Choose a doctor and date above to see available times.</p>
                             </div>
-                            <p class="time-slot-hint"><i class="bi bi-square-fill is-booked-dot"></i>Booked slots are unavailable</p>
+                            <p class="time-slot-hint"><i class="bi bi-square-fill is-booked-dot"></i>Booked slots are unavailable &mdash; this list updates automatically if another patient books or cancels.</p>
                         </div>
 
                         <!-- Step 4: Patient Details -->
@@ -203,5 +204,5 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'js/patient/book_appointment.js' %}"></script>
+<script src="{% static 'js/patient/book_appointment.js' %}?v=2"></script>
 {% endblock %}

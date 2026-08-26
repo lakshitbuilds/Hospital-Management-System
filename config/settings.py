@@ -24,6 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-1azvpu0k_7^ck2jy738%xw(luxct=lin8_&jb)_n=3n0*=ax-s')
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -98,6 +99,12 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# In dev (DEBUG=True), serve static files straight from STATICFILES_DIRS instead
+# of the collectstatic snapshot in STATIC_ROOT, so edits show up without having
+# to re-run `collectstatic` after every change. Never enabled in production.
+WHITENOISE_USE_FINDERS = DEBUG
+WHITENOISE_AUTOREFRESH = DEBUG
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -120,11 +127,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
+DATABASE_URL = config(
+    'DATABASE_URL',
+    default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+)
+
 DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-    )
+    'default': dj_database_url.parse(DATABASE_URL, conn_max_age=600)
 }
 
 
@@ -170,7 +179,7 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
 
-OTP_VALID_MINUTES = 1
+OTP_VALID_MINUTES = 2
 
 # Maximum wrong-code guesses allowed against a single OTP before it's
 # invalidated, the account is locked, and the user is sent back to log in

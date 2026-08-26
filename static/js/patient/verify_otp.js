@@ -21,6 +21,151 @@ document.addEventListener('DOMContentLoaded', function () {
         return code;
     }
 
+
+    /* ----------------------------------------------------------------------
+       Verifying / Success / Locked Overlay
+       Submits the code via fetch (instead of a plain form submit) so we
+       can tell a correct code apart from a wrong one *before* navigating
+       anywhere -- only a correct code gets the "Successful!" animation.
+       A wrong-but-not-locked-out code never leaves this page on the
+       server side either way (Django redirects back to the same
+       verify-otp URL), so we just read the fresh attempts-remaining/error
+       text out of that response and patch it into the current page
+       in place -- no full reload, and no reliance on Django's one-shot
+       flash-message cookie surviving a second round-trip. Only a genuine
+       navigation away (success, or a lockout bounce to /login/) uses a
+       real `window.location.href` -- deliberately not `document.write`,
+       which turned out to silently drop the page's own flash message in
+       testing (its script/style tags reload with the page mid-write,
+       and by then the flash-message cookie has already been consumed by
+       this same fetch's redirect-follow, before the write even starts).
+    ---------------------------------------------------------------------- */
+    var overlay = document.getElementById('otpOverlay');
+    var overlaySpinner = document.getElementById('otpSpinner');
+    var successIcon = document.getElementById('otpSuccessIcon');
+    var lockedIcon = document.getElementById('otpLockedIcon');
+    var overlayTitle = document.getElementById('otpOverlayTitle');
+    var overlaySubtitle = document.getElementById('otpOverlaySubtitle');
+    var inlineError = document.getElementById('otpInlineError');
+    var attemptsNote = document.getElementById('otpAttemptsNote');
+
+    function showOverlay() {
+        if (overlaySpinner) overlaySpinner.classList.remove('d-none');
+        if (successIcon) successIcon.classList.add('d-none');
+        if (lockedIcon) lockedIcon.classList.add('d-none');
+        if (overlayTitle) overlayTitle.textContent = 'Verifying…';
+        if (overlaySubtitle) {
+            overlaySubtitle.textContent = '';
+            overlaySubtitle.classList.add('d-none');
+        }
+        if (overlay) overlay.classList.remove('d-none');
+    }
+
+    function hideOverlay() {
+        if (overlay) overlay.classList.add('d-none');
+    }
+
+    function showSuccessState() {
+        if (overlaySpinner) overlaySpinner.classList.add('d-none');
+        if (successIcon) successIcon.classList.remove('d-none');
+        if (overlayTitle) overlayTitle.textContent = 'Successful!';
+        if (overlaySubtitle) {
+            overlaySubtitle.textContent = "You're verified — taking you in…";
+            overlaySubtitle.classList.remove('d-none');
+        }
+    }
+
+    function showLockedState(message) {
+        if (overlaySpinner) overlaySpinner.classList.add('d-none');
+        if (lockedIcon) lockedIcon.classList.remove('d-none');
+        if (overlayTitle) overlayTitle.textContent = 'Account Locked';
+        if (overlaySubtitle) {
+            overlaySubtitle.textContent = message || 'Too many incorrect attempts.';
+            overlaySubtitle.classList.remove('d-none');
+        }
+    }
+
+    // Pulls a bit of text out of an HTML string without touching the live
+    // document -- used to read the fresh error/attempts-remaining text a
+    // wrong-code response rendered, without a full-page reload.
+    function extractText(html, selector) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var el = doc.querySelector(selector);
+        return el ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    }
+
+    function showInlineError(html) {
+        hideOverlay();
+
+        var message = extractText(html, '.alert');
+        var freshAttemptsNote = extractText(html, '#otpAttemptsNote');
+
+        if (inlineError && message) {
+            inlineError.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i>' + message;
+            inlineError.classList.remove('d-none');
+        }
+        if (attemptsNote && freshAttemptsNote) {
+            attemptsNote.textContent = freshAttemptsNote;
+        }
+
+        // Clear the boxes so the patient can try again.
+        boxes.forEach(function (box) { box.value = ''; });
+        hiddenInput.value = '';
+        focusBox(0);
+    }
+
+    function submitOtpForCheck() {
+        showOverlay();
+
+        var formData = new FormData(form);
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+        })
+            .then(function (response) {
+                var destinationUrl = response.url;
+                var landedOnVerifyPage = new URL(destinationUrl).pathname === window.location.pathname;
+
+                if (landedOnVerifyPage) {
+                    return response.text().then(showInlineError);
+                }
+
+                var isLockout = /\/login\/?$/.test(new URL(destinationUrl).pathname);
+                if (isLockout) {
+                    return response.text().then(function (html) {
+                        showLockedState(extractText(html, '.alert'));
+                        setTimeout(function () {
+                            window.location.href = destinationUrl;
+                        }, 1600);
+                    });
+                }
+
+                // Correct code: the server already logged the patient in
+                // and redirected to their destination -- just show the
+                // moment, then follow it for real.
+                showSuccessState();
+                setTimeout(function () {
+                    window.location.href = destinationUrl;
+                }, 1400);
+            })
+            .catch(function () {
+                // Network hiccup: fall back to a plain form submit rather
+                // than leaving the user stuck behind the overlay.
+                hideOverlay();
+                form.submit();
+            });
+    }
+
+    // Route every submission -- auto-fill, paste-fill, or a manual click
+    // on "Verify & Login" -- through the same fetch-based check above.
+    if (form) {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+            submitOtpForCheck();
+        });
+    }
+
     function focusBox(index) {
         if (index >= 0 && index < boxes.length) {
             boxes[index].focus();
@@ -38,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             var code = syncHiddenValue();
             if (code.length === boxes.length) {
-                form.requestSubmit ? form.requestSubmit() : form.submit();
+                submitOtpForCheck();
             }
         });
 
@@ -64,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var code = syncHiddenValue();
             focusBox(Math.min(index + pasted.length, boxes.length - 1));
             if (code.length === boxes.length) {
-                form.requestSubmit ? form.requestSubmit() : form.submit();
+                submitOtpForCheck();
             }
         });
     });

@@ -7,6 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="MediCare Hospital - Admin Panel">
 
+    <!-- ===== Theme (applied before CSS paints to avoid a light/dark flash) ===== -->
+    <script>
+        (function () {
+            var theme = localStorage.getItem('hms-theme') ||
+                (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
     <!-- ===== Title Block ===== -->
     <title>{% block title %}Admin Panel - MediCare Hospital{% endblock %}</title>
 
@@ -151,6 +160,10 @@
                     <span class="topbar-date">
                         <i class="bi bi-calendar3 me-1"></i>{% now "d M Y" %}
                     </span>
+
+                    <button type="button" class="topbar-icon-btn theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle dark mode" title="Toggle dark mode">
+                        <i class="bi bi-moon-stars-fill" id="themeToggleIcon"></i>
+                    </button>
 
                     <div class="dropdown">
                         <button class="topbar-icon-btn" type="button" id="topbarNotifDropdown" data-bs-toggle="dropdown" aria-expanded="false">

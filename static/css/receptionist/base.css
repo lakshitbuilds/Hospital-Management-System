@@ -47,6 +47,28 @@
     --rec-transition: all 0.25s ease;
 }
 
+/* ===== Dark Mode Palette (activated via <html data-theme="dark">) ===== */
+[data-theme="dark"] {
+    --rec-primary: #818cf8;
+    --rec-primary-dark: #6366f1;
+    --rec-primary-light: #241f52;
+    --rec-sidebar-bg: #1e1b4b;
+    --rec-sidebar-bg-active: #312e81;
+    --rec-sidebar-text: #a5b4fc;
+    --rec-sidebar-text-active: #ffffff;
+    --rec-background: #121019;
+    --rec-white: #1c1a29;
+    --rec-border-color: #2d2b3d;
+    --rec-text-dark: #e7e6ee;
+    --rec-text-light: #9c9ab0;
+    --rec-success: #22c55e;
+    --rec-warning: #f59e0b;
+    --rec-danger: #ef4444;
+
+    --rec-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --rec-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.45);
+}
+
 
 /* ==========================================================================
    2. RESET / TYPOGRAPHY
@@ -61,6 +83,7 @@ body {
     font-family: 'Poppins', sans-serif;
     color: var(--rec-text-dark);
     background-color: var(--rec-background);
+    transition: background-color 0.25s ease, color 0.25s ease;
     line-height: 1.6;
 }
 
@@ -696,4 +719,65 @@ p {
     .topbar-date {
         display: none;
     }
+}
+
+
+/* ==========================================================================
+   12. DARK MODE — BOOTSTRAP COMPONENT OVERRIDES
+   (base layout/sidebar/cards already re-theme via the CSS vars above;
+   these cover CDN Bootstrap chrome that ships with hardcoded light colors)
+   ========================================================================== */
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--rec-white);
+    border-color: var(--rec-border-color);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--rec-text-dark);
+}
+
+[data-theme="dark"] .dropdown-item:hover,
+[data-theme="dark"] .dropdown-item:focus {
+    background-color: var(--rec-primary-light);
+    color: var(--rec-primary);
+}
+
+[data-theme="dark"] .dropdown-header {
+    color: var(--rec-text-light);
+}
+
+[data-theme="dark"] .dropdown-divider {
+    border-color: var(--rec-border-color);
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: var(--rec-white);
+    border-color: var(--rec-border-color);
+    color: var(--rec-text-dark);
+}
+
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+    background-color: var(--rec-white);
+    color: var(--rec-text-dark);
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: var(--rec-white);
+    color: var(--rec-text-dark);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: var(--rec-border-color);
+}
+
+[data-theme="dark"] .table {
+    color: var(--rec-text-dark);
+    border-color: var(--rec-border-color);
+}
+
+[data-theme="dark"] .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
 }

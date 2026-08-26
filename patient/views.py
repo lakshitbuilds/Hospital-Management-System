@@ -39,6 +39,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 
 from .models import Patient, Appointment, Billing, ContactMessage, Notification
+from .emails import send_appointment_booked_email, send_appointment_cancelled_email
 from doctor.models import Doctor
 from accounts.models import SystemSettings
 
@@ -583,24 +584,55 @@ def book_appointment(request):
 @login_required
 def confirm_appointment_billing(request):
     """
-    Step two (final step) of patient self-service booking. Requires
+    Step two of patient self-service booking: a review-only page. Requires
     ``request.session['pending_appointment']`` to already be set by
     ``book_appointment``; if missing, bounces back there.
 
-    On GET: shows a "pay at the front desk" confirmation page with the
-    doctor, date/time, visit type, reason, and consultation fee pulled
-    from the pending session data (plus a fresh availability re-check
-    happens only on POST, not here).
+    Shows the doctor, date/time, visit type, reason, and consultation fee
+    pulled from the pending session data. The "Proceed to Payment" button
+    on this page links (GET, not a form) to ``card_payment``, which is
+    where the appointment/bill are actually created.
+    """
+    pending = request.session.get('pending_appointment')
+    if not pending:
+        messages.error(request, 'Please choose a doctor, date, and time slot first.')
+        return redirect('book_appointment')
+
+    doctor = get_object_or_404(Doctor, id=pending['doctor_id'])
+    parsed_date = datetime.strptime(pending['appointment_date'], '%Y-%m-%d').date()
+
+    return render(request, 'patient/confirm_billing.html', {
+        'doctor': doctor,
+        'department': dict(Appointment.DEPARTMENT_CHOICES).get(pending['department'], pending['department']),
+        'appointment_date': parsed_date,
+        'time_slot': pending['time_slot'],
+        'visit_type': dict(Appointment.VISIT_TYPE_CHOICES).get(pending['visit_type'], pending['visit_type']),
+        'reason': pending['reason'],
+        'consultation_fee': doctor.consultation_fee,
+    })
+
+
+@login_required
+def card_payment(request):
+    """
+    Step three (final step) of patient self-service booking: a fake card
+    checkout. There's no real payment gateway integrated -- this page just
+    collects card-shaped fields for demo purposes and never validates or
+    stores them. Submitting it is treated as an immediate successful
+    payment.
+
+    On GET: shows the card entry form plus the amount due, requiring
+    ``request.session['pending_appointment']`` to already be set.
 
     On POST: re-checks the slot is still free (it may have been taken by
-    someone else while the patient was on this page) -- if not, discards
-    the pending session data and sends them back to ``book_appointment``.
-    If still free, this is the point where the real ``Appointment`` row
-    is finally created, along with a ``Billing`` row
-    (``bill_type='consultation'``, amount = doctor's consultation fee) and
-    a ``Notification`` telling the patient their request was sent. Clears
-    ``request.session['pending_appointment']`` and redirects to
-    ``my_appointments``.
+    someone else while the patient was on this page or the previous one)
+    -- if not, discards the pending session data and sends them back to
+    ``book_appointment``. If still free, this is the point where the real
+    ``Appointment`` row is finally created, along with a ``Billing`` row
+    already marked ``status='paid'`` (simulating the successful demo
+    payment) and a ``Notification`` telling the patient their appointment
+    is booked. Clears ``request.session['pending_appointment']`` and
+    redirects to ``my_appointments``.
     """
     pending = request.session.get('pending_appointment')
     if not pending:
@@ -613,7 +645,7 @@ def confirm_appointment_billing(request):
 
     if request.method == 'POST':
         # Re-validate availability in case the slot was booked by someone
-        # else between step one and now.
+        # else between the earlier steps and now.
         availability = doctor.get_available_slots(parsed_date)
         matching_slot = next((s for s in availability['slots'] if s['time'] == pending['time_slot']), None)
         if not availability['available'] or matching_slot is None or matching_slot['booked']:
@@ -622,7 +654,7 @@ def confirm_appointment_billing(request):
             return redirect('book_appointment')
 
         # This is the actual creation point for the appointment -- nothing
-        # was written to the database during book_appointment.
+        # was written to the database during the earlier steps.
         appointment = Appointment.objects.create(
             patient=patient,
             doctor=doctor,
@@ -633,32 +665,33 @@ def confirm_appointment_billing(request):
             reason=pending['reason'],
         )
 
-        # The billing checkpoint: a pending consultation charge is created
-        # alongside the appointment, to be settled at the front desk.
+        # No real gateway is charged -- the "payment" is simulated, so the
+        # bill is created already paid rather than left pending.
         Billing.objects.create(
             appointment=appointment,
             patient=patient,
             bill_type='consultation',
             amount=doctor.consultation_fee,
+            status='paid',
+            paid_at=timezone.now(),
         )
 
         Notification.objects.create(
             user=request.user,
             notification_type='general',
-            message=f'Your appointment with Dr. {doctor.user.get_full_name()} has been requested.'
+            message=f'Your appointment with Dr. {doctor.user.get_full_name()} has been booked and paid.'
         )
+        send_appointment_booked_email(appointment)
 
         del request.session['pending_appointment']
-        messages.success(request, 'Appointment request sent successfully.')
+        messages.success(request, 'Payment successful. Your appointment is booked!')
         return redirect('my_appointments')
 
-    return render(request, 'patient/confirm_billing.html', {
+    return render(request, 'patient/card_payment.html', {
         'doctor': doctor,
         'department': dict(Appointment.DEPARTMENT_CHOICES).get(pending['department'], pending['department']),
         'appointment_date': parsed_date,
         'time_slot': pending['time_slot'],
-        'visit_type': dict(Appointment.VISIT_TYPE_CHOICES).get(pending['visit_type'], pending['visit_type']),
-        'reason': pending['reason'],
         'consultation_fee': doctor.consultation_fee,
     })
 
@@ -724,6 +757,7 @@ def cancel_appointment(request, appointment_id):
             notification_type='cancelled',
             message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} was cancelled.'
         )
+        send_appointment_cancelled_email(appointment)
 
     return redirect('my_appointments')
 

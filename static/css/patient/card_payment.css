@@ -1,0 +1,66 @@
+/* ==========================================================================
+   PAYMENT PAGE (card_payment.html) - PAGE SPECIFIC STYLES
+   Structure:
+   1. Fake Card Preview
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. FAKE CARD PREVIEW
+   ========================================================================== */
+.fake-card-preview {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    color: #fff;
+    padding: 1.5rem;
+    margin-bottom: 1.75rem;
+    max-width: 380px;
+}
+
+.fake-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.fake-card-chip {
+    font-size: 1.8rem;
+    opacity: 0.9;
+}
+
+.fake-card-brand {
+    font-size: 1.6rem;
+    opacity: 0.85;
+}
+
+.fake-card-number {
+    font-family: 'Courier New', monospace;
+    font-size: 1.25rem;
+    letter-spacing: 0.1rem;
+    margin-bottom: 1.75rem;
+    word-spacing: 0.3rem;
+}
+
+.fake-card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.fake-card-label {
+    display: block;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    opacity: 0.75;
+    margin-bottom: 0.2rem;
+}
+
+.fake-card-value {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}

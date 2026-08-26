@@ -23,6 +23,7 @@ from django.db.models import Count
 
 from .models import Doctor, DoctorAvailability, BlockedDate, Prescription, PrescriptionMedicine
 from patient.models import Patient, Appointment, Notification
+from patient.emails import send_appointment_cancelled_email
 
 
 def doctor_required(view_func):
@@ -202,6 +203,7 @@ def doctor_cancel_appointment(request, appointment_id):
             notification_type='cancelled',
             message=f'Your appointment with Dr. {doctor.user.get_full_name()} on {appointment.appointment_date} was cancelled by the doctor.'
         )
+        send_appointment_cancelled_email(appointment, cancelled_by='the doctor')
     return redirect('appointment_list')
 
 
