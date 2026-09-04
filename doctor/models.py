@@ -113,17 +113,30 @@ class Doctor(models.Model):
         current = datetime.combine(appointment_date, start_time)
         end = datetime.combine(appointment_date, end_time)
 
+        # When booking for today, a slot that has already started is no
+        # longer something a patient/receptionist can walk into -- skip it
+        # rather than offering a same-day slot in the past.
+        now = datetime.now()
+        is_today = appointment_date == now.date()
+
         # Walk forward from start_time to end_time in step_minutes
         # increments, emitting one slot per iteration (marked booked/free)
         # until there's no more room for a full slot_duration block before
-        # end_time, or the optional max_per_day cap is reached.
+        # end_time, or the optional max_per_day cap is reached. Past slots
+        # (today only) are skipped entirely rather than counted toward
+        # max_per_day, so a doctor's daily cap still reflects real,
+        # bookable slots.
         slots = []
         while current + timedelta(minutes=self.slot_duration) <= end:
-            label = current.strftime('%I:%M %p')
-            slots.append({'time': label, 'booked': label in booked_slots})
-            if self.max_per_day and len(slots) >= self.max_per_day:
-                break
+            if not (is_today and current < now):
+                label = current.strftime('%I:%M %p')
+                slots.append({'time': label, 'booked': label in booked_slots})
+                if self.max_per_day and len(slots) >= self.max_per_day:
+                    break
             current += timedelta(minutes=step_minutes)
+
+        if is_today and not slots:
+            return {'available': False, 'reason': 'No more slots available today.', 'slots': []}
 
         return {'available': True, 'reason': None, 'slots': slots}
 

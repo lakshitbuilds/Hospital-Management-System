@@ -25,7 +25,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from doctor.models import Doctor, DoctorAvailability
+from doctor.models import BlockedDate, Doctor, DoctorAvailability
 from patient.models import Appointment, Billing, Notification, Patient
 from patient.emails import send_appointment_booked_email, send_appointment_cancelled_email
 from image_validation import validate_uploaded_image
@@ -598,6 +598,23 @@ def mark_bill_paid(request, bill_id):
     return redirect(request.POST.get('next') or 'receptionist_billing_list')
 
 
+@receptionist_required
+def billing_receipt(request, bill_id):
+    """
+    Printable receipt for one bill (`receptionist_billing_receipt` URL).
+
+    Restricted to receptionists. Read-only -- just looks up the `Billing`
+    by `bill_id` (404 if not found) and renders
+    `receptionist/billing_receipt.html`, a print-friendly page (a "Print"
+    button calling `window.print()` plus an `@media print` rule hiding
+    the sidebar/topbar/actions). This project has no PDF library, so
+    every "receipt"/"printout" here follows the same browser-print
+    pattern already used by `doctor/patient_details.html`.
+    """
+    bill = get_object_or_404(Billing, id=bill_id)
+    return render(request, 'receptionist/billing_receipt.html', {'bill': bill})
+
+
 # ================================================================
 # Doctors
 # ================================================================
@@ -617,6 +634,10 @@ def doctor_list(request):
     doctors = Doctor.objects.select_related('user').all()
     # Look up each doctor's explicit availability record for today's weekday, if one exists.
     availability_map = {a.doctor_id: a for a in DoctorAvailability.objects.filter(day=today_day)}
+    # Doctors who've blocked today off (leave/holiday) via their own
+    # availability page -- this overrides their weekly schedule below, same
+    # precedence Doctor.get_available_slots() uses for the booking flow.
+    blocked_today_ids = set(BlockedDate.objects.filter(date=today).values_list('doctor_id', flat=True))
 
     doctor_rows = []
     for index, doc in enumerate(doctors):
@@ -626,9 +647,10 @@ def doctor_list(request):
             # No real photo upload for doctors - cycle through 8 placeholder
             # images based on list position so each doctor gets a stable-looking photo.
             'photo_path': f'public/images/doctor-{(index % 8) + 1}.jpg',
-            # Use the explicit DoctorAvailability record for today if one exists;
-            # otherwise default to "available" on every day except Sunday.
-            'available_today': avail.is_available if avail else (today_day != 'sunday'),
+            # A blocked date always wins. Otherwise use the explicit
+            # DoctorAvailability record for today if one exists; failing
+            # that, default to "available" on every day except Sunday.
+            'available_today': doc.id not in blocked_today_ids and (avail.is_available if avail else (today_day != 'sunday')),
             'today_appointment_count': Appointment.objects.filter(doctor=doc, appointment_date=today).exclude(status='cancelled').count(),
         })
 

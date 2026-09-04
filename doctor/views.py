@@ -12,7 +12,7 @@ As with the rest of this project, there is no forms.py -- all forms are
 plain HTML <form method="POST"> elements in the templates, and fields are
 read directly off request.POST / request.GET / request.FILES.
 """
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from functools import wraps
 
 from django.shortcuts import render, redirect, get_object_or_404
@@ -442,6 +442,29 @@ def availability(request):
     days = [d[0] for d in DoctorAvailability.DAY_CHOICES]
 
     if request.method == 'POST':
+        # A holiday can't be requested for today (or a past date) -- it has
+        # to be set at least a day ahead, so a receptionist/patient who
+        # already sees today as bookable doesn't get pulled out from under
+        # them at the last minute. Dates that were already blocked before
+        # this submission are grandfathered in (this view wipes and
+        # recreates every BlockedDate row from the submitted form on every
+        # save -- see below -- so an old, legitimately-set date can age
+        # into "today" and still needs to survive an unrelated resubmit of
+        # this same form); only a genuinely new date has to be >= tomorrow.
+        already_blocked = set(BlockedDate.objects.filter(doctor=doctor).values_list('date', flat=True))
+        tomorrow = date.today() + timedelta(days=1)
+        for raw_date in request.POST.getlist('blocked_date[]'):
+            if not raw_date:
+                continue
+            try:
+                parsed_date = datetime.strptime(raw_date, '%Y-%m-%d').date()
+            except ValueError:
+                messages.error(request, 'One of the blocked dates is invalid.')
+                return redirect('availability')
+            if parsed_date not in already_blocked and parsed_date < tomorrow:
+                messages.error(request, 'A holiday can only be scheduled starting from tomorrow -- today\'s availability can\'t be blocked at the last minute.')
+                return redirect('availability')
+
         # One DoctorAvailability row is created/updated per weekday, keyed
         # by (doctor, day) -- update_or_create relies on that unique_together
         # constraint to either update the existing row or insert a new one.
@@ -506,6 +529,10 @@ def availability(request):
         'doctor': doctor,
         'weekly_schedule': weekly_schedule,
         'blocked_dates': blocked_dates,
+        # Earliest date the "Blocked Dates" picker below will allow --
+        # holidays can't be requested for today or a past date, only from
+        # tomorrow onward (see the matching check in the POST handler above).
+        'min_blocked_date': date.today() + timedelta(days=1),
     })
 
 

@@ -196,6 +196,12 @@
     margin: 0;
 }
 
+.blocked-date-hint {
+    font-size: 0.8rem;
+    color: var(--doc-text-light);
+    margin: 0.5rem 0 0;
+}
+
 
 /* ==========================================================================
    4. SAVE BAR

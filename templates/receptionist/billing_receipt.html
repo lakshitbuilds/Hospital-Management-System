@@ -1,0 +1,90 @@
+{% extends 'receptionist/base.html' %}
+{% load static %}
+
+{% block title %}Receipt #{{ bill.id }} - Receptionist Portal{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/receptionist/billing_receipt.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="receipt-page-actions">
+    <a href="{% url 'receptionist_billing_list' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Billing</a>
+    <button type="button" class="btn btn-primary" id="printReceiptBtn"><i class="bi bi-printer-fill me-2"></i>Print Receipt</button>
+</div>
+
+<div class="rec-card receipt-card" id="receiptCard">
+
+    <div class="receipt-header">
+        <div class="receipt-brand">
+            <img src="{% static 'public/images/logo.png' %}" alt="MediCare Hospital Logo" class="receipt-logo">
+            <div>
+                <h5>MediCare Hospital</h5>
+                <p>123 Health Street, Wellness City</p>
+            </div>
+        </div>
+        <div class="receipt-meta">
+            <h6>RECEIPT</h6>
+            <p>Receipt No. RCP-{{ bill.id|stringformat:"06d" }}</p>
+            <p>Date: {{ bill.created_at|date:"M d, Y" }}</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="receipt-parties">
+        <div>
+            <span class="receipt-label">Billed To</span>
+            <p class="receipt-value">{{ bill.patient.user.get_full_name }}</p>
+            <p>Patient ID: {{ bill.patient.patient_id }}</p>
+            {% if bill.patient.phone %}<p>{{ bill.patient.phone }}</p>{% endif %}
+        </div>
+        <div>
+            <span class="receipt-label">Appointment</span>
+            <p class="receipt-value">Dr. {{ bill.appointment.doctor.user.get_full_name }}</p>
+            <p>{{ bill.appointment.get_department_display }}</p>
+            <p>{{ bill.appointment.appointment_date|date:"M d, Y" }} &middot; {{ bill.appointment.time_slot }}</p>
+        </div>
+        <div>
+            <span class="receipt-label">Payment Status</span>
+            <p><span class="status-badge status-{{ bill.status }}">{{ bill.get_status_display }}</span></p>
+            {% if bill.paid_at %}<p>Paid on {{ bill.paid_at|date:"M d, Y, h:i A" }}</p>{% endif %}
+        </div>
+    </div>
+
+    <table class="receipt-line-table">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th class="text-end">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ bill.get_bill_type_display }}</td>
+                <td class="text-end">&#8377;{{ bill.amount }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <td>Total</td>
+                <td class="text-end">&#8377;{{ bill.amount }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <p class="receipt-footer-note">This is a computer-generated receipt and does not require a signature.</p>
+
+</div>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+    var printReceiptBtn = document.getElementById('printReceiptBtn');
+    if (printReceiptBtn) {
+        printReceiptBtn.addEventListener('click', function () { window.print(); });
+    }
+</script>
+{% endblock %}

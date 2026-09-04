@@ -23,10 +23,12 @@ urlpatterns = [
 
     # ===== Appointments =====
     path('appointments/', views.appointment_list, name='admin_appointment_list'),
+    path('appointments/<int:appointment_id>/update-status/', views.update_appointment_status, name='admin_update_appointment_status'),
 
     # ===== Billing =====
     path('billing/', views.billing_list, name='admin_billing_list'),
     path('billing/<int:bill_id>/mark-paid/', views.mark_bill_paid, name='admin_mark_bill_paid'),
+    path('billing/<int:bill_id>/receipt/', views.billing_receipt, name='admin_billing_receipt'),
 
     # ===== Security Settings =====
     path('security-settings/', views.security_settings, name='admin_security_settings'),

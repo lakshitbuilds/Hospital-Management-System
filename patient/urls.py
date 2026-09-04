@@ -33,6 +33,7 @@ urlpatterns = [
     path('my-appointments/', views.my_appointments, name='my_appointments'),
     path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='cancel_appointment'),
     path('my-billing/', views.my_billing, name='my_billing'),
+    path('my-billing/<int:bill_id>/receipt/', views.billing_receipt, name='billing_receipt'),
 
     # ===== Notifications =====
     path('notifications/', views.notifications_view, name='notifications'),

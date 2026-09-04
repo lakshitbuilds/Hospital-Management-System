@@ -1,0 +1,167 @@
+/* ==========================================================================
+   BILLING RECEIPT (billing_receipt.html)
+   A printable, single-bill receipt. status-badge / .rec-card / .back-link
+   already come from base.css -- only the receipt-specific layout and the
+   print rule live here.
+   ========================================================================== */
+
+.receipt-page-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.receipt-card {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.receipt-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.receipt-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.receipt-logo {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
+
+.receipt-brand h5 {
+    margin-bottom: 0.15rem;
+    color: var(--rec-text-dark);
+}
+
+.receipt-brand p {
+    margin-bottom: 0;
+    font-size: 0.85rem;
+    color: var(--rec-text-light);
+}
+
+.receipt-meta {
+    text-align: right;
+}
+
+.receipt-meta h6 {
+    letter-spacing: 0.08em;
+    color: var(--rec-primary);
+    margin-bottom: 0.35rem;
+}
+
+.receipt-meta p {
+    margin-bottom: 0.1rem;
+    font-size: 0.85rem;
+    color: var(--rec-text-light);
+}
+
+.receipt-card hr {
+    border-color: var(--rec-border-color);
+    margin: 1.25rem 0;
+}
+
+.receipt-parties {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.receipt-label {
+    display: block;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rec-text-light);
+    margin-bottom: 0.35rem;
+}
+
+.receipt-parties p {
+    margin-bottom: 0.15rem;
+    font-size: 0.9rem;
+    color: var(--rec-text-dark);
+}
+
+.receipt-value {
+    font-weight: 600;
+}
+
+.receipt-line-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.25rem;
+}
+
+.receipt-line-table th {
+    text-align: left;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--rec-text-light);
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--rec-border-color);
+}
+
+.receipt-line-table td {
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
+    color: var(--rec-text-dark);
+    border-bottom: 1px solid var(--rec-border-color);
+}
+
+.receipt-line-table tfoot td {
+    border-bottom: none;
+    border-top: 2px solid var(--rec-border-color);
+    font-weight: 700;
+    font-size: 1.05rem;
+    padding-top: 0.9rem;
+}
+
+.receipt-footer-note {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--rec-text-light);
+    margin-bottom: 0;
+}
+
+@media print {
+    .receptionist-sidebar,
+    .receptionist-topbar,
+    .receipt-page-actions {
+        display: none !important;
+    }
+
+    .receptionist-main {
+        margin-left: 0 !important;
+    }
+
+    .receipt-card {
+        box-shadow: none !important;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .receipt-header {
+        flex-direction: column;
+    }
+
+    .receipt-meta {
+        text-align: left;
+    }
+
+    .receipt-parties {
+        grid-template-columns: 1fr;
+    }
+}

@@ -24,6 +24,7 @@ urlpatterns = [
     # ===== Billing =====
     path('billing/', views.billing_list, name='receptionist_billing_list'),
     path('billing/<int:bill_id>/mark-paid/', views.mark_bill_paid, name='receptionist_mark_bill_paid'),
+    path('billing/<int:bill_id>/receipt/', views.billing_receipt, name='receptionist_billing_receipt'),
 
     # ===== Doctors =====
     path('doctors/', views.doctor_list, name='receptionist_doctor_list'),

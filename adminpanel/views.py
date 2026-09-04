@@ -504,6 +504,35 @@ def appointment_list(request):
     })
 
 
+@admin_required
+def update_appointment_status(request, appointment_id):
+    """Change any appointment's status system-wide (admin-only).
+
+    This is the mechanism for an admin to correct a status a doctor (or
+    anyone else) set by mistake -- e.g. an appointment marked 'completed'
+    by accident can be reverted back to 'confirmed'. Wired up as an
+    inline auto-submitting `<select>` per row on the admin appointment
+    list, the same pattern `update_receptionist_shift` above uses for
+    shift.
+
+    Looks up the `Appointment` by `appointment_id` (404 if not found;
+    deliberately not scoped to a doctor/patient, since admin oversight is
+    system-wide). On POST, validates the submitted `status` value against
+    `Appointment.STATUS_CHOICES` before saving it (silently ignoring
+    anything invalid). Always redirects back to wherever the request
+    came from (the `next` POST field), falling back to the appointment
+    list.
+    """
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    if request.method == 'POST':
+        status = request.POST.get('status')
+        if status in dict(Appointment.STATUS_CHOICES):
+            appointment.status = status
+            appointment.save()
+            messages.success(request, f"Appointment status updated to {appointment.get_status_display()}.")
+    return redirect(request.POST.get('next') or 'admin_appointment_list')
+
+
 # ================================================================
 # Billing
 # ================================================================
@@ -554,6 +583,22 @@ def mark_bill_paid(request, bill_id):
         bill.save()
         messages.success(request, 'Bill marked as paid.')
     return redirect(request.POST.get('next') or 'admin_billing_list')
+
+
+@admin_required
+def billing_receipt(request, bill_id):
+    """Printable receipt for one bill (admin-only, system-wide).
+
+    Read-only -- just looks up the `Billing` by `bill_id` (404 if not
+    found) and renders `adminpanel/billing_receipt.html`. That template
+    is a print-friendly page (a "Print" button calling `window.print()`
+    plus an `@media print` rule hiding the sidebar/topbar/actions) --
+    this project has no PDF library, so every "receipt"/"printout" here
+    follows the same browser-print pattern already used by
+    `doctor/patient_details.html` and `doctor/prescription_history.html`.
+    """
+    bill = get_object_or_404(Billing, id=bill_id)
+    return render(request, 'adminpanel/billing_receipt.html', {'bill': bill})
 
 
 # ================================================================

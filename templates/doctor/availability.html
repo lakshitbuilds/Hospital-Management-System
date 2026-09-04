@@ -92,12 +92,13 @@
                 </div>
 
                 <div class="blocked-date-form">
-                    <input type="date" class="form-control" id="blockedDateInput" aria-label="Date">
+                    <input type="date" class="form-control" id="blockedDateInput" aria-label="Date" min="{{ min_blocked_date|date:'Y-m-d' }}">
                     <input type="text" class="form-control" id="blockedReasonInput" placeholder="Reason (e.g. Conference)" aria-label="Reason">
                     <button type="button" class="btn btn-primary" id="addBlockedDateBtn">
                         <i class="bi bi-plus-lg"></i>
                     </button>
                 </div>
+                <p class="blocked-date-hint">Holidays can only be scheduled starting from tomorrow -- today's availability can't be blocked at the last minute.</p>
 
                 <ul class="blocked-date-list" id="blockedDateList">
                     {% for b in blocked_dates %}

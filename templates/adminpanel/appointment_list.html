@@ -57,7 +57,17 @@
                     <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
                     <td>{{ appt.get_department_display }}</td>
                     <td>{{ appt.appointment_date|date:"M d, Y" }} &middot; {{ appt.time_slot }}</td>
-                    <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                    <td>
+                        <form action="{% url 'admin_update_appointment_status' appt.id %}" method="post" class="shift-select-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                {% for value, label in appt.STATUS_CHOICES %}
+                                <option value="{{ value }}" {% if appt.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </td>
                     <td class="text-end">
                         <div class="table-actions">
                             <a href="{% url 'admin_patient_detail' appt.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-person"></i></a>

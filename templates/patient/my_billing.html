@@ -51,6 +51,7 @@
                 </div>
                 <div class="billing-amount">&#8377;{{ bill.amount }}</div>
                 <span class="status-badge status-{{ bill.status }}">{{ bill.get_status_display }}</span>
+                <a href="{% url 'billing_receipt' bill.id %}" class="billing-receipt-link" title="View Receipt"><i class="bi bi-receipt"></i></a>
             </div>
             {% empty %}
             <p>You have no bills yet.</p>

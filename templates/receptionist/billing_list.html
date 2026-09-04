@@ -65,6 +65,7 @@
                     <td class="text-end">
                         <div class="table-actions">
                             <a href="{% url 'receptionist_patient_detail' bill.patient.id %}" class="table-action-btn" title="View Patient"><i class="bi bi-eye"></i></a>
+                            <a href="{% url 'receptionist_billing_receipt' bill.id %}" class="table-action-btn" title="View Receipt"><i class="bi bi-receipt"></i></a>
                             {% if bill.status == 'pending' %}
                             <form action="{% url 'receptionist_mark_bill_paid' bill.id %}" method="post" class="d-inline">
                                 {% csrf_token %}

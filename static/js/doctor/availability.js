@@ -109,6 +109,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Mirrors the server-side check in doctor.views.availability --
+            // holidays can only be requested from tomorrow onward. The
+            // input's `min` attribute already blocks this in most browsers'
+            // native date picker, but a typed-in date can still slip past
+            // that, so re-check here too.
+            if (blockedDateInput.min && isoDate < blockedDateInput.min) {
+                blockedDateInput.setCustomValidity('A holiday can only be scheduled starting from tomorrow.');
+                blockedDateInput.reportValidity();
+                return;
+            }
+            blockedDateInput.setCustomValidity('');
+
             addBlockedDate(isoDate, reason);
             blockedDateInput.value = '';
             blockedReasonInput.value = '';

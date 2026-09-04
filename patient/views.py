@@ -926,6 +926,25 @@ def my_billing(request):
 
 
 @login_required
+def billing_receipt(request, bill_id):
+    """
+    Printable receipt for one of the logged-in patient's own bills.
+
+    Scoped to `patient=patient` in the lookup (404 if the bill doesn't
+    belong to them) so a patient can't view someone else's receipt by
+    guessing an id in the URL. Renders `patient/billing_receipt.html`, a
+    print-friendly page (a "Print" button calling `window.print()` plus
+    an `@media print` rule hiding the site header/footer) -- this
+    project has no PDF library, so every "receipt"/"printout" here
+    follows the same browser-print pattern already used by
+    `doctor/patient_details.html`.
+    """
+    patient = Patient.objects.get(user=request.user)
+    bill = get_object_or_404(Billing, id=bill_id, patient=patient)
+    return render(request, 'patient/billing_receipt.html', {'bill': bill})
+
+
+@login_required
 def cancel_appointment(request, appointment_id):
     """
     Lets a patient cancel one of their own appointments. The

@@ -138,7 +138,30 @@
 
 
 /* ==========================================================================
-   4. RESPONSIVE
+   4. RECEIPT LINK
+   ========================================================================== */
+.billing-receipt-link {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    transition: var(--transition);
+}
+
+.billing-receipt-link:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: var(--white);
+}
+
+
+/* ==========================================================================
+   5. RESPONSIVE
    ========================================================================== */
 @media (max-width: 767.98px) {
     .billing-card {
@@ -172,5 +195,9 @@
 
     .status-badge {
         order: 4;
+    }
+
+    .billing-receipt-link {
+        order: 5;
     }
 }
