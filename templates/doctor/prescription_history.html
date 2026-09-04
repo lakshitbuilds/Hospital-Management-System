@@ -15,20 +15,21 @@
 <div class="doc-card">
 
     <!-- Toolbar -->
-    <div class="rx-toolbar">
+    <form class="rx-toolbar" method="get">
         <div class="rx-search-box">
             <i class="bi bi-search"></i>
-            <input type="search" id="rxSearchInput" placeholder="Search by patient or diagnosis...">
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by patient or diagnosis...">
         </div>
-        <select class="form-select rx-sort-select" id="rxSortSelect">
-            <option value="newest" selected>Newest First</option>
-            <option value="oldest">Oldest First</option>
+        <select class="form-select rx-sort-select" name="sort" onchange="this.form.submit()">
+            <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if current_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
         </select>
-    </div>
+    </form>
 
+    {% if page_obj %}
     <!-- Table -->
     <div class="table-responsive">
-        <table class="rx-table" id="rxTable">
+        <table class="rx-table">
             <thead>
                 <tr>
                     <th>Patient</th>
@@ -38,10 +39,10 @@
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
-            <tbody id="rxTableBody">
+            <tbody>
 
-                {% for rx in prescriptions %}
-                <tr data-rx="rx{{ rx.id }}" data-timestamp="{{ rx.created_at|date:'YmdHi' }}" data-search="{{ rx.patient.user.get_full_name|lower }} {{ rx.diagnosis|lower }}">
+                {% for rx in page_obj %}
+                <tr data-rx="rx{{ rx.id }}">
                     <td>
                         <div class="table-patient-cell">
                             {% if rx.patient.profile_image %}
@@ -73,20 +74,47 @@
                         </div>
                     </td>
                 </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center text-muted py-4">No prescriptions issued yet.</td></tr>
                 {% endfor %}
 
             </tbody>
         </table>
     </div>
 
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="list-pagination" aria-label="Pagination">
+        <span class="pagination-info">Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+        <ul class="pagination-controls">
+            {% if page_obj.has_previous %}
+            <li><a class="page-link-btn" href="{% querystring page=page_obj.previous_page_number %}" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a></li>
+            {% else %}
+            <li><span class="page-link-btn disabled" aria-hidden="true"><i class="bi bi-chevron-left"></i></span></li>
+            {% endif %}
+            {% for num in elided_page_range %}
+                {% if num == "…" %}
+                <li><span class="page-link-btn disabled">&hellip;</span></li>
+                {% elif num == page_obj.number %}
+                <li><span class="page-link-btn active">{{ num }}</span></li>
+                {% else %}
+                <li><a class="page-link-btn" href="{% querystring page=num %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li><a class="page-link-btn" href="{% querystring page=page_obj.next_page_number %}" aria-label="Next page"><i class="bi bi-chevron-right"></i></a></li>
+            {% else %}
+            <li><span class="page-link-btn disabled" aria-hidden="true"><i class="bi bi-chevron-right"></i></span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
     <!-- Empty State -->
-    <div class="table-empty-state d-none" id="rxEmptyState">
+    <div class="table-empty-state">
         <i class="bi bi-file-earmark-x"></i>
         <h6>No prescriptions found</h6>
         <p>Try a different search term.</p>
     </div>
+    {% endif %}
 
 </div>
 

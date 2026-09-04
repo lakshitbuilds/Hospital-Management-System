@@ -40,9 +40,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('cardPaymentForm');
     const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
     if (form && submitBtn) {
-        form.addEventListener('submit', function () {
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            form.classList.remove('was-validated');
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="btn-spinner"></span>Processing payment&hellip;';
+            form.submit();
         });
     }
 });

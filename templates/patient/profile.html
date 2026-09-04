@@ -23,7 +23,12 @@
 {% if messages %}
 <div class="container mt-4">
     {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        <div class="alert
+            {% if message.tags == 'success' %}alert-success
+            {% elif message.tags == 'error' %}alert-danger
+            {% elif message.tags == 'warning' %}alert-warning
+            {% else %}alert-info
+            {% endif %}" role="alert">{{ message }}</div>
     {% endfor %}
 </div>
 {% endif %}
@@ -93,12 +98,12 @@
             </div>
           </div>
 
-          <a href="{% url 'patient_profile' %}" class="profile-nav-link active">
+          <a href="{% url 'patient_profile' %}" class="profile-nav-link active" data-tab="personal-info">
             <i class="bi bi-person-lines-fill"></i>
             Personal Info
           </a>
 
-          <a href="#" class="profile-nav-link">
+          <a href="#" class="profile-nav-link" data-tab="change-password">
             <i class="bi bi-shield-lock-fill"></i>
             Change Password
           </a>
@@ -446,7 +451,8 @@
               Use a strong password you don't use elsewhere.
             </p>
 
-            <form id="changePasswordForm" class="profile-form" novalidate>
+            <form id="changePasswordForm" class="profile-form" method="POST" action="{% url 'patient_change_password' %}" novalidate>
+              {% csrf_token %}
               <div class="row gy-3">
                 <div class="col-12">
                   <label for="currentPassword" class="form-label"
@@ -456,6 +462,7 @@
                     type="password"
                     class="form-control"
                     id="currentPassword"
+                    name="current_password"
                     required
                   />
                 </div>
@@ -467,6 +474,7 @@
                     type="password"
                     class="form-control"
                     id="newPassword"
+                    name="new_password"
                     minlength="8"
                     required
                   />
@@ -479,6 +487,7 @@
                     type="password"
                     class="form-control"
                     id="confirmNewPassword"
+                    name="confirm_new_password"
                     minlength="8"
                     required
                   />
@@ -488,9 +497,6 @@
                   <button type="submit" class="btn btn-primary btn-lg">
                     <i class="bi bi-shield-check me-2"></i>Update Password
                   </button>
-                  <span class="save-success d-none" id="passwordSuccess">
-                    <i class="bi bi-check-circle-fill"></i>Password updated
-                  </span>
                 </div>
               </div>
             </form>
@@ -573,5 +579,5 @@
 </section>
 
 {% endblock %} {% block javascript %}
-<script src="{% static 'js/patient/profile.js' %}"></script>
+<script src="{% static 'js/patient/profile.js' %}?v=2"></script>
 {% endblock %}

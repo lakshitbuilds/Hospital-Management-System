@@ -18,6 +18,8 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -26,6 +28,7 @@ from accounts.models import SystemSettings
 from doctor.models import Doctor
 from patient.models import Appointment, Billing, Notification, Patient
 from receptionist.models import Receptionist
+from pagination import paginate
 
 User = get_user_model()
 
@@ -172,7 +175,7 @@ def doctor_list(request):
     and the current query string.
     """
     query = request.GET.get('q', '').strip()
-    doctors = Doctor.objects.select_related('user').order_by('user__first_name')
+    doctors = Doctor.objects.select_related('user').order_by('user__first_name', 'id')
     if query:
         doctors = doctors.filter(
             Q(user__first_name__icontains=query)
@@ -180,7 +183,12 @@ def doctor_list(request):
             | Q(department__icontains=query)
             | Q(specialization__icontains=query)
         )
-    return render(request, 'adminpanel/doctor_list.html', {'doctors': doctors, 'query': query})
+    page_obj, elided_page_range = paginate(request, doctors)
+    return render(request, 'adminpanel/doctor_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+    })
 
 
 @admin_required
@@ -202,6 +210,11 @@ def add_doctor(request):
         email = request.POST.get('email')
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
+        department = request.POST.get('department')
+
+        if not all([full_name, email, password, confirm_password, department]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('admin_add_doctor')
 
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
@@ -212,18 +225,28 @@ def add_doctor(request):
             return redirect('admin_add_doctor')
 
         name_parts = full_name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        try:
+            validate_password(password, User(email=email, first_name=first_name, last_name=last_name))
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
+            return redirect('admin_add_doctor')
+
         user = User.objects.create_user(
             username=email,
             email=email,
             password=password,
-            first_name=name_parts[0],
-            last_name=name_parts[1] if len(name_parts) > 1 else '',
+            first_name=first_name,
+            last_name=last_name,
             role='doctor',
         )
 
         doctor = Doctor.objects.create(
             user=user,
-            department=request.POST.get('department'),
+            department=department,
             specialization=request.POST.get('specialization', ''),
             phone_number=request.POST.get('phone_number', ''),
             qualification=request.POST.get('qualification', ''),
@@ -277,14 +300,19 @@ def receptionist_list(request):
     by `update_receptionist_shift` below.
     """
     query = request.GET.get('q', '').strip()
-    receptionists = Receptionist.objects.select_related('user').order_by('user__first_name')
+    receptionists = Receptionist.objects.select_related('user').order_by('user__first_name', 'id')
     if query:
         receptionists = receptionists.filter(
             Q(user__first_name__icontains=query)
             | Q(user__last_name__icontains=query)
             | Q(employee_id__icontains=query)
         )
-    return render(request, 'adminpanel/receptionist_list.html', {'receptionists': receptionists, 'query': query})
+    page_obj, elided_page_range = paginate(request, receptionists)
+    return render(request, 'adminpanel/receptionist_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+    })
 
 
 @admin_required
@@ -306,6 +334,10 @@ def add_receptionist(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
+        if not all([full_name, email, password, confirm_password]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('admin_add_receptionist')
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('admin_add_receptionist')
@@ -315,12 +347,22 @@ def add_receptionist(request):
             return redirect('admin_add_receptionist')
 
         name_parts = full_name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        try:
+            validate_password(password, User(email=email, first_name=first_name, last_name=last_name))
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
+            return redirect('admin_add_receptionist')
+
         user = User.objects.create_user(
             username=email,
             email=email,
             password=password,
-            first_name=name_parts[0],
-            last_name=name_parts[1] if len(name_parts) > 1 else '',
+            first_name=first_name,
+            last_name=last_name,
             role='receptionist',
         )
 
@@ -379,7 +421,7 @@ def patient_list(request):
     (possibly filtered) patients and the current query string.
     """
     query = request.GET.get('q', '').strip()
-    patients = Patient.objects.select_related('user', 'registered_by').order_by('-created_at')
+    patients = Patient.objects.select_related('user', 'registered_by').order_by('-created_at', '-id')
     if query:
         patients = patients.filter(
             Q(user__first_name__icontains=query)
@@ -387,7 +429,12 @@ def patient_list(request):
             | Q(patient_id__icontains=query)
             | Q(user__email__icontains=query)
         )
-    return render(request, 'adminpanel/patient_list.html', {'patients': patients, 'query': query})
+    page_obj, elided_page_range = paginate(request, patients)
+    return render(request, 'adminpanel/patient_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+    })
 
 
 @admin_required
@@ -424,12 +471,37 @@ def patient_detail(request, patient_id):
 def appointment_list(request):
     """List every appointment system-wide, newest first (admin-only).
 
-    No filtering here -- just pulls all appointments with their related
-    patient and doctor rows preloaded, and renders
-    `adminpanel/appointment_list.html`.
+    Reads optional `status` and `q` query-string parameters -- `status`
+    narrows to one Appointment.status value (or 'all', the default), `q`
+    searches the patient's and doctor's names (case-insensitive partial
+    match). This used to be done entirely client-side in JS over every row
+    already in the DOM; it's server-side now so it keeps working once the
+    list is paginated (a client-side filter could otherwise only ever see
+    whatever rows happen to be on the current page).
     """
-    appointments = Appointment.objects.select_related('patient__user', 'doctor__user').order_by('-appointment_date')
-    return render(request, 'adminpanel/appointment_list.html', {'appointments': appointments})
+    status = request.GET.get('status', 'all')
+    query = request.GET.get('q', '').strip()
+
+    appointments = Appointment.objects.select_related('patient__user', 'doctor__user').order_by('-appointment_date', '-id')
+
+    if status and status != 'all':
+        appointments = appointments.filter(status=status)
+
+    if query:
+        appointments = appointments.filter(
+            Q(patient__user__first_name__icontains=query)
+            | Q(patient__user__last_name__icontains=query)
+            | Q(doctor__user__first_name__icontains=query)
+            | Q(doctor__user__last_name__icontains=query)
+        )
+
+    page_obj, elided_page_range = paginate(request, appointments)
+    return render(request, 'adminpanel/appointment_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+        'current_status': status,
+    })
 
 
 # ================================================================
@@ -448,7 +520,7 @@ def billing_list(request):
     across all pending bills.
     """
     query = request.GET.get('q', '').strip()
-    bills = Billing.objects.select_related('patient__user', 'appointment__doctor__user').order_by('-created_at')
+    bills = Billing.objects.select_related('patient__user', 'appointment__doctor__user').order_by('-created_at', '-id')
 
     if query:
         bills = bills.filter(
@@ -457,8 +529,10 @@ def billing_list(request):
             | Q(patient__patient_id__icontains=query)
         )
 
+    page_obj, elided_page_range = paginate(request, bills)
     return render(request, 'adminpanel/billing_list.html', {
-        'bills': bills,
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
         'query': query,
         'pending_total': Billing.objects.filter(status='pending').aggregate(total=Sum('amount'))['total'] or 0,
     })
@@ -659,6 +733,13 @@ def change_password(request):
 
         if new_password != confirm_new_password:
             messages.error(request, 'New passwords do not match.')
+            return redirect('admin_change_password')
+
+        try:
+            validate_password(new_password, request.user)
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
             return redirect('admin_change_password')
 
         request.user.set_password(new_password)

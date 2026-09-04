@@ -29,18 +29,25 @@ from datetime import datetime, timedelta
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model
+from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.urls import reverse, NoReverseMatch
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.http import JsonResponse
+from django.db import IntegrityError
 
 from .models import Patient, Appointment, Billing, ContactMessage, Notification
 from .emails import send_appointment_booked_email, send_appointment_cancelled_email
 from doctor.models import Doctor
+from image_validation import validate_uploaded_image
 from accounts.models import SystemSettings
 
 User = get_user_model()
@@ -94,6 +101,50 @@ def _send_otp_email(user):
     )
     email.attach_alternative(html_body, 'text/html')
     email.send(fail_silently=False)
+
+
+def _send_password_reset_email(request, user):
+    """
+    Emails ``user`` a signed, single-use link to reset_password_confirm.
+    Uses the same primitives Django's own PasswordResetView relies on
+    (default_token_generator + a base64-encoded pk): the token embeds a hash
+    of the user's current password, so it stops working the moment
+    set_password() changes it (natural single-use), and it expires after
+    PASSWORD_RESET_TIMEOUT seconds (see settings.py).
+
+    fail_silently=True, matching the appointment emails rather than the OTP
+    one: forgot_password always shows the same "check your email" message
+    regardless of whether this send actually succeeds, to avoid letting the
+    page be used to probe which addresses have accounts -- so there is
+    nothing useful this call could raise back up to the request anyway.
+    """
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    token = default_token_generator.make_token(user)
+    reset_url = request.build_absolute_uri(
+        reverse('reset_password_confirm', kwargs={'uidb64': uidb64, 'token': token})
+    )
+    valid_minutes = settings.PASSWORD_RESET_TIMEOUT // 60
+
+    context = {
+        'first_name': user.first_name,
+        'reset_url': reset_url,
+        'valid_minutes': valid_minutes,
+        'current_year': timezone.now().year,
+    }
+    text_body = (
+        f'Hi {user.first_name or "there"}, use this link to reset your MediCare Hospital password: '
+        f'{reset_url} (expires in {valid_minutes} minutes).'
+    )
+    html_body = render_to_string('patient/emails/password_reset_email.html', context)
+
+    email = EmailMultiAlternatives(
+        subject='Reset your MediCare Hospital password',
+        body=text_body,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[user.email],
+    )
+    email.attach_alternative(html_body, 'text/html')
+    email.send(fail_silently=True)
 
 
 def _redirect_for_role(request, user):
@@ -159,12 +210,22 @@ def contact(request):
     the same page with a success message.
     """
     if request.method == 'POST':
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        subject = request.POST.get('subject')
+        message_body = request.POST.get('message')
+
+        if not all([full_name, email, phone, subject, message_body]):
+            messages.error(request, 'Please fill in all fields.')
+            return redirect('contact')
+
         ContactMessage.objects.create(
-            full_name=request.POST.get('full_name'),
-            email=request.POST.get('email'),
-            phone=request.POST.get('phone'),
-            subject=request.POST.get('subject'),
-            message=request.POST.get('message'),
+            full_name=full_name,
+            email=email,
+            phone=phone,
+            subject=subject,
+            message=message_body,
         )
         messages.success(request, 'Your message has been received.')
         return redirect('contact')
@@ -375,6 +436,10 @@ def register(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
+        if not all([full_name, email, phone, gender, password, confirm_password]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('register')
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('register')
@@ -388,6 +453,13 @@ def register(request):
         name_parts = full_name.split(' ', 1)
         first_name = name_parts[0]
         last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        try:
+            validate_password(password, User(email=email, first_name=first_name, last_name=last_name))
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
+            return redirect('register')
 
         # username is set to the email since this project authenticates
         # by email rather than a separate username.
@@ -422,8 +494,64 @@ def register(request):
 
 
 def forgot_password(request):
-    """Public "forgot password" page. Currently just renders the template (no reset logic wired up yet)."""
-    return render(request, "patient/forgot_password.html")
+    """
+    Public "forgot password" page. On GET, shows the request form.
+
+    On POST: looks up an account by the submitted email and, if one exists,
+    emails it a signed reset link via _send_password_reset_email(). Renders
+    the same "check your email" success state regardless of whether a
+    matching account was actually found, so this page can't be used to
+    discover which email addresses are registered.
+    """
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        user = User.objects.filter(email=email).first() if email else None
+        if user is not None:
+            _send_password_reset_email(request, user)
+        return render(request, 'patient/forgot_password.html', {'request_sent': True, 'sent_email': email})
+
+    return render(request, 'patient/forgot_password.html')
+
+
+def reset_password_confirm(request, uidb64, token):
+    """
+    Landing page for the link emailed by forgot_password. Validates the
+    uid/token pair using the same primitives Django's own
+    PasswordResetConfirmView relies on before allowing a new password to be
+    set -- an invalid, expired, or already-used link (the token embeds a
+    hash of the current password, so it stops matching the moment
+    set_password() runs) instead shows an "expired" state with a link back
+    to request a new one.
+    """
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    token_valid = user is not None and default_token_generator.check_token(user, token)
+    if not token_valid:
+        return render(request, 'patient/reset_password_confirm.html', {'token_valid': False})
+
+    if request.method == 'POST':
+        new_password = request.POST.get('new_password')
+        confirm_new_password = request.POST.get('confirm_new_password')
+
+        if not new_password or new_password != confirm_new_password:
+            messages.error(request, 'Passwords do not match.')
+        else:
+            try:
+                validate_password(new_password, user)
+            except ValidationError as exc:
+                for error_message in exc.messages:
+                    messages.error(request, error_message)
+            else:
+                user.set_password(new_password)
+                user.save()
+                messages.success(request, 'Your password has been reset. You can now log in.')
+                return redirect('login')
+
+    return render(request, 'patient/reset_password_confirm.html', {'token_valid': True})
 
 
 def logout_view(request):
@@ -475,7 +603,12 @@ def patient_profile(request):
         patient.medical_history = request.POST.get('medical_history')
 
         if request.FILES.get('profile_image'):
-            patient.profile_image = request.FILES['profile_image']
+            uploaded_image = request.FILES['profile_image']
+            image_error = validate_uploaded_image(uploaded_image)
+            if image_error:
+                messages.error(request, image_error)
+                return redirect('patient_profile')
+            patient.profile_image = uploaded_image
 
         patient.save()
         messages.success(request, 'Profile updated successfully.')
@@ -488,6 +621,54 @@ def patient_profile(request):
         'member_since_year': patient.created_at.year,
     }
     return render(request, 'patient/profile.html', context)
+
+
+@login_required
+def change_password(request):
+    """
+    Lets the logged-in patient change their own account password, posted
+    from the "Change Password" tab on patient_profile. Mirrors the pattern
+    already used by doctor.views.change_password / receptionist.views.change_password
+    (check the current password, compare the two new-password fields, then
+    set_password + update_session_auth_hash so the change doesn't log the
+    patient out of their current session) -- with one addition: this also
+    runs the new password through Django's configured
+    AUTH_PASSWORD_VALIDATORS, since this is new code with no reason to
+    repeat the blank-password gap those older views still have.
+
+    Always redirects back to patient_profile with the Change Password tab
+    still open (via a #change-password hash that profile.js reads on load),
+    since this form lives on that same page rather than a page of its own.
+    """
+    change_password_url = f"{reverse('patient_profile')}#change-password"
+
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_password = request.POST.get('new_password')
+        confirm_new_password = request.POST.get('confirm_new_password')
+
+        if not request.user.check_password(current_password):
+            messages.error(request, 'Current password is incorrect.')
+            return redirect(change_password_url)
+
+        if new_password != confirm_new_password:
+            messages.error(request, 'New passwords do not match.')
+            return redirect(change_password_url)
+
+        try:
+            validate_password(new_password, request.user)
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
+            return redirect(change_password_url)
+
+        request.user.set_password(new_password)
+        request.user.save()
+        update_session_auth_hash(request, request.user)
+
+        messages.success(request, 'Password updated successfully.')
+
+    return redirect(change_password_url)
 
 
 # ================================================================
@@ -654,16 +835,25 @@ def card_payment(request):
             return redirect('book_appointment')
 
         # This is the actual creation point for the appointment -- nothing
-        # was written to the database during the earlier steps.
-        appointment = Appointment.objects.create(
-            patient=patient,
-            doctor=doctor,
-            department=pending['department'],
-            appointment_date=pending['appointment_date'],
-            time_slot=pending['time_slot'],
-            visit_type=pending['visit_type'],
-            reason=pending['reason'],
-        )
+        # was written to the database during the earlier steps. The
+        # availability recheck above closes most of the race window, but
+        # two requests can still slip through it at almost the same instant
+        # (e.g. a double-submitted click) -- caught here as a fallback
+        # rather than surfacing a raw IntegrityError to the patient.
+        try:
+            appointment = Appointment.objects.create(
+                patient=patient,
+                doctor=doctor,
+                department=pending['department'],
+                appointment_date=pending['appointment_date'],
+                time_slot=pending['time_slot'],
+                visit_type=pending['visit_type'],
+                reason=pending['reason'],
+            )
+        except IntegrityError:
+            messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
+            del request.session['pending_appointment']
+            return redirect('book_appointment')
 
         # No real gateway is charged -- the "payment" is simulated, so the
         # bill is created already paid rather than left pending.

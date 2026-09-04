@@ -1,12 +1,14 @@
 /* ==========================================================================
    SHARED LIST PAGE STYLES
    Used by doctor_list.html, receptionist_list.html, patient_list.html,
-   appointment_list.html. Table-person-cell / table-actions / table-action-btn
-   live in the shared base.css.
+   appointment_list.html, billing_list.html. Table-person-cell /
+   table-actions / table-action-btn live in the shared base.css.
    Structure:
    1. Toolbar
    2. Table
-   3. Responsive
+   3. Pagination
+   4. Status Toggle Modal
+   5. Responsive
    ========================================================================== */
 
 
@@ -128,7 +130,64 @@
 
 
 /* ==========================================================================
-   3. STATUS TOGGLE MODAL
+   3. PAGINATION
+   ========================================================================== */
+.list-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--adm-border-color);
+}
+
+.pagination-info {
+    font-size: 0.8rem;
+    color: var(--adm-text-light);
+}
+
+.pagination-controls {
+    display: flex;
+    list-style: none;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+}
+
+.page-link-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--adm-border-color);
+    border-radius: var(--adm-radius-sm);
+    font-size: 0.82rem;
+    color: var(--adm-text-dark);
+    transition: var(--adm-transition);
+}
+
+.page-link-btn:hover:not(.disabled) {
+    border-color: var(--adm-primary);
+    color: var(--adm-primary-dark);
+}
+
+.page-link-btn.active {
+    background-color: var(--adm-primary);
+    border-color: var(--adm-primary);
+    color: var(--adm-white);
+}
+
+.page-link-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   4. STATUS TOGGLE MODAL
    ========================================================================== */
 #statusToggleModal .modal-content {
     border: none;
@@ -162,7 +221,7 @@
 
 
 /* ==========================================================================
-   4. RESPONSIVE
+   5. RESPONSIVE
    ========================================================================== */
 @media (max-width: 767.98px) {
     .list-toolbar {

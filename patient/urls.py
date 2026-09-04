@@ -16,11 +16,13 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('logout/', views.logout_view, name='logout'),
     path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset-password/<uidb64>/<token>/', views.reset_password_confirm, name='reset_password_confirm'),
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('resend-otp/', views.resend_otp, name='resend_otp'),
 
     # ===== Patient Profile =====
     path('patient-profile/', views.patient_profile, name='patient_profile'),
+    path('patient-profile/change-password/', views.change_password, name='patient_change_password'),
 
     # ===== Appointments =====
     path('book-appointment/', views.book_appointment, name='book_appointment'),

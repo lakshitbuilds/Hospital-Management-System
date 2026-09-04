@@ -19,11 +19,15 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.db.models import Count
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.db.models import Count, Q
 
 from .models import Doctor, DoctorAvailability, BlockedDate, Prescription, PrescriptionMedicine
 from patient.models import Patient, Appointment, Notification
 from patient.emails import send_appointment_cancelled_email
+from pagination import paginate
+from image_validation import validate_uploaded_image
 
 
 def doctor_required(view_func):
@@ -177,10 +181,37 @@ def appointment_list(request):
     Serves the `appointment_list` URL: the full history of this doctor's
     appointments (all dates/statuses), newest first. Restricted to the
     doctor role. Renders 'doctor/appointment_list.html'.
+
+    Reads optional `status` and `q` query-string parameters -- `status`
+    narrows to one Appointment.status value (or 'all', the default), `q`
+    searches the patient's name (case-insensitive partial match). This
+    used to be done entirely client-side in JS over every row already in
+    the DOM; it's server-side now so it keeps working once the list is
+    paginated (a client-side filter could otherwise only ever see whatever
+    rows happen to be on the current page).
     """
     doctor = get_doctor(request)
-    appointments = Appointment.objects.filter(doctor=doctor).select_related('patient__user').order_by('-appointment_date')
-    return render(request, 'doctor/appointment_list.html', {'appointments': appointments})
+    status = request.GET.get('status', 'all')
+    query = request.GET.get('q', '').strip()
+
+    appointments = Appointment.objects.filter(doctor=doctor).select_related('patient__user').order_by('-appointment_date', '-id')
+
+    if status and status != 'all':
+        appointments = appointments.filter(status=status)
+
+    if query:
+        appointments = appointments.filter(
+            Q(patient__user__first_name__icontains=query)
+            | Q(patient__user__last_name__icontains=query)
+        )
+
+    page_obj, elided_page_range = paginate(request, appointments)
+    return render(request, 'doctor/appointment_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+        'current_status': status,
+    })
 
 
 @doctor_required
@@ -343,13 +374,45 @@ def add_prescription(request):
 def prescription_history(request):
     """
     Serves the `prescription_history` URL: lists every prescription this
-    doctor has written (with their medicine line items prefetched), ordered
-    newest first per the Prescription model's default Meta.ordering.
+    doctor has written (with their medicine line items prefetched).
     Restricted to the doctor role. Renders 'doctor/prescription_history.html'.
+
+    Reads optional `q` and `sort` query-string parameters. `q` searches the
+    patient's name and the diagnosis text (case-insensitive partial match);
+    `sort` is 'newest' (default) or 'oldest'. Both used to be handled
+    entirely client-side in JS (a substring filter and a DOM row re-sort)
+    over every row already in the DOM; they're server-side now so they
+    keep working once the list is paginated -- a client-side sort in
+    particular would otherwise only ever reorder whatever rows happen to
+    already be on the current page, which would look broken (e.g. "Oldest
+    First" showing the oldest of page 1, not overall).
     """
     doctor = get_doctor(request)
+    query = request.GET.get('q', '').strip()
+    sort = request.GET.get('sort', 'newest')
+
     prescriptions = Prescription.objects.filter(doctor=doctor).select_related('patient__user').prefetch_related('medicines')
-    return render(request, 'doctor/prescription_history.html', {'prescriptions': prescriptions})
+
+    if query:
+        prescriptions = prescriptions.filter(
+            Q(patient__user__first_name__icontains=query)
+            | Q(patient__user__last_name__icontains=query)
+            | Q(diagnosis__icontains=query)
+        )
+
+    if sort == 'oldest':
+        prescriptions = prescriptions.order_by('created_at', 'id')
+    else:
+        sort = 'newest'
+        prescriptions = prescriptions.order_by('-created_at', '-id')
+
+    page_obj, elided_page_range = paginate(request, prescriptions)
+    return render(request, 'doctor/prescription_history.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+        'current_sort': sort,
+    })
 
 
 # ================================================================
@@ -554,7 +617,12 @@ def edit_profile(request):
         doctor.bio = request.POST.get('bio', '')
 
         if request.FILES.get('profile_picture'):
-            doctor.profile_picture = request.FILES['profile_picture']
+            uploaded_image = request.FILES['profile_picture']
+            image_error = validate_uploaded_image(uploaded_image)
+            if image_error:
+                messages.error(request, image_error)
+                return redirect('doctor_profile')
+            doctor.profile_picture = uploaded_image
 
         doctor.save()
         messages.success(request, 'Profile updated successfully.')
@@ -588,6 +656,13 @@ def change_password(request):
 
         if new_password != confirm_new_password:
             messages.error(request, 'New passwords do not match.')
+            return redirect('change_password')
+
+        try:
+            validate_password(new_password, request.user)
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
             return redirect('change_password')
 
         request.user.set_password(new_password)

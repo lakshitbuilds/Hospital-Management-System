@@ -17,6 +17,9 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.db.models import Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -25,6 +28,8 @@ from django.utils import timezone
 from doctor.models import Doctor, DoctorAvailability
 from patient.models import Appointment, Billing, Notification, Patient
 from patient.emails import send_appointment_booked_email, send_appointment_cancelled_email
+from image_validation import validate_uploaded_image
+from pagination import paginate
 
 from .models import Receptionist
 
@@ -122,7 +127,7 @@ def patient_list(request):
     matching patients, most recently created first.
     """
     query = request.GET.get('q', '').strip()
-    patients = Patient.objects.select_related('user').order_by('-created_at')
+    patients = Patient.objects.select_related('user').order_by('-created_at', '-id')
 
     if query:
         patients = patients.filter(
@@ -133,7 +138,12 @@ def patient_list(request):
             | Q(user__email__icontains=query)
         )
 
-    return render(request, 'receptionist/patient_list.html', {'patients': patients, 'query': query})
+    page_obj, elided_page_range = paginate(request, patients)
+    return render(request, 'receptionist/patient_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+    })
 
 
 @receptionist_required
@@ -158,6 +168,10 @@ def register_patient(request):
         password = request.POST.get('password')
         confirm_password = request.POST.get('confirm_password')
 
+        if not all([full_name, email, password, confirm_password]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('receptionist_register_patient')
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('receptionist_register_patient')
@@ -171,6 +185,13 @@ def register_patient(request):
         name_parts = full_name.split(' ', 1)
         first_name = name_parts[0]
         last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        try:
+            validate_password(password, User(email=email, first_name=first_name, last_name=last_name))
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
+            return redirect('receptionist_register_patient')
 
         user = User.objects.create_user(
             username=email,
@@ -245,11 +266,39 @@ def appointment_list(request):
     """
     Serves the full appointment list (`receptionist_appointment_list` URL).
 
-    Restricted to receptionists. Simply lists every appointment in the
-    system, most recent date first, with patient/doctor info preloaded.
+    Restricted to receptionists. Lists every appointment in the system,
+    most recent date first, with patient/doctor info preloaded. Reads
+    optional `status` and `q` query-string parameters -- `status` narrows
+    to one Appointment.status value (or 'all', the default), `q` searches
+    the patient's and doctor's names (case-insensitive partial match).
+    This used to be done entirely client-side in JS over every row already
+    in the DOM; it's server-side now so it keeps working once the list is
+    paginated (a client-side filter could otherwise only ever see whatever
+    rows happen to be on the current page).
     """
-    appointments = Appointment.objects.select_related('patient__user', 'doctor__user').order_by('-appointment_date')
-    return render(request, 'receptionist/appointment_list.html', {'appointments': appointments})
+    status = request.GET.get('status', 'all')
+    query = request.GET.get('q', '').strip()
+
+    appointments = Appointment.objects.select_related('patient__user', 'doctor__user').order_by('-appointment_date', '-id')
+
+    if status and status != 'all':
+        appointments = appointments.filter(status=status)
+
+    if query:
+        appointments = appointments.filter(
+            Q(patient__user__first_name__icontains=query)
+            | Q(patient__user__last_name__icontains=query)
+            | Q(doctor__user__first_name__icontains=query)
+            | Q(doctor__user__last_name__icontains=query)
+        )
+
+    page_obj, elided_page_range = paginate(request, appointments)
+    return render(request, 'receptionist/appointment_list.html', {
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
+        'query': query,
+        'current_status': status,
+    })
 
 
 @receptionist_required
@@ -359,16 +408,20 @@ def book_appointment(request):
 
         # Booked immediately as 'confirmed' (no pending step) since a receptionist
         # is arranging this in person, unlike patient self-booking elsewhere.
-        appointment = Appointment.objects.create(
-            patient=patient,
-            doctor=doctor,
-            department=request.POST.get('department', doctor.department),
-            appointment_date=appointment_date,
-            time_slot=time_slot,
-            visit_type=request.POST.get('visit_type', 'new'),
-            reason=request.POST.get('reason', ''),
-            status='confirmed',
-        )
+        try:
+            appointment = Appointment.objects.create(
+                patient=patient,
+                doctor=doctor,
+                department=request.POST.get('department', doctor.department),
+                appointment_date=appointment_date,
+                time_slot=time_slot,
+                visit_type=request.POST.get('visit_type', 'new'),
+                reason=request.POST.get('reason', ''),
+                status='confirmed',
+            )
+        except IntegrityError:
+            messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
+            return redirect('receptionist_book_appointment')
 
         # Auto-generate the consultation bill for this appointment, using the
         # doctor's standard consultation fee as the amount.
@@ -506,7 +559,7 @@ def billing_list(request):
     for a summary figure on the page.
     """
     query = request.GET.get('q', '').strip()
-    bills = Billing.objects.select_related('patient__user', 'appointment__doctor__user').order_by('-created_at')
+    bills = Billing.objects.select_related('patient__user', 'appointment__doctor__user').order_by('-created_at', '-id')
 
     if query:
         bills = bills.filter(
@@ -515,8 +568,10 @@ def billing_list(request):
             | Q(patient__patient_id__icontains=query)
         )
 
+    page_obj, elided_page_range = paginate(request, bills)
     return render(request, 'receptionist/billing_list.html', {
-        'bills': bills,
+        'page_obj': page_obj,
+        'elided_page_range': elided_page_range,
         'query': query,
         # Sum of amounts for ALL pending bills system-wide (Sum returns None with
         # no matching rows, hence "or 0" to default to zero instead of None).
@@ -668,7 +723,12 @@ def edit_profile(request):
         receptionist.phone = request.POST.get('phone', '')
 
         if request.FILES.get('profile_picture'):
-            receptionist.profile_picture = request.FILES['profile_picture']
+            uploaded_image = request.FILES['profile_picture']
+            image_error = validate_uploaded_image(uploaded_image)
+            if image_error:
+                messages.error(request, image_error)
+                return redirect('receptionist_profile')
+            receptionist.profile_picture = uploaded_image
 
         receptionist.save()
         messages.success(request, 'Profile updated successfully.')
@@ -699,6 +759,13 @@ def change_password(request):
 
         if new_password != confirm_new_password:
             messages.error(request, 'New passwords do not match.')
+            return redirect('receptionist_change_password')
+
+        try:
+            validate_password(new_password, request.user)
+        except ValidationError as exc:
+            for error_message in exc.messages:
+                messages.error(request, error_message)
             return redirect('receptionist_change_password')
 
         request.user.set_password(new_password)

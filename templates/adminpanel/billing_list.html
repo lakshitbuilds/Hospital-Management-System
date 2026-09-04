@@ -39,7 +39,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for bill in bills %}
+                {% for bill in page_obj %}
                 <tr>
                     <td>
                         <div class="table-person-cell">
@@ -73,6 +73,33 @@
             </tbody>
         </table>
     </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <nav class="list-pagination" aria-label="Pagination">
+        <span class="pagination-info">Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }}</span>
+        <ul class="pagination-controls">
+            {% if page_obj.has_previous %}
+            <li><a class="page-link-btn" href="{% querystring page=page_obj.previous_page_number %}" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a></li>
+            {% else %}
+            <li><span class="page-link-btn disabled" aria-hidden="true"><i class="bi bi-chevron-left"></i></span></li>
+            {% endif %}
+            {% for num in elided_page_range %}
+                {% if num == "…" %}
+                <li><span class="page-link-btn disabled">&hellip;</span></li>
+                {% elif num == page_obj.number %}
+                <li><span class="page-link-btn active">{{ num }}</span></li>
+                {% else %}
+                <li><a class="page-link-btn" href="{% querystring page=num %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li><a class="page-link-btn" href="{% querystring page=page_obj.next_page_number %}" aria-label="Next page"><i class="bi bi-chevron-right"></i></a></li>
+            {% else %}
+            <li><span class="page-link-btn disabled" aria-hidden="true"><i class="bi bi-chevron-right"></i></span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 
 </div>
 

@@ -1,65 +1,19 @@
 /* ==========================================================================
    PRESCRIPTION HISTORY PAGE (prescription_history.html) - PAGE SPECIFIC JS
    Features:
-   1. Search by Patient / Diagnosis
-   2. Sort by Date (Newest / Oldest)
-   3. View Prescription Modal (static lookup by rx id)
+   1. View Prescription Modal (static lookup by rx id)
+
+   Search and sort used to be done here client-side (a substring filter and
+   a DOM row re-sort), but both only ever worked over whatever rows were
+   already in the DOM -- now that the list is paginated, both are handled
+   server-side (see doctor.views.prescription_history) via the search/sort
+   form on the page.
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
 
     /* ----------------------------------------------------------------------
-       1. Search by Patient / Diagnosis
-    ---------------------------------------------------------------------- */
-    var searchInput = document.getElementById('rxSearchInput');
-    var sortSelect = document.getElementById('rxSortSelect');
-    var tableBody = document.getElementById('rxTableBody');
-    var emptyState = document.getElementById('rxEmptyState');
-
-    function applySearch() {
-        var term = searchInput.value.trim().toLowerCase();
-        var visibleCount = 0;
-
-        tableBody.querySelectorAll('tr').forEach(function (row) {
-            var matches = !term || row.getAttribute('data-search').indexOf(term) !== -1;
-            row.classList.toggle('d-none', !matches);
-            if (matches) visibleCount++;
-        });
-
-        if (emptyState) {
-            emptyState.classList.toggle('d-none', visibleCount > 0);
-        }
-        tableBody.closest('.table-responsive').classList.toggle('d-none', visibleCount === 0);
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', applySearch);
-    }
-
-
-    /* ----------------------------------------------------------------------
-       2. Sort by Date (Newest / Oldest)
-    ---------------------------------------------------------------------- */
-    if (sortSelect) {
-        sortSelect.addEventListener('change', function () {
-            var rows = Array.from(tableBody.querySelectorAll('tr'));
-            var direction = sortSelect.value === 'oldest' ? 1 : -1;
-
-            rows.sort(function (a, b) {
-                var aTime = parseInt(a.getAttribute('data-timestamp'), 10);
-                var bTime = parseInt(b.getAttribute('data-timestamp'), 10);
-                return (aTime - bTime) * direction;
-            });
-
-            rows.forEach(function (row) {
-                tableBody.appendChild(row);
-            });
-        });
-    }
-
-
-    /* ----------------------------------------------------------------------
-       3. View Prescription Modal
+       1. View Prescription Modal
     ---------------------------------------------------------------------- */
     var viewModalEl = document.getElementById('viewRxModal');
     var modalAvatar = document.getElementById('rxModalAvatar');

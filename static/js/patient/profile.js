@@ -11,24 +11,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     /* ----------------------------------------------------------------------
        1. Tab Switching
+       Also activates a tab on load from the URL hash (e.g. "#change-password"),
+       so a redirect back from a form on another tab (like changePasswordForm,
+       which posts to a separate view) can reopen on the right tab instead of
+       silently landing back on Personal Info.
     ---------------------------------------------------------------------- */
     var navLinks = document.querySelectorAll('.profile-nav-link[data-tab]');
     var panels = document.querySelectorAll('.profile-tab-panel');
 
+    function activateTab(targetId) {
+        var matchingLink = null;
+        navLinks.forEach(function (link) {
+            if (link.getAttribute('data-tab') === targetId) matchingLink = link;
+        });
+        if (!matchingLink) return;
+
+        navLinks.forEach(function (btn) {
+            btn.classList.remove('active');
+        });
+        matchingLink.classList.add('active');
+
+        panels.forEach(function (panel) {
+            panel.classList.toggle('active', panel.id === targetId);
+        });
+    }
+
     navLinks.forEach(function (link) {
-        link.addEventListener('click', function () {
-            var targetId = link.getAttribute('data-tab');
-
-            navLinks.forEach(function (btn) {
-                btn.classList.remove('active');
-            });
-            link.classList.add('active');
-
-            panels.forEach(function (panel) {
-                panel.classList.toggle('active', panel.id === targetId);
-            });
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            activateTab(link.getAttribute('data-tab'));
         });
     });
+
+    if (window.location.hash) {
+        activateTab(window.location.hash.slice(1));
+    }
 
 
     /* ----------------------------------------------------------------------
@@ -72,6 +89,19 @@ document.addEventListener('DOMContentLoaded', function () {
     if (newPassword && confirmNewPassword) {
         newPassword.addEventListener('input', validateNewPasswordMatch);
         confirmNewPassword.addEventListener('input', validateNewPasswordMatch);
+    }
+
+    var changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', function (event) {
+            validateNewPasswordMatch();
+
+            if (!changePasswordForm.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            changePasswordForm.classList.add('was-validated');
+        });
     }
 
 

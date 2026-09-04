@@ -110,7 +110,16 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        # Manifest storage hashes filenames and resolves {% static %} tags
+        # through the collectstatic snapshot in STATIC_ROOT -- so in DEBUG
+        # (see WHITENOISE_USE_FINDERS above) it's swapped for the plain
+        # finders-backed storage, or every static edit would keep serving
+        # stale bytes from staticfiles/ until collectstatic is re-run.
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG else
+            "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        ),
     },
 }
 
@@ -192,3 +201,9 @@ OTP_LOCKOUT_MINUTES = 10
 # Set to False to skip email OTP verification on login/registration and sign
 # users in immediately. Set back to True to require it again.
 OTP_LOGIN_ENABLED = True
+
+# How long an emailed "forgot password" reset link stays valid, in seconds.
+# Read by Django's own default_token_generator (used in patient.views'
+# forgot_password/reset_password_confirm), matching the "expires in 15
+# minutes" copy already shown on the forgot-password page.
+PASSWORD_RESET_TIMEOUT = 15 * 60 

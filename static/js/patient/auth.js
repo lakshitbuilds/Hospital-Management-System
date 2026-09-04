@@ -1,9 +1,11 @@
 /* ==========================================================================
-   AUTH PAGES (login.html / register.html) - SHARED JAVASCRIPT
+   AUTH PAGES (login.html / register.html / reset_password_confirm.html) -
+   SHARED JAVASCRIPT
    Features:
    1. Password Visibility Toggle
    2. Login Form Validation
    3. Register Form Validation (incl. password match check)
+   4. Reset Password Form Validation (incl. password match check)
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -82,6 +84,40 @@ document.addEventListener('DOMContentLoaded', function () {
                 event.stopPropagation();
             }
             registerForm.classList.add('was-validated');
+        });
+    }
+
+
+    /* ----------------------------------------------------------------------
+       4. Reset Password Form Validation
+       Same "Confirm Password must match Password" check as registration.
+    ---------------------------------------------------------------------- */
+    var resetPasswordForm = document.getElementById('resetPasswordForm');
+    var newPasswordInput = document.getElementById('newPassword');
+    var confirmNewPasswordInput = document.getElementById('confirmNewPassword');
+
+    function validateNewPasswordMatch() {
+        if (!newPasswordInput || !confirmNewPasswordInput) return;
+
+        if (confirmNewPasswordInput.value !== newPasswordInput.value) {
+            confirmNewPasswordInput.setCustomValidity('mismatch');
+        } else {
+            confirmNewPasswordInput.setCustomValidity('');
+        }
+    }
+
+    if (resetPasswordForm) {
+        newPasswordInput.addEventListener('input', validateNewPasswordMatch);
+        confirmNewPasswordInput.addEventListener('input', validateNewPasswordMatch);
+
+        resetPasswordForm.addEventListener('submit', function (event) {
+            validateNewPasswordMatch();
+
+            if (!resetPasswordForm.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            resetPasswordForm.classList.add('was-validated');
         });
     }
 

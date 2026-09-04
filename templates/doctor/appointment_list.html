@@ -16,20 +16,22 @@
 
     <!-- Toolbar -->
     <div class="appointment-list-toolbar">
-        <div class="apt-search-box">
+        <form class="apt-search-box" method="get">
             <i class="bi bi-search"></i>
-            <input type="search" id="patientSearchInput" placeholder="Search by patient name...">
-        </div>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by patient name...">
+            <input type="hidden" name="status" value="{{ current_status }}">
+        </form>
 
         <div class="apt-status-filters">
-            <button type="button" class="apt-filter-btn active" data-filter="all">All</button>
-            <button type="button" class="apt-filter-btn" data-filter="confirmed">Confirmed</button>
-            <button type="button" class="apt-filter-btn" data-filter="pending">Pending</button>
-            <button type="button" class="apt-filter-btn" data-filter="completed">Completed</button>
-            <button type="button" class="apt-filter-btn" data-filter="cancelled">Cancelled</button>
+            <a class="apt-filter-btn {% if current_status == 'all' %}active{% endif %}" href="{% querystring status='all' page=1 %}">All</a>
+            <a class="apt-filter-btn {% if current_status == 'confirmed' %}active{% endif %}" href="{% querystring status='confirmed' page=1 %}">Confirmed</a>
+            <a class="apt-filter-btn {% if current_status == 'pending' %}active{% endif %}" href="{% querystring status='pending' page=1 %}">Pending</a>
+            <a class="apt-filter-btn {% if current_status == 'completed' %}active{% endif %}" href="{% querystring status='completed' page=1 %}">Completed</a>
+            <a class="apt-filter-btn {% if current_status == 'cancelled' %}active{% endif %}" href="{% querystring status='cancelled' page=1 %}">Cancelled</a>
         </div>
     </div>
 
+    {% if page_obj %}
     <!-- Table -->
     <div class="table-responsive">
         <table class="appointment-table">
@@ -42,10 +44,10 @@
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
-            <tbody id="appointmentTableBody">
+            <tbody>
 
-                {% for appt in appointments %}
-                <tr data-status="{{ appt.status }}" data-patient="{{ appt.patient.user.get_full_name|lower }}">
+                {% for appt in page_obj %}
+                <tr>
                     <td>
                         <div class="table-patient-cell">
                             {% if appt.patient.profile_image %}
@@ -83,25 +85,48 @@
                         </div>
                     </td>
                 </tr>
-                {% empty %}
-                <tr><td colspan="5" class="text-center text-muted py-4">No appointments found.</td></tr>
                 {% endfor %}
 
             </tbody>
         </table>
     </div>
 
+    {% if page_obj.paginator.num_pages > 1 %}
+    <!-- Pagination -->
+    <nav class="appointment-pagination" aria-label="Appointment list pagination">
+        <span class="pagination-info">Showing {{ page_obj.start_index }}&ndash;{{ page_obj.end_index }} of {{ page_obj.paginator.count }} appointments</span>
+        <ul class="pagination-controls">
+            {% if page_obj.has_previous %}
+            <li><a class="page-link-btn" href="{% querystring page=page_obj.previous_page_number %}" aria-label="Previous page"><i class="bi bi-chevron-left"></i></a></li>
+            {% else %}
+            <li><span class="page-link-btn disabled" aria-hidden="true"><i class="bi bi-chevron-left"></i></span></li>
+            {% endif %}
+            {% for num in elided_page_range %}
+                {% if num == "…" %}
+                <li><span class="page-link-btn disabled">&hellip;</span></li>
+                {% elif num == page_obj.number %}
+                <li><span class="page-link-btn active">{{ num }}</span></li>
+                {% else %}
+                <li><a class="page-link-btn" href="{% querystring page=num %}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li><a class="page-link-btn" href="{% querystring page=page_obj.next_page_number %}" aria-label="Next page"><i class="bi bi-chevron-right"></i></a></li>
+            {% else %}
+            <li><span class="page-link-btn disabled" aria-hidden="true"><i class="bi bi-chevron-right"></i></span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
     <!-- Empty State -->
-    <div class="table-empty-state d-none" id="tableEmptyState">
+    <div class="table-empty-state">
         <i class="bi bi-calendar-x"></i>
         <h6>No appointments found</h6>
         <p>Try a different search term or filter.</p>
     </div>
-
-    <!-- Pagination -->
-    <nav class="appointment-pagination" aria-label="Appointment list pagination">
-        <span class="pagination-info">Showing {{ appointments|length }} of {{ appointments|length }} appointments</span>
-    </nav>
+    {% endif %}
 
 </div>
 

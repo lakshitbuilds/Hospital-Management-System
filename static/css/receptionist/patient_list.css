@@ -5,7 +5,8 @@
    Structure:
    1. Toolbar
    2. Table
-   3. Responsive
+   3. Pagination
+   4. Responsive
    ========================================================================== */
 
 
@@ -85,7 +86,64 @@
 
 
 /* ==========================================================================
-   3. RESPONSIVE
+   3. PAGINATION
+   ========================================================================== */
+.list-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 1.25rem;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--rec-border-color);
+}
+
+.pagination-info {
+    font-size: 0.8rem;
+    color: var(--rec-text-light);
+}
+
+.pagination-controls {
+    display: flex;
+    list-style: none;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+}
+
+.page-link-btn {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--rec-border-color);
+    border-radius: var(--rec-radius-sm);
+    font-size: 0.82rem;
+    color: var(--rec-text-dark);
+    transition: var(--rec-transition);
+}
+
+.page-link-btn:hover:not(.disabled) {
+    border-color: var(--rec-primary);
+    color: var(--rec-primary);
+}
+
+.page-link-btn.active {
+    background-color: var(--rec-primary);
+    border-color: var(--rec-primary);
+    color: var(--rec-white);
+}
+
+.page-link-btn.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+
+/* ==========================================================================
+   4. RESPONSIVE
    ========================================================================== */
 @media (max-width: 767.98px) {
     .list-toolbar {

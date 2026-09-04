@@ -152,10 +152,13 @@ class Appointment(models.Model):
     # (e.g. if it's triggered more than once a day) never double-sends.
     reminder_sent = models.BooleanField(default=False)
 
-    class Meta:
-        # Prevents double-booking: the same doctor can't have two
-        # appointments on the same date in the same time slot.
-        unique_together = ('doctor', 'appointment_date', 'time_slot')
+    # No DB-level unique_together on (doctor, appointment_date, time_slot):
+    # a cancelled appointment is meant to free that slot back up for
+    # rebooking (see Doctor.get_available_slots()'s `.exclude(status='cancelled')`),
+    # and MySQL has no partial/conditional unique index to express "unique
+    # unless cancelled". Double-booking is instead prevented at the
+    # application level -- every booking view re-checks get_available_slots()
+    # immediately before calling Appointment.objects.create().
 
     def __str__(self):
         return f"{self.patient} with {self.doctor} on {self.appointment_date} {self.time_slot}"
