@@ -43,15 +43,19 @@ document.addEventListener('DOMContentLoaded', function () {
             modalDiagnosis.textContent = triggerBtn.getAttribute('data-diagnosis');
             modalAdvice.textContent = triggerBtn.getAttribute('data-advice') || '-';
 
-            modalMedicineBody.innerHTML = medicines.map(function (med) {
-                return '<tr>' +
-                    '<td>' + med.name + '</td>' +
-                    '<td>' + med.dosage + '</td>' +
-                    '<td>' + med.frequency + '</td>' +
-                    '<td>' + med.duration + '</td>' +
-                    '<td>' + (med.instructions || '-') + '</td>' +
-                    '</tr>';
-            }).join('');
+            // Built with DOM APIs (textContent) rather than innerHTML string
+            // concatenation, so a medicine field containing HTML/script
+            // markup is always rendered as plain text, never executed.
+            modalMedicineBody.replaceChildren();
+            medicines.forEach(function (med) {
+                var row = document.createElement('tr');
+                [med.name, med.dosage, med.frequency, med.duration, med.instructions || '-'].forEach(function (value) {
+                    var cell = document.createElement('td');
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+                modalMedicineBody.appendChild(row);
+            });
 
             var followUp = triggerBtn.getAttribute('data-follow-up');
             if (followUp) {

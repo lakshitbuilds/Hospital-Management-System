@@ -19,8 +19,8 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
-from django.db.models import Q, Sum
+from django.db import IntegrityError, transaction
+from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -29,7 +29,9 @@ from doctor.models import BlockedDate, Doctor, DoctorAvailability
 from patient.models import Appointment, Billing, Notification, Patient
 from patient.emails import send_appointment_booked_email, send_appointment_cancelled_email
 from image_validation import validate_uploaded_image
+from input_validation import is_valid_name
 from pagination import paginate
+from safe_redirect import safe_next_redirect
 
 from .models import Receptionist
 
@@ -172,6 +174,10 @@ def register_patient(request):
             messages.error(request, 'Please fill in all required fields.')
             return redirect('receptionist_register_patient')
 
+        if not is_valid_name(full_name):
+            messages.error(request, 'Please enter a valid full name (letters only).')
+            return redirect('receptionist_register_patient')
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('receptionist_register_patient')
@@ -193,34 +199,42 @@ def register_patient(request):
                 messages.error(request, error_message)
             return redirect('receptionist_register_patient')
 
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            role='patient',
-        )
+        # Wrapped in transaction.atomic() so a concurrent duplicate-email
+        # submission (racing past the .exists() check above) rolls back
+        # the User instead of leaving it orphaned with no Patient profile.
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role='patient',
+                )
 
-        # registered_by links this patient record back to the receptionist who
-        # walked them through registration at the front desk, for tracking/attribution.
-        patient = Patient.objects.create(
-            user=user,
-            registered_by=receptionist,
-            phone=request.POST.get('phone', ''),
-            date_of_birth=request.POST.get('date_of_birth') or None,
-            gender=request.POST.get('gender', ''),
-            blood_group=request.POST.get('blood_group', ''),
-            address=request.POST.get('address', ''),
-            city=request.POST.get('city', ''),
-            state=request.POST.get('state', ''),
-            country=request.POST.get('country', ''),
-            pincode=request.POST.get('pincode', ''),
-            emergency_contact_name=request.POST.get('emergency_contact_name', ''),
-            emergency_contact_number=request.POST.get('emergency_contact_number', ''),
-            allergies=request.POST.get('allergies', ''),
-            medical_history=request.POST.get('medical_history', ''),
-        )
+                # registered_by links this patient record back to the receptionist who
+                # walked them through registration at the front desk, for tracking/attribution.
+                patient = Patient.objects.create(
+                    user=user,
+                    registered_by=receptionist,
+                    phone=request.POST.get('phone', ''),
+                    date_of_birth=request.POST.get('date_of_birth') or None,
+                    gender=request.POST.get('gender', ''),
+                    blood_group=request.POST.get('blood_group', ''),
+                    address=request.POST.get('address', ''),
+                    city=request.POST.get('city', ''),
+                    state=request.POST.get('state', ''),
+                    country=request.POST.get('country', ''),
+                    pincode=request.POST.get('pincode', ''),
+                    emergency_contact_name=request.POST.get('emergency_contact_name', ''),
+                    emergency_contact_number=request.POST.get('emergency_contact_number', ''),
+                    allergies=request.POST.get('allergies', ''),
+                    medical_history=request.POST.get('medical_history', ''),
+                )
+        except IntegrityError:
+            messages.error(request, 'Email already registered.')
+            return redirect('receptionist_register_patient')
 
         messages.success(request, f'Patient {patient.user.get_full_name()} registered successfully with ID {patient.patient_id}.')
         return redirect('receptionist_patient_detail', patient_id=patient.id)
@@ -326,6 +340,34 @@ def today_appointments(request):
 
 
 @receptionist_required
+def search_patients(request):
+    """
+    JSON endpoint (`receptionist_search_patients` URL) backing the booking
+    form's patient search box. Reads `q` from the query string and returns
+    up to 20 matching patients (name or patient_id, case-insensitive) as
+    JSON -- this replaces rendering every patient in the system into the
+    booking form as a plain <select>, which stopped scaling once the
+    patient list grew past a couple dozen rows.
+    """
+    query = request.GET.get('q', '').strip()
+    patients = Patient.objects.select_related('user')
+    if query:
+        patients = patients.filter(
+            Q(user__first_name__icontains=query)
+            | Q(user__last_name__icontains=query)
+            | Q(patient_id__icontains=query)
+        )
+    patients = patients.order_by('user__first_name')[:20]
+
+    return JsonResponse({
+        'results': [
+            {'id': p.id, 'name': p.user.get_full_name(), 'patient_id': p.patient_id}
+            for p in patients
+        ]
+    })
+
+
+@receptionist_required
 def get_doctor_slots(request):
     """
     JSON endpoint (`receptionist_get_doctor_slots` URL) used by the booking
@@ -367,9 +409,13 @@ def book_appointment(request):
     = the doctor's `consultation_fee`) is created alongside it, and the
     patient is notified. Redirects to the appointment list on success.
     """
-    patients = Patient.objects.select_related('user').order_by('user__first_name')
     doctors = Doctor.objects.select_related('user').all()
     preselected_patient_id = request.GET.get('patient')
+    # Only the one preselected patient (if any) is looked up directly --
+    # the full patient list used to be rendered into a plain <select>,
+    # which stopped scaling once the patient count grew; the form now
+    # searches via `receptionist_search_patients` instead.
+    preselected_patient = Patient.objects.select_related('user').filter(id=preselected_patient_id).first() if preselected_patient_id else None
 
     if request.method == 'POST':
         patient_id = request.POST.get('patient')
@@ -394,34 +440,42 @@ def book_appointment(request):
             messages.error(request, 'Please select a valid date.')
             return redirect('receptionist_book_appointment')
 
-        availability = doctor.get_available_slots(parsed_date)
-        if not availability['available']:
-            messages.error(request, availability['reason'] or 'Doctor is unavailable on this date.')
-            return redirect('receptionist_book_appointment')
+        # select_for_update() locks this doctor's row for the rest of the
+        # transaction, so a second, near-simultaneous booking request for
+        # the same doctor blocks until this one commits or rolls back --
+        # closing the race window between the availability check and the
+        # Appointment.objects.create() below (Appointment has no DB-level
+        # unique constraint on doctor/date/slot -- see the model docstring).
+        with transaction.atomic():
+            locked_doctor = Doctor.objects.select_for_update().get(id=doctor.id)
+            availability = locked_doctor.get_available_slots(parsed_date)
+            if not availability['available']:
+                messages.error(request, availability['reason'] or 'Doctor is unavailable on this date.')
+                return redirect('receptionist_book_appointment')
 
-        # Find the requested slot among the doctor's available slots for this date,
-        # and reject the booking if it isn't listed or if it's already taken.
-        matching_slot = next((s for s in availability['slots'] if s['time'] == time_slot), None)
-        if matching_slot is None or matching_slot['booked']:
-            messages.error(request, 'This slot is already booked.')
-            return redirect('receptionist_book_appointment')
+            # Find the requested slot among the doctor's available slots for this date,
+            # and reject the booking if it isn't listed or if it's already taken.
+            matching_slot = next((s for s in availability['slots'] if s['time'] == time_slot), None)
+            if matching_slot is None or matching_slot['booked']:
+                messages.error(request, 'This slot is already booked.')
+                return redirect('receptionist_book_appointment')
 
-        # Booked immediately as 'confirmed' (no pending step) since a receptionist
-        # is arranging this in person, unlike patient self-booking elsewhere.
-        try:
-            appointment = Appointment.objects.create(
-                patient=patient,
-                doctor=doctor,
-                department=request.POST.get('department', doctor.department),
-                appointment_date=appointment_date,
-                time_slot=time_slot,
-                visit_type=request.POST.get('visit_type', 'new'),
-                reason=request.POST.get('reason', ''),
-                status='confirmed',
-            )
-        except IntegrityError:
-            messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
-            return redirect('receptionist_book_appointment')
+            # Booked immediately as 'confirmed' (no pending step) since a receptionist
+            # is arranging this in person, unlike patient self-booking elsewhere.
+            try:
+                appointment = Appointment.objects.create(
+                    patient=patient,
+                    doctor=doctor,
+                    department=request.POST.get('department', doctor.department),
+                    appointment_date=appointment_date,
+                    time_slot=time_slot,
+                    visit_type=request.POST.get('visit_type', 'new'),
+                    reason=request.POST.get('reason', ''),
+                    status='confirmed',
+                )
+            except IntegrityError:
+                messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
+                return redirect('receptionist_book_appointment')
 
         # Auto-generate the consultation bill for this appointment, using the
         # doctor's standard consultation fee as the amount.
@@ -443,9 +497,8 @@ def book_appointment(request):
         return redirect('receptionist_appointment_list')
 
     return render(request, 'receptionist/book_appointment.html', {
-        'patients': patients,
         'doctors': doctors,
-        'preselected_patient_id': preselected_patient_id,
+        'preselected_patient': preselected_patient,
     })
 
 
@@ -470,7 +523,7 @@ def confirm_appointment(request, appointment_id):
             message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} on {appointment.appointment_date} has been confirmed.',
         )
         messages.success(request, 'Appointment confirmed.')
-    return redirect(request.POST.get('next') or 'receptionist_appointment_list')
+    return safe_next_redirect(request, 'receptionist_appointment_list')
 
 
 @receptionist_required
@@ -494,7 +547,7 @@ def cancel_appointment(request, appointment_id):
         )
         send_appointment_cancelled_email(appointment, cancelled_by='the front desk')
         messages.success(request, 'Appointment cancelled.')
-    return redirect(request.POST.get('next') or 'receptionist_appointment_list')
+    return safe_next_redirect(request, 'receptionist_appointment_list')
 
 
 @receptionist_required
@@ -540,7 +593,7 @@ def mark_no_show(request, appointment_id):
                 ),
             )
             messages.success(request, 'Appointment marked as a no-show and a fee has been billed to the patient.')
-    return redirect(request.POST.get('next') or 'receptionist_appointment_list')
+    return safe_next_redirect(request, 'receptionist_appointment_list')
 
 
 # ================================================================
@@ -595,7 +648,7 @@ def mark_bill_paid(request, bill_id):
         bill.paid_at = timezone.now()
         bill.save()
         messages.success(request, 'Bill marked as paid.')
-    return redirect(request.POST.get('next') or 'receptionist_billing_list')
+    return safe_next_redirect(request, 'receptionist_billing_list')
 
 
 @receptionist_required
@@ -638,6 +691,13 @@ def doctor_list(request):
     # availability page -- this overrides their weekly schedule below, same
     # precedence Doctor.get_available_slots() uses for the booking flow.
     blocked_today_ids = set(BlockedDate.objects.filter(date=today).values_list('doctor_id', flat=True))
+    # One grouped query for every doctor's today's-appointment count, instead
+    # of a separate .count() query per doctor in the loop below.
+    today_counts = {
+        row['doctor']: row['count']
+        for row in Appointment.objects.filter(appointment_date=today).exclude(status='cancelled')
+            .values('doctor').annotate(count=Count('id'))
+    }
 
     doctor_rows = []
     for index, doc in enumerate(doctors):
@@ -651,7 +711,7 @@ def doctor_list(request):
             # DoctorAvailability record for today if one exists; failing
             # that, default to "available" on every day except Sunday.
             'available_today': doc.id not in blocked_today_ids and (avail.is_available if avail else (today_day != 'sunday')),
-            'today_appointment_count': Appointment.objects.filter(doctor=doc, appointment_date=today).exclude(status='cancelled').count(),
+            'today_appointment_count': today_counts.get(doc.id, 0),
         })
 
     return render(request, 'receptionist/doctor_list.html', {'doctor_rows': doctor_rows})
@@ -736,10 +796,18 @@ def edit_profile(request):
     receptionist = get_receptionist(request)
 
     if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+
+        if not all([first_name, last_name, email]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('receptionist_profile')
+
         user = request.user
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
         user.save()
 
         receptionist.phone = request.POST.get('phone', '')
@@ -777,6 +845,10 @@ def change_password(request):
 
         if not request.user.check_password(current_password):
             messages.error(request, 'Current password is incorrect.')
+            return redirect('receptionist_change_password')
+
+        if not new_password or not confirm_new_password:
+            messages.error(request, 'Please fill in both new password fields.')
             return redirect('receptionist_change_password')
 
         if new_password != confirm_new_password:

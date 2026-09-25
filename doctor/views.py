@@ -28,6 +28,7 @@ from patient.models import Patient, Appointment, Notification
 from patient.emails import send_appointment_cancelled_email
 from pagination import paginate
 from image_validation import validate_uploaded_image
+from safe_redirect import safe_next_redirect
 
 
 def doctor_required(view_func):
@@ -172,7 +173,7 @@ def mark_appointment_complete(request, appointment_id):
     if request.method == 'POST':
         appointment.status = 'completed'
         appointment.save()
-    return redirect(request.POST.get('next') or 'today_appointments')
+    return safe_next_redirect(request, 'today_appointments')
 
 
 @doctor_required
@@ -315,7 +316,19 @@ def add_prescription(request):
         advice = request.POST.get('advice', '')
         follow_up_date = request.POST.get('follow_up_date') or None
 
+        if not all([patient_id, diagnosis]):
+            messages.error(request, 'Please select a patient and enter a diagnosis.')
+            return redirect('add_prescription')
+
         patient = get_object_or_404(Patient.objects.distinct(), id=patient_id, appointments__doctor=doctor)
+
+        if appointment_id:
+            # Confirm the linked appointment actually belongs to this
+            # doctor/patient pair -- otherwise a tampered POST could
+            # attach the new prescription to someone else's appointment.
+            if not Appointment.objects.filter(id=appointment_id, doctor=doctor, patient=patient).exists():
+                messages.error(request, 'That appointment does not belong to this patient.')
+                return redirect('add_prescription')
 
         prescription = Prescription.objects.create(
             doctor=doctor,
@@ -360,7 +373,7 @@ def add_prescription(request):
         messages.success(request, 'Prescription saved successfully.')
         return redirect('prescription_history')
 
-    appointments = Appointment.objects.filter(doctor=doctor).select_related('patient').order_by('-appointment_date')
+    appointments = Appointment.objects.filter(doctor=doctor).select_related('patient__user').order_by('-appointment_date')
 
     return render(request, 'doctor/add_prescription.html', {
         'patients': patients,
@@ -468,6 +481,23 @@ def availability(request):
         # One DoctorAvailability row is created/updated per weekday, keyed
         # by (doctor, day) -- update_or_create relies on that unique_together
         # constraint to either update the existing row or insert a new one.
+        # Validate every day's range *before* writing any of them, so a bad
+        # day doesn't leave earlier days in this same submission half-saved.
+        for day in days:
+            if request.POST.get(f'available_{day}') != 'on':
+                continue
+            start_time = request.POST.get(f'start_{day}') or '09:00'
+            end_time = request.POST.get(f'end_{day}') or '17:00'
+            try:
+                parsed_start = datetime.strptime(start_time, '%H:%M').time()
+                parsed_end = datetime.strptime(end_time, '%H:%M').time()
+            except ValueError:
+                messages.error(request, f'{day.capitalize()}\'s hours are not a valid time.')
+                return redirect('availability')
+            if parsed_end <= parsed_start:
+                messages.error(request, f'{day.capitalize()}\'s end time must be after its start time.')
+                return redirect('availability')
+
         for day in days:
             is_available = request.POST.get(f'available_{day}') == 'on'
             start_time = request.POST.get(f'start_{day}') or '09:00'
@@ -629,18 +659,41 @@ def edit_profile(request):
     doctor = get_doctor(request)
 
     if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+        department = request.POST.get('department')
+
+        if not all([first_name, last_name, email, department]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('doctor_profile')
+
+        # experience_years/consultation_fee are unsigned DB columns -- a
+        # negative value would otherwise crash with a raw DataError rather
+        # than a friendly message.
+        try:
+            experience_years = int(request.POST.get('experience_years') or 0)
+            consultation_fee = int(request.POST.get('consultation_fee') or 0)
+        except ValueError:
+            messages.error(request, 'Experience and consultation fee must be numbers.')
+            return redirect('doctor_profile')
+
+        if experience_years < 0 or consultation_fee < 0:
+            messages.error(request, 'Experience and consultation fee cannot be negative.')
+            return redirect('doctor_profile')
+
         user = request.user
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
         user.save()
 
         doctor.phone_number = request.POST.get('phone_number', '')
-        doctor.department = request.POST.get('department')
+        doctor.department = department
         doctor.specialization = request.POST.get('specialization', '')
         doctor.qualification = request.POST.get('qualification', '')
-        doctor.experience_years = request.POST.get('experience_years') or 0
-        doctor.consultation_fee = request.POST.get('consultation_fee') or 0
+        doctor.experience_years = experience_years
+        doctor.consultation_fee = consultation_fee
         doctor.bio = request.POST.get('bio', '')
 
         if request.FILES.get('profile_picture'):
@@ -679,6 +732,10 @@ def change_password(request):
 
         if not request.user.check_password(current_password):
             messages.error(request, 'Current password is incorrect.')
+            return redirect('change_password')
+
+        if not new_password or not confirm_new_password:
+            messages.error(request, 'Please fill in both new password fields.')
             return redirect('change_password')
 
         if new_password != confirm_new_password:

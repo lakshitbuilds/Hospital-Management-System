@@ -23,16 +23,15 @@
 
                 <h6 class="form-section-title"><i class="bi bi-people-fill"></i>Patient &amp; Doctor</h6>
                 <div class="row gy-3 mb-4">
-                    <div class="col-md-6">
-                        <label for="patientSelect" class="form-label">Patient</label>
-                        <select class="form-select" id="patientSelect" name="patient" required>
-                            <option value="" disabled {% if not preselected_patient_id %}selected{% endif %}>Choose a patient</option>
-                            {% for p in patients %}
-                            <option value="{{ p.id }}" {% if preselected_patient_id|stringformat:"s" == p.id|stringformat:"s" %}selected{% endif %}>
-                                {{ p.user.get_full_name }} &middot; {{ p.patient_id }}
-                            </option>
-                            {% endfor %}
-                        </select>
+                    <div class="col-md-6 position-relative">
+                        <label for="patientSearchInput" class="form-label">Patient</label>
+                        <input type="text" class="form-control" id="patientSearchInput" autocomplete="off"
+                               data-search-url="{% url 'receptionist_search_patients' %}"
+                               placeholder="Search by name or patient ID..."
+                               value="{% if preselected_patient %}{{ preselected_patient.user.get_full_name }} &middot; {{ preselected_patient.patient_id }}{% endif %}">
+                        <input type="hidden" id="patientSelect" name="patient" required
+                               value="{% if preselected_patient %}{{ preselected_patient.id }}{% endif %}">
+                        <div id="patientSearchResults" class="patient-search-results" hidden></div>
                     </div>
                     <div class="col-md-6">
                         <label for="doctorSelect" class="form-label">Doctor</label>
@@ -49,7 +48,7 @@
                 <div class="row gy-3 mb-3">
                     <div class="col-md-6">
                         <label for="appointmentDate" class="form-label">Appointment Date</label>
-                        <input type="date" class="form-control" id="appointmentDate" name="appointment_date" required>
+                        <input type="date" class="form-control" id="appointmentDate" name="appointment_date" min="{% now 'Y-m-d' %}" required>
                     </div>
                     <div class="col-md-6">
                         <label for="visitType" class="form-label">Visit Type</label>
@@ -110,5 +109,5 @@
 {% endblock %}
 
 {% block javascript %}
-<script src="{% static 'js/receptionist/book_appointment.js' %}"></script>
+<script src="{% static 'js/receptionist/book_appointment.js' %}?v=2"></script>
 {% endblock %}

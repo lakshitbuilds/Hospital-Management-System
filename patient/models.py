@@ -87,7 +87,7 @@ class Patient(models.Model):
     allergies = models.TextField(blank=True)
     medical_history = models.TextField(blank=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     def save(self, *args, **kwargs):
         # Auto-generate the display ID the first time this patient is
@@ -140,11 +140,11 @@ class Appointment(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
     # The doctor the appointment is booked with.
     doctor = models.ForeignKey('doctor.Doctor', on_delete=models.CASCADE, related_name='appointments')
-    appointment_date = models.DateField()
+    appointment_date = models.DateField(db_index=True)
     time_slot = models.CharField(max_length=20)
     visit_type = models.CharField(max_length=20, choices=VISIT_TYPE_CHOICES, default='new')
     reason = models.TextField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     department = models.CharField(max_length=30, choices=DEPARTMENT_CHOICES, default='general')
     # Set by the send_appointment_reminders management command once a
@@ -190,7 +190,7 @@ class Billing(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='bills')
     bill_type = models.CharField(max_length=20, choices=BILL_TYPE_CHOICES, default='consultation')
     amount = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending', db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     # Timestamp set once the bill is actually paid; stays null while pending.
     paid_at = models.DateTimeField(blank=True, null=True)

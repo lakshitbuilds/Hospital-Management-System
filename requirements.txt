@@ -1,12 +1,447 @@
-asgiref==3.12.1
-dj-database-url==3.1.2
+# ============================================================
+# HOSPITAL MANAGEMENT SYSTEM - PYTHON DEPENDENCIES
+# ============================================================
+#
+# This file contains all Python packages required by the project.
+#
+# Install everything with:
+#     pip install -r requirements.txt
+#
+# Each package is pinned to an exact version (==) so that the same
+# versions are installed on different machines and deployments.
+# ============================================================
+
+
+# ============================================================
+# DJANGO CORE
+# ============================================================
+
+# Django is the main web framework used to build the entire
+# Hospital Management System.
+#
+# It provides:
+# - URL routing
+# - Views
+# - Models
+# - Django ORM
+# - Database migrations
+# - Templates
+# - Authentication and sessions
+# - Django Admin
+# - Security features
+# - Development server
+#
+# Project apps such as patient, doctor, receptionist, adminpanel,
+# and accounts are all Django applications.
+#
+# In simple words:
+# Django = The main framework/engine of the project.
 Django==6.1
-gunicorn==26.0.0
-mysqlclient==2.2.8
-packaging==26.3
-pillow==12.3.0
-psycopg2-binary==2.9.12
-python-decouple==3.8
+
+
+# ASGI/async support library used internally by Django.
+#
+# ASGI stands for:
+#     Asynchronous Server Gateway Interface
+#
+# Django uses asgiref for asynchronous-related functionality,
+# sync/async adapters, and other internal operations.
+#
+# This project is deployed as a traditional WSGI application
+# using Gunicorn, so our own code does not directly use async
+# views or asgiref.
+#
+# In simple words:
+# asgiref = A Django internal helper for async/ASGI support.
+asgiref==3.12.1
+
+
+# SQL parsing and formatting library used internally by Django.
+#
+# Django uses SQL-related functionality for things such as
+# displaying and processing SQL queries.
+#
+# We normally do not import sqlparse directly in our application.
+#
+# In simple words:
+# sqlparse = Django's SQL helper.
 sqlparse==0.5.5
+
+
+# Provides utilities for working with Python package versions
+# and requirements.
+#
+# Other Python packages can use it to compare versions and check
+# compatibility.
+#
+# Example:
+#     Is Django version 6.1 newer than Django 5.x?
+#
+# This is mainly a dependency/helper package and is not normally
+# imported directly by our Hospital Management System.
+#
+# In simple words:
+# packaging = Package and version checking helper.
+packaging==26.3
+
+
+# ============================================================
+# DATABASE
+# ============================================================
+
+# MySQL database driver for Python.
+#
+# Django's MySQL database backend needs a database driver to
+# communicate with the actual MySQL server.
+#
+# Simple architecture:
+#
+#     Django
+#        |
+#        v
+#     mysqlclient
+#        |
+#        v
+#     MySQL
+#
+# Our project currently uses MySQL as its database.
+#
+# Without this package, Django may fail with an error such as:
+#
+#     No module named 'MySQLdb'
+#
+# In simple words:
+# mysqlclient = Bridge between Django and MySQL.
+mysqlclient==2.2.8
+
+
+# PostgreSQL database driver for Python.
+#
+# This is the PostgreSQL equivalent of mysqlclient.
+#
+# Architecture:
+#
+#     Django
+#        |
+#        v
+#     psycopg2
+#        |
+#        v
+#     PostgreSQL
+#
+# The current project uses MySQL, so this package is not required
+# for the current local MySQL setup.
+#
+# It is kept here because the project also documents PostgreSQL
+# as an alternative production database.
+#
+# In simple words:
+# psycopg2-binary = Bridge between Django and PostgreSQL.
+psycopg2-binary==2.9.12
+
+
+# Converts a DATABASE_URL connection string into the dictionary
+# format expected by Django's DATABASES setting.
+#
+# Instead of writing:
+#
+#     ENGINE
+#     NAME
+#     USER
+#     PASSWORD
+#     HOST
+#     PORT
+#
+# separately in settings.py, we can use one value in .env:
+#
+#     DATABASE_URL=mysql://root:@127.0.0.1:3307/hms_db
+#
+# Then settings.py can use:
+#
+#     dj_database_url.parse(DATABASE_URL)
+#
+# This makes switching between development and production
+# databases much easier.
+#
+# In simple words:
+# dj-database-url = Converts DATABASE_URL into Django DB settings.
+dj-database-url==3.1.2
+
+
+# ============================================================
+# ENVIRONMENT VARIABLES / CONFIGURATION
+# ============================================================
+
+# Reads configuration values from environment variables or a
+# local .env file.
+#
+# This is used for values such as:
+#
+#     SECRET_KEY
+#     DEBUG
+#     ALLOWED_HOSTS
+#     DATABASE_URL
+#     EMAIL_HOST
+#     EMAIL_HOST_USER
+#     EMAIL_HOST_PASSWORD
+#
+# Example .env:
+#
+#     SECRET_KEY=your-secret-key
+#     DEBUG=True
+#     DATABASE_URL=mysql://root:@127.0.0.1:3307/hms_db
+#
+# Then settings.py can use:
+#
+#     from decouple import config
+#     SECRET_KEY = config("SECRET_KEY")
+#
+# This prevents sensitive information such as passwords and
+# secret keys from being hardcoded in the source code.
+#
+# The .env file should normally be included in .gitignore.
+#
+# In simple words:
+# python-decouple = Reads configuration/secrets from .env.
+python-decouple==3.8
+
+
+# ============================================================
+# IMAGE PROCESSING / IMAGE VALIDATION
+# ============================================================
+
+# Pillow is the Python Imaging Library used for working with
+# image files.
+#
+# This project allows users to upload profile pictures for:
+#
+#     - Patients
+#     - Doctors
+#     - Receptionists
+#
+# Pillow can:
+#
+#     - Open images
+#     - Verify images
+#     - Read image information
+#     - Resize images
+#     - Convert image formats
+#     - Process image files
+#
+# The project uses Pillow to verify that an uploaded file is
+# actually a valid image and not simply a file renamed with an
+# image extension.
+#
+# Example:
+#
+#     from PIL import Image
+#
+#     Image.verify()
+#
+# Simple flow:
+#
+#     User uploads file
+#            |
+#            v
+#          Pillow
+#            |
+#       +----+----+
+#       |         |
+#     Valid     Invalid
+#       |         |
+#       v         v
+#      Save     Reject
+#
+# In simple words:
+# Pillow = Image processing and image validation library.
+pillow==12.3.0
+
+
+# ============================================================
+# TIMEZONE
+# ============================================================
+
+# Provides the IANA timezone database used by Python's zoneinfo
+# functionality.
+#
+# Examples of timezone names:
+#
+#     UTC
+#     Asia/Kolkata
+#     Europe/London
+#     America/New_York
+#
+# The project uses timezone-aware datetime handling through
+# Django's:
+#
+#     USE_TZ = True
+#
+# This is important for things such as:
+#
+#     - Appointment times
+#     - OTP expiry times
+#     - Session timestamps
+#     - Created/updated timestamps
+#
+# On Windows, tzdata can provide timezone information that Python
+# may otherwise not be able to obtain from the operating system.
+#
+# In simple words:
+# tzdata = Timezone information for correct date/time handling.
 tzdata==2026.3
-whitenoise==6.12.0 
+
+
+# ============================================================
+# STATIC FILES
+# ============================================================
+
+# WhiteNoise helps Django serve static files efficiently,
+# especially in production.
+#
+# Static files include:
+#
+#     - CSS
+#     - JavaScript
+#     - Developer-provided images
+#     - Fonts
+#     - Other frontend assets
+#
+# Example:
+#
+#     static/
+#       css/
+#         patient.css
+#         doctor.css
+#       js/
+#         main.js
+#       images/
+#
+# WhiteNoise can also provide compressed and hashed static files
+# when configured with Django's static-file storage.
+#
+# Production flow can be:
+#
+#     Browser
+#        |
+#        v
+#     Django / WhiteNoise
+#        |
+#        +--> CSS
+#        +--> JavaScript
+#        +--> Static Images
+#
+# Important:
+#
+# Static files:
+#     CSS, JS, website assets
+#
+# Media files:
+#     User-uploaded profile pictures/files
+#
+# In simple words:
+# WhiteNoise = Helps serve Django static files in production.
+whitenoise==6.12.0
+
+
+# ============================================================
+# PRODUCTION SERVER
+# ============================================================
+
+# Gunicorn is a production WSGI server used to run the Django
+# application on a production server.
+#
+# During development we normally use:
+#
+#     python manage.py runserver
+#
+# The Django development server is not intended for production.
+#
+# A typical production architecture is:
+#
+#     User
+#       |
+#       v
+#     Nginx
+#       |
+#       v
+#     Gunicorn
+#       |
+#       v
+#     Django
+#       |
+#       v
+#     MySQL / PostgreSQL
+#
+# Example command:
+#
+#     gunicorn config.wsgi:application
+#
+# Multiple workers can be used:
+#
+#     gunicorn --workers 3 config.wsgi:application
+#
+# In simple words:
+# Gunicorn = Production server that runs the Django application.
+gunicorn==26.0.0
+
+
+# ============================================================
+# QUICK REFERENCE
+# ============================================================
+#
+# Django
+#     -> Main web framework
+#
+# asgiref
+#     -> Django async/ASGI helper
+#
+# sqlparse
+#     -> Django SQL helper
+#
+# packaging
+#     -> Package/version helper
+#
+# mysqlclient
+#     -> Django <-> MySQL connection
+#
+# psycopg2-binary
+#     -> Django <-> PostgreSQL connection
+#
+# dj-database-url
+#     -> DATABASE_URL -> Django database configuration
+#
+# python-decouple
+#     -> Read .env configuration and secrets
+#
+# Pillow
+#     -> Image processing and validation
+#
+# tzdata
+#     -> Timezone database
+#
+# WhiteNoise
+#     -> Static file serving
+#
+# Gunicorn
+#     -> Production WSGI server
+#
+#
+# ============================================================
+# INSTALLATION
+# ============================================================
+#
+# Create/activate your virtual environment first.
+#
+# Then run:
+#
+#     python -m pip install -r requirements.txt
+#
+# To check installed packages:
+#
+#     pip list
+#
+# To check a specific package:
+#
+#     pip show Django
+#
+# ============================================================

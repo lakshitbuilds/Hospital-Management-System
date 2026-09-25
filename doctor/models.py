@@ -79,6 +79,13 @@ class Doctor(models.Model):
 
         Returns {'available': bool, 'reason': str|None, 'slots': [{'time': '09:00 AM', 'booked': bool}, ...]}
         """
+        # A date that's already passed can never be booked, regardless of
+        # weekly schedule/holidays -- checked first, before any other rule,
+        # since both the patient and receptionist booking views trust this
+        # return value as their sole date validation.
+        if appointment_date < datetime.now().date():
+            return {'available': False, 'reason': 'That date has already passed.', 'slots': []}
+
         if self.blocked_dates.filter(date=appointment_date).exists():
             return {'available': False, 'reason': 'Doctor is on leave (holiday) on this date.', 'slots': []}
 

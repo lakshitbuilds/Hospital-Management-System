@@ -16,6 +16,7 @@ urlpatterns = [
     path('appointments/today/', views.today_appointments, name='receptionist_today_appointments'),
     path('appointments/book/', views.book_appointment, name='receptionist_book_appointment'),
     path('appointments/book/available-slots/', views.get_doctor_slots, name='receptionist_get_doctor_slots'),
+    path('appointments/book/search-patients/', views.search_patients, name='receptionist_search_patients'),
     path('appointments/<int:appointment_id>/confirm/', views.confirm_appointment, name='receptionist_confirm_appointment'),
     path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='receptionist_cancel_appointment'),
     path('appointments/<int:appointment_id>/no-show/', views.mark_no_show, name='receptionist_mark_no_show'),

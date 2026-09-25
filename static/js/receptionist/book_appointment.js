@@ -9,6 +9,8 @@
 document.addEventListener('DOMContentLoaded', function () {
 
     var patientSelect = document.getElementById('patientSelect');
+    var patientSearchInput = document.getElementById('patientSearchInput');
+    var patientSearchResults = document.getElementById('patientSearchResults');
     var doctorSelect = document.getElementById('doctorSelect');
     var dateInput = document.getElementById('appointmentDate');
     var timeSlotGrid = document.getElementById('timeSlotGrid');
@@ -23,9 +25,68 @@ document.addEventListener('DOMContentLoaded', function () {
         return option && option.value ? option.textContent.trim() : 'Not selected';
     }
 
-    if (patientSelect && summaryPatient) {
-        patientSelect.addEventListener('change', function () {
-            summaryPatient.textContent = selectedText(patientSelect);
+    /* ----------------------------------------------------------------------
+       Patient search-as-you-type (replaces a plain <select> listing every
+       patient in the system, which stopped scaling as the patient count grew)
+    ---------------------------------------------------------------------- */
+    if (patientSearchInput && patientSelect && patientSearchResults) {
+        var searchDebounce = null;
+
+        function pickPatient(id, label) {
+            patientSelect.value = id;
+            patientSearchInput.value = label;
+            if (summaryPatient) summaryPatient.textContent = label;
+            patientSearchResults.hidden = true;
+            patientSearchResults.innerHTML = '';
+        }
+
+        var patientSearchUrl = patientSearchInput.getAttribute('data-search-url');
+
+        function runSearch(query) {
+            fetch(patientSearchUrl + '?q=' + encodeURIComponent(query))
+                .then(function (resp) { return resp.json(); })
+                .then(function (data) {
+                    patientSearchResults.innerHTML = '';
+                    if (!data.results.length) {
+                        patientSearchResults.innerHTML = '<div class="patient-search-empty">No matching patients</div>';
+                        patientSearchResults.hidden = false;
+                        return;
+                    }
+                    data.results.forEach(function (p) {
+                        var label = p.name + ' · ' + p.patient_id;
+                        var item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'patient-search-item';
+                        item.textContent = label;
+                        item.addEventListener('click', function () {
+                            pickPatient(p.id, label);
+                        });
+                        patientSearchResults.appendChild(item);
+                    });
+                    patientSearchResults.hidden = false;
+                });
+        }
+
+        patientSearchInput.addEventListener('input', function () {
+            // Typing again invalidates whatever was previously selected,
+            // so the form can't silently submit a stale patient id that no
+            // longer matches the visible search text.
+            patientSelect.value = '';
+            var query = patientSearchInput.value.trim();
+            clearTimeout(searchDebounce);
+            searchDebounce = setTimeout(function () { runSearch(query); }, 200);
+        });
+
+        patientSearchInput.addEventListener('focus', function () {
+            if (patientSearchInput.value.trim()) {
+                runSearch(patientSearchInput.value.trim());
+            }
+        });
+
+        document.addEventListener('click', function (event) {
+            if (event.target !== patientSearchInput && !patientSearchResults.contains(event.target)) {
+                patientSearchResults.hidden = true;
+            }
         });
     }
 

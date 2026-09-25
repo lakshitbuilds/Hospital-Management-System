@@ -82,18 +82,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function addBlockedDate(isoDate, reason) {
+        // Built with DOM APIs (textContent / .value) rather than an
+        // innerHTML string, so a reason containing HTML/script markup is
+        // always rendered as plain text, never executed.
         var li = document.createElement('li');
         li.setAttribute('data-date', isoDate);
-        li.innerHTML =
-            '<div>' +
-                '<h6>' + formatDisplayDate(isoDate) + '</h6>' +
-                '<p>' + (reason || 'Unavailable') + '</p>' +
-            '</div>' +
-            '<button type="button" class="remove-blocked-date-btn" aria-label="Remove blocked date">' +
-                '<i class="bi bi-trash3"></i>' +
-            '</button>' +
-            '<input type="hidden" name="blocked_date[]" value="' + isoDate + '">' +
-            '<input type="hidden" name="blocked_reason[]" value="' + (reason || '') + '">';
+
+        var info = document.createElement('div');
+        var heading = document.createElement('h6');
+        heading.textContent = formatDisplayDate(isoDate);
+        var reasonEl = document.createElement('p');
+        reasonEl.textContent = reason || 'Unavailable';
+        info.appendChild(heading);
+        info.appendChild(reasonEl);
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'remove-blocked-date-btn';
+        removeBtn.setAttribute('aria-label', 'Remove blocked date');
+        removeBtn.innerHTML = '<i class="bi bi-trash3"></i>';
+
+        var dateInput = document.createElement('input');
+        dateInput.type = 'hidden';
+        dateInput.name = 'blocked_date[]';
+        dateInput.value = isoDate;
+
+        var reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'blocked_reason[]';
+        reasonInput.value = reason || '';
+
+        li.appendChild(info);
+        li.appendChild(removeBtn);
+        li.appendChild(dateInput);
+        li.appendChild(reasonInput);
 
         blockedDateList.appendChild(li);
         refreshBlockedEmptyState();

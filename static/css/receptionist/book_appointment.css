@@ -2,10 +2,53 @@
    BOOK APPOINTMENT PAGE (book_appointment.html) - PAGE SPECIFIC STYLES
    Note: .form-section-title / .form-actions load from edit_profile.css.
    Structure:
+   0. Patient Search
    1. Time Slot Selector
    2. Booking Summary Sidebar
    3. Responsive
    ========================================================================== */
+
+
+/* ==========================================================================
+   0. PATIENT SEARCH
+   ========================================================================== */
+.patient-search-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    margin-top: 0.25rem;
+    background: var(--rec-white);
+    border: 1px solid var(--rec-border-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    max-height: 240px;
+    overflow-y: auto;
+}
+
+.patient-search-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.55rem 0.85rem;
+    border: none;
+    background: none;
+    font-size: 0.9rem;
+    color: inherit;
+}
+
+.patient-search-item:hover,
+.patient-search-item:focus {
+    background: var(--rec-primary-light);
+    color: var(--rec-primary-dark);
+}
+
+.patient-search-empty {
+    padding: 0.55rem 0.85rem;
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
 
 
 /* ==========================================================================

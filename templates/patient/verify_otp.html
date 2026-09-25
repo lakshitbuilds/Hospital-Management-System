@@ -41,27 +41,6 @@
                     <h2 class="section-title">Enter Verification Code</h2>
                     <p class="section-text">We sent a 6-digit code to <strong>{{ email }}</strong>.</p>
                 </div>
-                {% if messages %}
-                    {% for message in messages %}
-                        <div class="alert
-                            {% if message.tags == 'success' %}alert-success
-                            {% elif message.tags == 'error' %}alert-danger
-                            {% elif message.tags == 'warning' %}alert-warning
-                            {% else %}alert-info
-                            {% endif %}
-                            alert-dismissible fade show mb-3"
-                            role="alert">
-
-                            {{ message }}
-
-                            <button type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="alert"
-                                    aria-label="Close">
-                            </button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
                 <form id="verifyOtpForm" class="auth-form" action="{% url 'verify_otp' %}" method="post" novalidate>
                     {% csrf_token %}
 

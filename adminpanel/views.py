@@ -20,6 +20,7 @@ from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 from django.db.models import Count, Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -28,7 +29,9 @@ from accounts.models import SystemSettings
 from doctor.models import Doctor
 from patient.models import Appointment, Billing, Notification, Patient
 from receptionist.models import Receptionist
+from input_validation import is_valid_name
 from pagination import paginate
+from safe_redirect import safe_next_redirect
 
 User = get_user_model()
 
@@ -100,8 +103,9 @@ def admin_dashboard(request):
     """
     today = date.today()
 
-    completed_appointments = Appointment.objects.filter(status='completed').select_related('doctor')
-    revenue_estimate = sum(a.doctor.consultation_fee for a in completed_appointments)
+    revenue_estimate = Appointment.objects.filter(status='completed').aggregate(
+        total=Sum('doctor__consultation_fee')
+    )['total'] or 0
     outstanding_bills = Billing.objects.filter(status='pending').aggregate(total=Sum('amount'))['total'] or 0
 
     # --- Chart 1: appointments by department (bar chart) ---
@@ -216,6 +220,10 @@ def add_doctor(request):
             messages.error(request, 'Please fill in all required fields.')
             return redirect('admin_add_doctor')
 
+        if not is_valid_name(full_name):
+            messages.error(request, 'Please enter a valid full name (letters only).')
+            return redirect('admin_add_doctor')
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('admin_add_doctor')
@@ -235,25 +243,47 @@ def add_doctor(request):
                 messages.error(request, error_message)
             return redirect('admin_add_doctor')
 
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            role='doctor',
-        )
+        # experience_years/consultation_fee are unsigned columns -- a
+        # negative value would crash with a raw DB error rather than a
+        # friendly message, so reject it before it ever reaches .create().
+        try:
+            experience_years = int(request.POST.get('experience_years') or 0)
+            consultation_fee = int(request.POST.get('consultation_fee') or 0)
+        except ValueError:
+            messages.error(request, 'Experience and consultation fee must be numbers.')
+            return redirect('admin_add_doctor')
 
-        doctor = Doctor.objects.create(
-            user=user,
-            department=department,
-            specialization=request.POST.get('specialization', ''),
-            phone_number=request.POST.get('phone_number', ''),
-            qualification=request.POST.get('qualification', ''),
-            experience_years=request.POST.get('experience_years') or 0,
-            consultation_fee=request.POST.get('consultation_fee') or 0,
-            license_number=request.POST.get('license_number', ''),
-        )
+        if experience_years < 0 or consultation_fee < 0:
+            messages.error(request, 'Experience and consultation fee cannot be negative.')
+            return redirect('admin_add_doctor')
+
+        # Wrapped in transaction.atomic() so a concurrent duplicate-email
+        # submission (racing past the .exists() check above) rolls back
+        # the User instead of leaving it orphaned with no Doctor profile.
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role='doctor',
+                )
+
+                doctor = Doctor.objects.create(
+                    user=user,
+                    department=department,
+                    specialization=request.POST.get('specialization', ''),
+                    phone_number=request.POST.get('phone_number', ''),
+                    qualification=request.POST.get('qualification', ''),
+                    experience_years=experience_years,
+                    consultation_fee=consultation_fee,
+                    license_number=request.POST.get('license_number', ''),
+                )
+        except IntegrityError:
+            messages.error(request, 'Email already registered.')
+            return redirect('admin_add_doctor')
 
         messages.success(request, f'Dr. {doctor.user.get_full_name()} has been onboarded successfully.')
         return redirect('admin_doctor_detail', doctor_id=doctor.id)
@@ -338,6 +368,10 @@ def add_receptionist(request):
             messages.error(request, 'Please fill in all required fields.')
             return redirect('admin_add_receptionist')
 
+        if not is_valid_name(full_name):
+            messages.error(request, 'Please enter a valid full name (letters only).')
+            return redirect('admin_add_receptionist')
+
         if password != confirm_password:
             messages.error(request, 'Passwords do not match.')
             return redirect('admin_add_receptionist')
@@ -357,20 +391,28 @@ def add_receptionist(request):
                 messages.error(request, error_message)
             return redirect('admin_add_receptionist')
 
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            role='receptionist',
-        )
+        # Wrapped in transaction.atomic() so a concurrent duplicate-email
+        # submission (racing past the .exists() check above) rolls back
+        # the User instead of leaving it orphaned with no Receptionist profile.
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role='receptionist',
+                )
 
-        receptionist = Receptionist.objects.create(
-            user=user,
-            phone=request.POST.get('phone', ''),
-            shift=request.POST.get('shift', 'morning'),
-        )
+                receptionist = Receptionist.objects.create(
+                    user=user,
+                    phone=request.POST.get('phone', ''),
+                    shift=request.POST.get('shift', 'morning'),
+                )
+        except IntegrityError:
+            messages.error(request, 'Email already registered.')
+            return redirect('admin_add_receptionist')
 
         messages.success(request, f'{receptionist.user.get_full_name()} has been onboarded successfully.')
         return redirect('admin_receptionist_list')
@@ -404,7 +446,7 @@ def update_receptionist_shift(request, receptionist_id):
             receptionist.shift = shift
             receptionist.save()
             messages.success(request, f'{receptionist.user.get_full_name()}\'s shift has been updated to {receptionist.get_shift_display()}.')
-    return redirect(request.POST.get('next') or 'admin_receptionist_list')
+    return safe_next_redirect(request, 'admin_receptionist_list')
 
 
 # ================================================================
@@ -421,7 +463,7 @@ def patient_list(request):
     (possibly filtered) patients and the current query string.
     """
     query = request.GET.get('q', '').strip()
-    patients = Patient.objects.select_related('user', 'registered_by').order_by('-created_at', '-id')
+    patients = Patient.objects.select_related('user', 'registered_by__user').order_by('-created_at', '-id')
     if query:
         patients = patients.filter(
             Q(user__first_name__icontains=query)
@@ -530,7 +572,7 @@ def update_appointment_status(request, appointment_id):
             appointment.status = status
             appointment.save()
             messages.success(request, f"Appointment status updated to {appointment.get_status_display()}.")
-    return redirect(request.POST.get('next') or 'admin_appointment_list')
+    return safe_next_redirect(request, 'admin_appointment_list')
 
 
 # ================================================================
@@ -582,7 +624,7 @@ def mark_bill_paid(request, bill_id):
         bill.paid_at = timezone.now()
         bill.save()
         messages.success(request, 'Bill marked as paid.')
-    return redirect(request.POST.get('next') or 'admin_billing_list')
+    return safe_next_redirect(request, 'admin_billing_list')
 
 
 @admin_required
@@ -671,7 +713,7 @@ def toggle_user_status(request, user_id):
             state = 'activated' if target.is_active else 'deactivated'
             messages.success(request, f'{target.get_full_name()} has been {state}.')
 
-    return redirect(request.POST.get('next') or 'admin_dashboard')
+    return safe_next_redirect(request, 'admin_dashboard')
 
 
 # ================================================================
@@ -744,10 +786,18 @@ def edit_profile(request):
     success message.
     """
     if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+
+        if not all([first_name, last_name, email]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('admin_profile')
+
         user = request.user
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
         user.save()
         messages.success(request, 'Profile updated successfully.')
         return redirect('admin_profile')
@@ -774,6 +824,10 @@ def change_password(request):
 
         if not request.user.check_password(current_password):
             messages.error(request, 'Current password is incorrect.')
+            return redirect('admin_change_password')
+
+        if not new_password or not confirm_new_password:
+            messages.error(request, 'Please fill in both new password fields.')
             return redirect('admin_change_password')
 
         if new_password != confirm_new_password:

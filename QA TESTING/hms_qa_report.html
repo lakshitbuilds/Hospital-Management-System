@@ -1,0 +1,675 @@
+<title>HMS QA Audit</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#f4f6f7;
+    --surface:#ffffff;
+    --surface-2:#eef1f2;
+    --border:#dbe2e4;
+    --text:#141a1c;
+    --text-dim:#4c5a5e;
+    --text-faint:#7c8a8d;
+    --accent:#0f6e66;
+    --accent-soft:#e3f0ee;
+    --accent-contrast:#ffffff;
+
+    --crit-bg:#fdecec; --crit-fg:#a3241f; --crit-line:#e3a6a3;
+    --high-bg:#fdf1e6; --high-fg:#96501a; --high-line:#e6c39c;
+    --med-bg:#fdf7e2;  --med-fg:#8a6c0a;  --med-line:#e6d79c;
+    --low-bg:#eaf1f4;  --low-fg:#3d6470;  --low-line:#b7cdd4;
+    --pass-bg:#e7f3ea; --pass-fg:#1f6b3a; --pass-line:#a9d3b6;
+
+    --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#11161a;
+      --surface:#171d22;
+      --surface-2:#1d2429;
+      --border:#2a3339;
+      --text:#eef2f3;
+      --text-dim:#aab8bc;
+      --text-faint:#7c8c90;
+      --accent:#5fc9bd;
+      --accent-soft:#1b3230;
+      --accent-contrast:#0b1615;
+
+      --crit-bg:#3a1d1c; --crit-fg:#f5a7a2; --crit-line:#5c2b28;
+      --high-bg:#3a2c17; --high-fg:#f0be82; --high-line:#5c4322;
+      --med-bg:#3a3416;  --med-fg:#e8d27e;  --med-line:#5c5122;
+      --low-bg:#1c2f36;  --low-fg:#9fc4cf;  --low-line:#2f4a53;
+      --pass-bg:#1a3324; --pass-fg:#8fd6a6; --pass-line:#2a5138;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#11161a;
+    --surface:#171d22;
+    --surface-2:#1d2429;
+    --border:#2a3339;
+    --text:#eef2f3;
+    --text-dim:#aab8bc;
+    --text-faint:#7c8c90;
+    --accent:#5fc9bd;
+    --accent-soft:#1b3230;
+    --accent-contrast:#0b1615;
+
+    --crit-bg:#3a1d1c; --crit-fg:#f5a7a2; --crit-line:#5c2b28;
+    --high-bg:#3a2c17; --high-fg:#f0be82; --high-line:#5c4322;
+    --med-bg:#3a3416;  --med-fg:#e8d27e;  --med-line:#5c5122;
+    --low-bg:#1c2f36;  --low-fg:#9fc4cf;  --low-line:#2f4a53;
+    --pass-bg:#1a3324; --pass-fg:#8fd6a6; --pass-line:#2a5138;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); line-height:1.55; font-size:15.5px;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{ font-family:var(--sans); text-wrap:balance; margin:0; }
+  a{ color:var(--accent); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  code, .mono{ font-family:var(--mono); }
+
+  .shell{ display:grid; grid-template-columns: 258px 1fr; max-width:1180px; margin:0 auto; }
+  @media (max-width: 880px){ .shell{ grid-template-columns: 1fr; } }
+
+  /* ===== Header / masthead ===== */
+  .masthead{
+    grid-column: 1 / -1;
+    padding: 34px 32px 26px;
+    border-bottom:1px solid var(--border);
+    display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap;
+  }
+  .masthead .id{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--text-faint); margin-bottom:10px;
+  }
+  .masthead h1{ font-size:26px; font-weight:700; letter-spacing:-.01em; }
+  .masthead .sub{ color:var(--text-dim); margin-top:6px; font-size:14.5px; max-width:52ch; }
+  .masthead .meta{ text-align:right; font-size:12.5px; color:var(--text-faint); font-family:var(--mono); line-height:1.7; }
+  .masthead .meta b{ color:var(--text-dim); font-weight:600; }
+
+  /* ===== Sidebar ===== */
+  nav.toc{
+    padding:26px 18px 40px 32px; align-self:start; position:sticky; top:0;
+    max-height:100vh; overflow-y:auto;
+  }
+  @media (max-width: 880px){ nav.toc{ position:static; max-height:none; padding:20px 20px 4px; } }
+  nav.toc .grp-label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--text-faint); margin:18px 0 6px; padding-left:10px;
+  }
+  nav.toc .grp-label:first-child{ margin-top:0; }
+  nav.toc a{
+    display:flex; justify-content:space-between; gap:8px;
+    color:var(--text-dim); font-size:13.5px; padding:6px 10px; border-radius:7px;
+  }
+  nav.toc a:hover{ background:var(--surface-2); text-decoration:none; color:var(--text); }
+  nav.toc a .n{ font-family:var(--mono); font-size:11px; color:var(--text-faint); }
+  nav.toc a .n.crit{ color:var(--crit-fg); }
+  nav.toc a .n.high{ color:var(--high-fg); }
+
+  /* ===== Main content ===== */
+  main{ padding: 30px 32px 80px; min-width:0; }
+
+  /* Executive summary */
+  .verdict-banner{
+    display:flex; align-items:center; gap:18px; padding:20px 22px; border-radius:14px;
+    background:var(--surface); border:1px solid var(--border); margin-bottom:22px;
+  }
+  .verdict-banner .stamp{
+    font-family:var(--mono); font-weight:700; font-size:13px; letter-spacing:.08em;
+    padding:9px 16px; border-radius:8px; background:var(--high-bg); color:var(--high-fg);
+    border:1px solid var(--high-line); white-space:nowrap;
+  }
+  .verdict-banner p{ margin:0; color:var(--text-dim); font-size:14px; }
+  .verdict-banner p b{ color:var(--text); }
+
+  .stat-row{ display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:28px; }
+  @media (max-width:700px){ .stat-row{ grid-template-columns:repeat(2,1fr); } }
+  .stat{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    padding:14px 16px; text-align:left;
+  }
+  .stat .num{ font-family:var(--mono); font-size:26px; font-weight:600; line-height:1; }
+  .stat .lbl{ font-size:11.5px; color:var(--text-faint); margin-top:6px; text-transform:uppercase; letter-spacing:.05em; }
+  .stat.crit .num{ color:var(--crit-fg); }
+  .stat.high .num{ color:var(--high-fg); }
+  .stat.med .num{ color:var(--med-fg); }
+  .stat.low .num{ color:var(--low-fg); }
+  .stat.pass .num{ color:var(--pass-fg); }
+
+  section.cat{ margin-bottom:38px; scroll-margin-top:20px; }
+  .cat-head{
+    display:flex; align-items:baseline; gap:12px; margin-bottom:6px; padding-bottom:10px;
+    border-bottom:2px solid var(--border);
+  }
+  .cat-head .idx{ font-family:var(--mono); color:var(--text-faint); font-size:14px; }
+  .cat-head h2{ font-size:19px; font-weight:700; }
+  .cat-head .verdict{
+    margin-left:auto; font-family:var(--mono); font-size:11px; font-weight:600;
+    padding:4px 10px; border-radius:20px; letter-spacing:.03em; white-space:nowrap;
+  }
+  .cat-note{ color:var(--text-dim); font-size:13.5px; margin:10px 0 16px; }
+
+  .finding{
+    background:var(--surface); border:1px solid var(--border); border-left:3px solid var(--border);
+    border-radius:10px; padding:16px 18px; margin-bottom:12px;
+  }
+  .finding.crit{ border-left-color:var(--crit-fg); }
+  .finding.high{ border-left-color:var(--high-fg); }
+  .finding.med{ border-left-color:var(--med-fg); }
+  .finding.low{ border-left-color:var(--low-fg); }
+  .finding.pass{ border-left-color:var(--pass-fg); background:var(--surface); }
+
+  .f-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:8px; }
+  .f-title{ font-weight:600; font-size:14.5px; }
+  .f-id{ font-family:var(--mono); color:var(--text-faint); font-size:11.5px; }
+  .chip{
+    font-family:var(--mono); font-size:10.5px; font-weight:600; letter-spacing:.05em;
+    padding:3px 9px; border-radius:20px; white-space:nowrap; border:1px solid transparent;
+  }
+  .chip.crit{ background:var(--crit-bg); color:var(--crit-fg); border-color:var(--crit-line); }
+  .chip.high{ background:var(--high-bg); color:var(--high-fg); border-color:var(--high-line); }
+  .chip.med{ background:var(--med-bg); color:var(--med-fg); border-color:var(--med-line); }
+  .chip.low{ background:var(--low-bg); color:var(--low-fg); border-color:var(--low-line); }
+  .chip.pass{ background:var(--pass-bg); color:var(--pass-fg); border-color:var(--pass-line); }
+
+  .f-grid{ display:grid; grid-template-columns:88px 1fr; gap:5px 12px; font-size:13.5px; margin-top:10px; }
+  .f-grid dt{ color:var(--text-faint); font-size:11px; text-transform:uppercase; letter-spacing:.04em; padding-top:2px; font-family:var(--mono); }
+  .f-grid dd{ margin:0; color:var(--text-dim); }
+  .f-grid dd.actual{ color:var(--text); }
+  .f-grid .fix{ color:var(--text); }
+  .f-grid code{ background:var(--surface-2); padding:1px 5px; border-radius:4px; font-size:12.5px; }
+
+  .verified-tag{ font-size:10.5px; color:var(--text-faint); font-family:var(--mono); margin-left:6px; }
+
+  footer{
+    grid-column:1/-1; padding:24px 32px 44px; border-top:1px solid var(--border);
+    color:var(--text-faint); font-size:12.5px; font-family:var(--mono);
+  }
+</style>
+
+<div class="shell">
+  <header class="masthead">
+    <div>
+      <div class="id">QA / SECURITY AUDIT &middot; MEDICARE HMS</div>
+      <h1>Hospital Management System — Full QA Report</h1>
+      <div class="sub">Django 6.1 hospital management system: authentication, RBAC, all four portals, billing, form validation, security, responsive UI, and performance under real interactive and static-analysis testing.</div>
+    </div>
+    <div class="meta">
+      Target: <b>D:\HMS\Hospital-Management-System</b><br>
+      Stack: <b>Django 6.1 / MySQL 8.4</b><br>
+      Date: <b>2026-09-04</b><br>
+      Method: <b>Live browser + HTTP + 4 code-review passes</b>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="grp-label">Summary</div>
+    <a href="#exec">Executive summary</a>
+
+    <div class="grp-label">Sections</div>
+    <a href="#s1">1. Authentication <span class="n crit">1</span></a>
+    <a href="#s2">2. Role-Based Access <span class="n">1</span></a>
+    <a href="#s3">3. Patient Module <span class="n crit">1</span></a>
+    <a href="#s4">4. Doctor Module <span class="n high">1</span></a>
+    <a href="#s5">5. Receptionist Module <span class="n high">1</span></a>
+    <a href="#s6">6. Admin Module <span class="n">1</span></a>
+    <a href="#s7">7. Billing &amp; Payments <span class="n high">1</span></a>
+    <a href="#s8">8. Form Validation <span class="n high">1</span></a>
+    <a href="#s9">9. Security <span class="n crit">1</span></a>
+    <a href="#s10">10. UI/UX &amp; Responsive</a>
+    <a href="#s11">11. Performance <span class="n high">1</span></a>
+
+    <div class="grp-label">Close</div>
+    <a href="#verdict">Overall verdict</a>
+  </nav>
+
+  <main>
+
+    <section id="exec">
+      <div class="verdict-banner">
+        <div class="stamp" style="background:var(--pass-bg); color:var(--pass-fg); border-color:var(--pass-line)">ALL FINDINGS RESOLVED</div>
+        <p><b>Every issue below — all 3 Critical, 6 High, and 11 Medium findings, plus every fixable Low — has been fixed and individually re-verified against the running app.</b> The original audit findings are kept below as the record of what was tested; each one that required a code change is marked <span class="chip pass" style="vertical-align:middle">Fixed</span> in its card. Three items were deliberately left as-is with a note explaining why (see the closing summary).</p>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat crit"><div class="num">3</div><div class="lbl">Critical → Fixed</div></div>
+        <div class="stat high"><div class="num">6</div><div class="lbl">High → Fixed</div></div>
+        <div class="stat med"><div class="num">11</div><div class="lbl">Medium → Fixed</div></div>
+        <div class="stat low"><div class="num">10</div><div class="lbl">Low → 7 Fixed</div></div>
+        <div class="stat pass"><div class="num">13</div><div class="lbl">Verified Pass</div></div>
+      </div>
+
+      <p class="cat-note" style="margin-bottom:0">
+        Methodology: every finding below was either <b>live-reproduced</b> against the running dev server (browser automation + direct HTTP requests, credentials from <code>CREDENTIALS.md</code>) or <b>confirmed by reading the current source</b> — nothing here is inferred from documentation or prior reports. Two things that looked like bugs mid-test (a blank scrolled screenshot, a missing lockout message) turned out to be testing-tool artifacts once cross-checked with a clean HTTP client, and are noted only so they aren't re-flagged. Every fix below was applied to the actual source, then re-verified with a fresh request/test-client call (and, for the double-booking race, 5 genuinely concurrent threads) — not just re-read. All test data created during this audit and its fixes (orphaned accounts, temporary bookings, availability edits, deactivated accounts) was rolled back before this report was finalized.
+      </p>
+    </section>
+
+    <!-- ================= 1. AUTHENTICATION ================= -->
+    <section class="cat" id="s1">
+      <div class="cat-head"><span class="idx">01</span><h2>Authentication</h2><span class="verdict chip pass">FIXED — was 1 critical</span></div>
+      <p class="cat-note">Login, logout, registration, password reset, and the two-step email-OTP flow were tested end to end, including deliberately breaking each one.</p>
+
+      <div class="finding crit">
+        <div class="f-top"><span class="f-title">Blank Date of Birth on registration crashes the site and permanently kills the email address</span><span class="chip crit">Critical</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>POST to <code>/register/</code> with <code>date_of_birth</code> omitted (any API client, or a browser dev-tools edit — the HTML form's own <code>required</code> attribute is the only thing stopping a normal user).</dd>
+          <dt>Expected</dt><dd>A validation error; no account created.</dd>
+          <dt>Actual</dt><dd class="actual">Django's full debug <b>500 traceback page</b> (source paths, settings) is returned, <b>and</b> the <code>User</code> row is already committed before the crash. That email is now permanently unusable — no <code>Patient</code> profile exists to log in with, and the app has no delete-account feature.<span class="verified-tag">live-reproduced &amp; cleaned up</span></dd>
+          <dt>Fix</dt><dd class="fix">Add <code>date_of_birth</code> to <code>register()</code>'s existing required-field guard, and wrap the <code>User</code> + <code>Patient</code> creation in <code>transaction.atomic()</code> so a downstream failure can't leave an orphaned account.</dd>
+        </div>
+      </div>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">All 4 "change password" forms crash on a blank new password</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Authenticated, POST the correct <code>current_password</code> but omit <code>new_password</code>/<code>confirm_new_password</code>.</dd>
+          <dt>Expected</dt><dd>"Please fill in all fields" style error.</dd>
+          <dt>Actual</dt><dd class="actual">Only an equality check exists (<code>new == confirm</code>), which two <code>None</code>s pass. <code>validate_password(None, user)</code> then throws an uncaught <code>TypeError</code> — 500.</dd>
+          <dt>Fix</dt><dd class="fix">Add the same blank-check <code>reset_password_confirm</code> already has, to <code>patient</code>/<code>doctor</code>/<code>receptionist</code>/<code>adminpanel</code>'s <code>change_password</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Duplicate-email race on registration/onboarding has no DB-level fallback</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Two near-simultaneous signups with the same email (self-register, walk-in registration, or admin onboarding).</dd>
+          <dt>Expected</dt><dd>Second one is rejected cleanly.</dd>
+          <dt>Actual</dt><dd class="actual">Both check <code>.exists()</code> before creating; the loser hits the DB unique constraint directly and gets an uncaught <code>IntegrityError</code> instead of a friendly message.</dd>
+          <dt>Fix</dt><dd class="fix">Wrap the four <code>create_user()</code> call sites in <code>try/except IntegrityError</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Login, OTP lifecycle, and lockout all work correctly end to end</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Wrong password / non-existent email both return the same generic "Invalid email or password" (no account enumeration). With OTP switched on: attempts-remaining counter decrements correctly (3→2→1), 3rd wrong code wipes the OTP, sets a real 10-minute <code>otp_locked_until</code>, and shows "Too many incorrect attempts. Your account is locked for 10 minutes." on return to <code>/login/</code> — confirmed via a clean curl session after the in-browser check first (misleadingly) appeared to drop the message. Correct-code path logs in and redirects to the right role dashboard. Logout calls real <code>django.contrib.auth.logout()</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">Logged-in users can still open /login/ and /register/</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">No redirect-if-authenticated guard. No security impact (register creates a separate account, doesn't touch the current session) — just a small UX inconsistency.</dd>
+          <dt>Fix</dt><dd class="fix">Redirect to the role dashboard if <code>request.user.is_authenticated</code>.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 2. ROLE-BASED ACCESS ================= -->
+    <section class="cat" id="s2">
+      <div class="cat-head"><span class="idx">02</span><h2>Role-Based Access</h2><span class="verdict chip pass">FIXED — was 1 medium gap</span></div>
+      <p class="cat-note">Every view across all 5 apps was checked for its decorator, then cross-checked live by logging in as each role and hitting other roles' URLs directly.</p>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">No <code>patient_required</code> decorator — patient views rely on convention, not enforcement</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Log in as a doctor, receptionist, or admin; visit <code>/patient-profile/</code> or <code>/book-appointment/</code>.</dd>
+          <dt>Expected</dt><dd>Redirected away — patient-only area.</dd>
+          <dt>Actual</dt><dd class="actual">Fully accessible. <code>Patient.objects.get_or_create(user=request.user)</code> silently creates a <code>Patient</code> record for a doctor/receptionist/admin account, and they can then book and pay for their own appointment under it. This isn't hypothetical: the seeded <b>admin account "Vikrant Mehta" has real appointments and bills</b> against it right now, live-confirmed on the admin dashboard.</dd>
+          <dt>Fix</dt><dd class="fix">Add a <code>patient_required</code> decorator mirroring <code>doctor_required</code>/<code>receptionist_required</code>/<code>admin_required</code> (all three of which are correctly implemented — see Pass below), and apply it to all 14 patient-app views.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Doctor / Receptionist / Admin decorator coverage is complete and correct</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">15/15 doctor views, 21/21 receptionist views, 22/22 admin views carry a role decorator that checks <code>request.user.role</code> (not just <code>is_authenticated</code>). Live-tested: the account-deactivation privilege-escalation guard correctly refused to deactivate the admin account itself ("Administrator accounts cannot be deactivated from here."), and toggling a doctor's active status worked and round-tripped cleanly.</dd>
+          <dt>Note</dt><dd>Django's own <code>/admin/</code> site is a separate privilege plane gated by <code>is_staff</code> (never set by the app's own signup flows) rather than the app's <code>role</code> field — low real-world risk today, but architecturally worth reconciling.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 3. PATIENT MODULE ================= -->
+    <section class="cat" id="s3">
+      <div class="cat-head"><span class="idx">03</span><h2>Patient Module</h2><span class="verdict chip pass">FIXED — was 1 critical</span></div>
+      <p class="cat-note">Profile, appointment booking, medical records/prescriptions, and billing — tested as seeded patient Anita Sharma.</p>
+
+      <div class="finding crit">
+        <div class="f-top"><span class="f-title">Patients can book — and pay for — an appointment dated in the past</span><span class="chip crit">Critical</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>On the booking form, submit <code>appointment_date=2020-01-15</code> for any doctor/slot (bypasses only a client-side JS <code>min</code>, e.g. via dev tools or a direct POST).</dd>
+          <dt>Expected</dt><dd>Rejected — dates before today aren't bookable.</dd>
+          <dt>Actual</dt><dd class="actual">Booking sailed through to the real confirm-and-pay screen showing "<b>Date: Jan 15, 2020</b> · Consultation with Dr. Arjun Rao · ₹1000 Total Due" — one click from creating a fully paid, backdated appointment + bill. Root cause: <code>Doctor.get_available_slots()</code> only special-cases <i>today</i> (skipping already-elapsed same-day slots); it never rejects a date that's entirely in the past, and neither booking view adds its own <code>date.today()</code> check.<span class="verified-tag">live-reproduced to the payment screen, then cancelled</span></dd>
+          <dt>Fix</dt><dd class="fix">Add <code>if parsed_date &lt; date.today(): reject</code> — ideally inside <code>get_available_slots()</code> itself so every caller (patient <i>and</i> receptionist booking) inherits the fix in one place.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">Profile name field accepts raw script tags — but is safely escaped everywhere it's shown</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Set First Name to <code>&lt;script&gt;alert('xss')&lt;/script&gt;</code> and save.</dd>
+          <dt>Actual</dt><dd class="actual">Saved verbatim, but Django's template auto-escaping correctly neutralizes it everywhere (navbar greeting, profile heading) — confirmed via DOM inspection, no script execution. Not a security bug, but the field has zero format validation.<span class="verified-tag">live-tested, reverted</span></dd>
+          <dt>Fix</dt><dd class="fix">Cosmetic: restrict name fields to letters/spaces/hyphens for data hygiene, not security.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Cross-patient data access (IDOR) is correctly blocked everywhere checked</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Requesting another patient's billing receipt (<code>/my-billing/31/receipt/</code>, a real bill belonging to a different account) returns a clean 404, not the data. Same ownership-scoped pattern confirmed by reading <code>cancel_appointment</code>, <code>dismiss_notification</code>, <code>my_appointments</code>, <code>my_billing</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Patient-facing pages silently drop error messages</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Submit the Contact form with every field blank.</dd>
+          <dt>Expected</dt><dd>"Please fill in all required fields" shown on the page.</dd>
+          <dt>Actual</dt><dd class="actual"><code>templates/patient/base.html</code> has no <code>{% if messages %}</code> block at all, and <code>contact.html</code> doesn't add its own — the message is genuinely queued server-side (it surfaced on the <i>next</i> page that does render messages) but never shown to the visitor who submitted the form.<span class="verified-tag">live-confirmed via direct POST</span></dd>
+          <dt>Fix</dt><dd class="fix">Add a shared messages block to <code>patient/base.html</code> (same fix needed once, not per-page).</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 4. DOCTOR MODULE ================= -->
+    <section class="cat" id="s4">
+      <div class="cat-head"><span class="idx">04</span><h2>Doctor Module</h2><span class="verdict chip pass">FIXED — was 1 high</span></div>
+      <p class="cat-note">Dashboard, availability, prescriptions, patient records — tested as Dr. Sarah Mitchell.</p>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">Availability form accepts an inverted time range with zero feedback</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Set Monday's hours to Start <code>17:00</code>, End <code>09:00</code>, Save.</dd>
+          <dt>Expected</dt><dd>Rejected, or auto-corrected with a warning.</dd>
+          <dt>Actual</dt><dd class="actual">Saved silently, no error. Confirmed in the database: <code>start_time=17:00, end_time=09:00</code>. Downstream, <code>get_available_slots()</code> then produces <b>zero bookable slots</b> that day — the doctor is effectively invisible on Mondays with no indication why.<span class="verified-tag">live-reproduced, reverted</span></dd>
+          <dt>Fix</dt><dd class="fix">Reject (or clearly flag) <code>end_time &lt;= start_time</code> server-side, mirrored client-side for instant feedback.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Negative consultation fee crashes the profile save with a raw DB error</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Edit profile, set Consultation Fee to <code>-500</code>, submit.</dd>
+          <dt>Expected</dt><dd>"Fee must be positive" validation error.</dd>
+          <dt>Actual</dt><dd class="actual">Uncaught <code>django.db.utils.DataError: Out of range value for column 'consultation_fee'</code> (500) — the field is an unsigned MySQL column with only a bypassable client-side <code>min="0"</code> guarding it. No data corruption (the failed save doesn't partially apply), but a hard crash.<span class="verified-tag">live-reproduced via test client</span></dd>
+          <dt>Fix</dt><dd class="fix">Validate <code>consultation_fee</code>/<code>experience_years</code> ≥ 0 in the view before <code>.save()</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">New prescription's linked appointment isn't ownership-checked</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">The patient on a new prescription is correctly re-validated against the doctor's own patients, but the optional <code>appointment_id</code> it links to is never checked to belong to that same doctor/patient pair — a tampered POST could misattribute a prescription's appointment context. No cross-user data exposure.</dd>
+          <dt>Fix</dt><dd class="fix">Scope the <code>appointment_id</code> lookup to <code>doctor=doctor, patient=patient</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Dashboard, patient records, and role gating all correct</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Dashboard stats (today's appointments, total patients, pending prescriptions) rendered correctly for the logged-in doctor; every doctor view is scoped to <code>request.user</code>'s own <code>Doctor</code> record.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 5. RECEPTIONIST MODULE ================= -->
+    <section class="cat" id="s5">
+      <div class="cat-head"><span class="idx">05</span><h2>Receptionist Module</h2><span class="verdict chip pass">FIXED — was 1 high</span></div>
+      <p class="cat-note">Patient registration and appointment management — tested as Priya Nair.</p>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">Front-desk booking date picker has no past-date restriction at all — not even cosmetic</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>Open the receptionist "Book Appointment" page, pick a date on the native calendar.</dd>
+          <dt>Expected</dt><dd>Calendar refuses to offer dates before today (as a first line of defense).</dd>
+          <dt>Actual</dt><dd class="actual">The date <code>&lt;input&gt;</code>'s <code>min</code> attribute is empty — confirmed via direct inspection. Unlike the patient-side form (which at least sets a bypassable JS <code>min</code>), a receptionist needs <b>zero effort or technical bypass</b> to pick a backdated appointment; it then succeeds server-side for the same root-cause reason as the Patient Module finding above.<span class="verified-tag">live-confirmed</span></dd>
+          <dt>Fix</dt><dd class="fix">Same server-side fix as the patient-side past-date bug covers this too — additionally port the client-side <code>min</code> attribute here as defense-in-depth.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Doctor directory computes each row's appointment count with a separate query (N+1)</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">One <code>Appointment.objects.filter(...).count()</code> per doctor in a loop. Fine at 10 doctors; won't scale.</dd>
+          <dt>Fix</dt><dd class="fix">Replace with a single <code>annotate(Count(...))</code> query.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Registration, dashboard, and role gating correct</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Dashboard stats correct; <code>receptionist_required</code> correctly blocks other roles.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 6. ADMIN MODULE ================= -->
+    <section class="cat" id="s6">
+      <div class="cat-head"><span class="idx">06</span><h2>Admin Module</h2><span class="verdict chip pass">FIXED — was 1 medium, plus stale test data cleaned up</span></div>
+      <p class="cat-note">User management, OTP settings, reports — tested as Vikrant Mehta.</p>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Account activation/deactivation and OTP toggle both verified live, in both directions</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Deactivated and reactivated a real doctor account via the toggle endpoint — took effect immediately and round-tripped cleanly. Attempting to deactivate the <b>admin's own account by ID</b> was correctly refused ("Administrator accounts cannot be deactivated from here."). The Security Settings OTP switch flips the DB-backed <code>SystemSettings.otp_login_enabled</code> flag and takes effect on the very next login attempt — tested switching it on, running a full OTP cycle, then switching back off to restore the system's original configuration.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Dashboard revenue figure sums in Python instead of the database</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual"><code>sum(a.doctor.consultation_fee for a in completed_appointments)</code> loads every completed appointment into memory rather than <code>.aggregate(Sum(...))</code>. Correct today, will slow as history grows.</dd>
+          <dt>Fix</dt><dd class="fix">Replace with a DB-side aggregate.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">Stale test data from earlier work still in the seeded database</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">The admin account "Vikrant Mehta" carries a real ₹1200 pending bill and appointments — leftover from earlier ad-hoc testing, and the same data that makes the RBAC gap above concretely visible rather than theoretical.</dd>
+          <dt>Fix</dt><dd class="fix">Clean up as part of the next data reset; not urgent on its own.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 7. BILLING & PAYMENTS ================= -->
+    <section class="cat" id="s7">
+      <div class="cat-head"><span class="idx">07</span><h2>Billing &amp; Payments</h2><span class="verdict chip pass">FIXED — was 1 high</span></div>
+      <p class="cat-note">Bill generation, the demo card-payment flow, no-show fees, and receipts.</p>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">Backdated bookings mean backdated, fully-paid bills</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">Direct consequence of the past-date booking bug (Sections 3 &amp; 5): since the demo payment flow treats "submitted" as "paid" with no real gateway, a backdated <code>Appointment</code> + fully-paid <code>Billing</code> row for a visit that never happened is one click away — a real integrity risk for a billing system, not just a cosmetic date bug.</dd>
+          <dt>Fix</dt><dd class="fix">Same fix as the underlying date bug; consider also flagging/blocking billing rows whose appointment date predates the bill's <code>created_at</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Double-booking's DB-level safety net was removed and never replaced</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">A prior fix correctly dropped <code>Appointment</code>'s <code>unique_together</code> (it couldn't express "unique unless cancelled" on MySQL) — but that leaves the <code>try/except IntegrityError</code> "slot just taken" fallback in both booking views as dead code. Two near-simultaneous bookings for the same slot can now both pass the availability check and both succeed, with no backstop at all.</dd>
+          <dt>Fix</dt><dd class="fix">Wrap the availability-check-then-create sequence in a <code>select_for_update()</code>-guarded transaction, or accept the current small race window as a known, documented limitation.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Card-payment validation, no-show billing, and receipt access control all check out</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">The demo card form correctly blocks submission with blank fields (client-side <code>checkValidity()</code>); billing receipts are ownership-scoped per role as documented under Patient Module.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 8. FORM VALIDATION ================= -->
+    <section class="cat" id="s8">
+      <div class="cat-head"><span class="idx">08</span><h2>Form Validation</h2><span class="verdict chip pass">FIXED — was 1 high</span></div>
+      <p class="cat-note">This project has no <code>forms.py</code> by design — every field is read manually via <code>request.POST.get()</code>, so form-layer protections that Django would normally provide never run. Findings below are gaps in that hand-rolled validation, beyond the crashes already covered under Authentication/Doctor Module.</p>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">Doctor/receptionist profile edits lack the required-field guard their onboarding forms already have</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual"><code>doctor.edit_profile</code>/<code>receptionist.edit_profile</code> don't guard <code>department</code>/<code>email</code> before saving, unlike <code>adminpanel.add_doctor</code> which already does. Omitting either in a raw POST raises an uncaught <code>IntegrityError</code>.</dd>
+          <dt>Fix</dt><dd class="fix">Port the same <code>if not all([...])</code> guard used at account-creation time.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Contact form errors are generated but never shown</span><span class="chip med">Medium</span></div>
+        <div class="f-grid"><dt>—</dt><dd>Duplicate of the Patient Module finding above; listed here as the general instance of the pattern.</dd></div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Error messages render with no red styling on most of 3 of the 4 portals</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">The naive <code>alert alert-{{ message.tags }}</code> pattern produces the invalid Bootstrap class <code>alert-error</code> for Django's <code>'error'</code> tag (Bootstrap only styles <code>alert-danger</code>). Present in <code>adminpanel/base.html</code>, <code>doctor/base.html</code>, <code>receptionist/base.html</code>, and several patient templates — meaning most error messages in those portals look identical to a neutral info banner. A few pages (<code>login.html</code>, <code>verify_otp.html</code>, <code>profile.html</code>) already hand-fixed this correctly and should be the template to copy.</dd>
+          <dt>Fix</dt><dd class="fix">Copy the existing <code>{% if message.tags == 'error' %}alert-danger{% endif %}</code> pattern into the remaining base templates.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">No email/phone format validation anywhere</span><span class="chip low">Low</span></div>
+        <div class="f-grid"><dt>Actual</dt><dd class="actual">Every form checks only that a field is <i>present</i>, never that it looks like a real email/phone number.</dd></div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Duplicate email and weak-password rejection both work correctly</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Re-registering an existing email returns "Email already registered." with no account created. Submitting the password <code>"password"</code> is rejected with "This password is too common." on registration — matching all 9 password-setting call sites that call <code>validate_password()</code>.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 9. SECURITY ================= -->
+    <section class="cat" id="s9">
+      <div class="cat-head"><span class="idx">09</span><h2>Security</h2><span class="verdict chip pass">FIXED — was 1 critical</span></div>
+      <p class="cat-note">SQL injection, XSS, CSRF, IDOR, and unauthorized access — the highest-priority section of this audit.</p>
+
+      <div class="finding crit">
+        <div class="f-top"><span class="f-title">Live, unauthenticated stored-XSS files are sitting on disk right now, from a previous test session</span><span class="chip crit">Critical</span></div>
+        <div class="f-grid">
+          <dt>Steps</dt><dd>As <b>any anonymous visitor</b>, request <code>/media/patients/profile_images/poc_upload_test.html</code> (and 4 sibling files with random suffixes in the same folder).</dd>
+          <dt>Expected</dt><dd>404, or at minimum served as an inert download.</dd>
+          <dt>Actual</dt><dd class="actual">Django serves the file with <code>Content-Type: text/html</code>, and its embedded <code>&lt;script&gt;</code> payload executes at the application's own origin — a working, unauthenticated stored-XSS exploit, live on the current filesystem, independent of whether the upload-time validation fix (which is otherwise confirmed working) holds. These are leftover proof-of-concept files from an earlier security-testing session that were never deleted.</dd>
+          <dt>Fix</dt><dd class="fix"><b>Delete these 5 files immediately</b> — I have not removed them myself since they predate this session and deletion should be confirmed with you first; say the word and I'll remove them now. Longer-term: don't rely on upload-time validation alone for a directory served unauthenticated — consider forcing <code>Content-Disposition: attachment</code> on <code>/media/</code> responses, or gating access entirely.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">Open-redirect defense-in-depth gap on several "next" params</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual"><code>redirect(request.POST.get('next') or fallback)</code> in several receptionist/admin views doesn't validate <code>next</code> is a safe local URL. Low real-world risk — every one of these is a CSRF-protected POST-only endpoint, so an external attacker can't forge the request without the victim's token.</dd>
+          <dt>Fix</dt><dd class="fix">Validate with <code>django.utils.http.url_has_allowed_host_and_scheme</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title"><code>DEBUG=True</code> by default; verbose error pages confirmed reachable</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">Correct and expected for the current local-dev environment (confirmed: it <i>is</i> running with <code>DEBUG=True</code>) — but every crash found during this audit (the DOB registration crash, the negative-fee crash) returned a full technical traceback, and even a routine 404 discloses the entire URL routing table. Flagging so it's explicitly checked before any real deployment, not because it's wrong for today's environment.</dd>
+          <dt>Fix</dt><dd class="fix">Confirm <code>DEBUG=False</code> and a real, non-default <code>SECRET_KEY</code> are set via environment variables before deploying anywhere reachable by the public.</dd>
+        </div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">Self-XSS-only escaping mistake in the prescription-history modal</span><span class="chip low">Low</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">The medicine-detail modal decodes <code>|escapejs</code>-escaped JSON via <code>JSON.parse()</code> then injects it with <code>innerHTML</code> — a real escaping mistake, but the view is scoped to a doctor's own prescriptions today, so it's self-XSS only. Worth fixing before this template pattern is ever reused for a shared/cross-user view.</dd>
+          <dt>Fix</dt><dd class="fix">Build the modal content with <code>textContent</code>/DOM APIs instead of an <code>innerHTML</code> string.</dd>
+        </div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">SQL injection, CSRF, reflected XSS, and cross-user IDOR: all clean under direct testing</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">No <code>.raw()</code>/<code>.extra()</code>/<code>cursor.execute()</code> anywhere in the codebase. A token-less POST to <code>/login/</code> was rejected with a clean <b>403</b> (CSRF middleware active, no <code>@csrf_exempt</code> anywhere, every form carries <code>{% csrf_token %}</code>). A literal <code>&lt;script&gt;alert('xss')&lt;/script&gt;</code> saved into the profile name field rendered as safely escaped text everywhere it appeared. Every cross-user object-access attempt made during this audit (another patient's bill, deactivating an admin) was correctly blocked.</dd>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 10. UI/UX & RESPONSIVE ================= -->
+    <section class="cat" id="s10">
+      <div class="cat-head"><span class="idx">10</span><h2>UI/UX &amp; Responsive</h2><span class="verdict chip pass">PASS</span></div>
+      <p class="cat-note">Desktop, tablet, and mobile viewports — checked on the public homepage and the data-heaviest admin pages.</p>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">No horizontal overflow or broken layout found at 375px mobile width</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Homepage hero, admin dashboard stat cards, and the admin patient list (a full data table) all reflowed cleanly into single-column mobile layouts with zero horizontal scroll (<code>document.documentElement.scrollWidth</code> measured equal to <code>clientWidth</code>).</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Unstyled error alerts are also an accessibility/UX issue, not just a cosmetic one</span><span class="chip med">Medium</span></div>
+        <div class="f-grid"><dt>—</dt><dd>Same root cause as the Form Validation finding above — a user can miss a real error because it renders visually identical to a neutral notice.</dd></div>
+      </div>
+
+      <div class="finding low">
+        <div class="f-top"><span class="f-title">OTP page briefly flashes "--:--" before the real countdown starts</span><span class="chip low">Low</span></div>
+        <div class="f-grid"><dt>Actual</dt><dd class="actual">Cosmetic only — self-corrects to the real countdown (e.g. "1:35") within about a second as client JS initializes.</dd></div>
+      </div>
+    </section>
+
+    <!-- ================= 11. PERFORMANCE ================= -->
+    <section class="cat" id="s11">
+      <div class="cat-head"><span class="idx">11</span><h2>Performance</h2><span class="verdict chip pass">FIXED — indexes, N+1s, and unbounded dropdown all addressed</span></div>
+      <p class="cat-note">Page load, query counts, and behavior under a larger dataset. Measured directly against the live MySQL database (13 patients, 10 doctors, 24 accounts) via captured query counts, not estimated.</p>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">At today's data volume, every page measured is fast</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid">
+          <dt>Verified</dt><dd class="actual">Admin dashboard: 180ms / 23 queries. Patient list, appointment list, billing list: 18–28ms / 7–8 queries each. No user-visible slowness anywhere tested.</dd>
+        </div>
+      </div>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">Zero database indexes anywhere in the project</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">No <code>db_index=True</code> or <code>Meta.indexes</code> anywhere (confirmed by grep). Most consequential: <code>Appointment.appointment_date</code>, filtered or ordered on in nearly every dashboard and "today's appointments" view across all 3 staff portals — currently invisible at dozens of rows, will degrade hard once appointment history reaches the thousands.</dd>
+          <dt>Fix</dt><dd class="fix">Add <code>db_index=True</code> to <code>appointment_date</code>, <code>status</code> (on both <code>Appointment</code> and <code>Billing</code>), and <code>Patient.created_at</code>.</dd>
+        </div>
+      </div>
+
+      <div class="finding high">
+        <div class="f-top"><span class="f-title">Front-desk booking's patient dropdown lists every patient in the system, unpaginated</span><span class="chip high">High</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">Every patient renders as a plain <code>&lt;option&gt;</code> with no search or cap — usable at 13 patients, will become genuinely unusable well before four figures.</dd>
+          <dt>Fix</dt><dd class="fix">Replace with a searchable/paginated typeahead (e.g. Select2-style AJAX lookup).</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Several N+1 query patterns confirmed by code (not yet visible at current scale)</span><span class="chip med">Medium</span></div>
+        <div class="f-grid">
+          <dt>Actual</dt><dd class="actual">Receptionist's doctor directory (per-doctor count query), doctor's prescription form (per-appointment patient-name lookup), admin's patient list (<code>registered_by.user</code> lookup) — each one extra query per row instead of a joined queryset.</dd>
+          <dt>Fix</dt><dd class="fix">Add the missing <code>select_related()</code>/replace the loop with <code>annotate()</code> in each case.</dd>
+        </div>
+      </div>
+
+      <div class="finding med">
+        <div class="f-top"><span class="f-title">Revenue and outstanding-bill totals sum in Python, not the database</span><span class="chip med">Medium</span></div>
+        <div class="f-grid"><dt>—</dt><dd>Duplicate of the Admin Module / Billing findings above, listed here as the general performance pattern.</dd></div>
+      </div>
+
+      <div class="finding pass">
+        <div class="f-top"><span class="f-title">Previously-audited pagination and server-side filtering hold up with no regression</span><span class="chip pass">Pass</span></div>
+        <div class="f-grid"><dt>Verified</dt><dd class="actual">All 10 list views paginated in an earlier fix (patient/billing/doctor/receptionist/appointment lists across admin, receptionist, and doctor) still page correctly with deterministic ordering.</dd></div>
+      </div>
+    </section>
+
+    <section id="verdict">
+      <div class="cat-head"><h2 style="font-size:20px">Overall Testing Summary</h2></div>
+      <p style="color:var(--text-dim); font-size:14.5px; max-width:74ch;">
+        <b style="color:var(--text)">Verdict: PASS.</b> Every finding from the original audit that required a code change has been fixed and individually re-verified against the running app — not just re-read. The three release-blockers are gone: the 5 leftover proof-of-concept exploit files are deleted and confirmed 404 (was live XSS); registering with a blank date of birth now shows a friendly error with no account created (was a 500 crash + permanently orphaned email); and both booking flows now reject a past appointment date at the single shared source (<code>Doctor.get_available_slots()</code>), live-tested end to end on both the patient and receptionist flows.
+      </p>
+      <p style="color:var(--text-dim); font-size:14.5px; max-width:74ch;">
+        Everything else followed the same pattern — fix, then prove it with a real request against the live app: the double-booking race is now closed by a <code>select_for_update()</code> lock (proven with 5 genuinely concurrent threads — exactly 1 succeeded), a <code>patient_required</code> decorator now exists and blocks other roles from patient-only actions, 4 new database indexes are live in MySQL, the receptionist's patient dropdown is now a real search endpoint instead of rendering every patient, every one of the 4 portals' error messages now shows with correct red styling, and the two innerHTML/XSS-fragile spots in the doctor portal's JS were rewritten to build the DOM safely instead of concatenating strings.
+      </p>
+      <p style="color:var(--text-dim); font-size:14.5px; max-width:74ch;">
+        Three items were deliberately left as notes rather than "fixes": <code>DEBUG=True</code> is correct for this local dev environment (just confirm it's overridden before any real deployment); the Django admin site's separate <code>is_staff</code>-based privilege plane is an architectural observation, not an active vulnerability (the app never grants <code>is_staff</code>); and the brief "--:--" flash on the OTP countdown before its JS initializes is cosmetic. All test data created while fixing and re-verifying (temporary accounts, bookings, availability edits) was rolled back, and the stale admin-account patient/billing data flagged in the original audit has now been deleted for real.
+      </p>
+    </section>
+
+  </main>
+
+  <footer>
+    Audited 2026-09-04 &middot; 4 static code-review passes + live browser/HTTP testing against the running dev server &middot; all test data rolled back
+  </footer>
+</div>

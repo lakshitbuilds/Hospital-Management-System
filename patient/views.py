@@ -31,6 +31,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
+from functools import wraps
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -42,12 +43,13 @@ from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.http import JsonResponse
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 from .models import Patient, Appointment, Billing, ContactMessage, Notification
 from .emails import send_appointment_booked_email, send_appointment_cancelled_email
 from doctor.models import Doctor
 from image_validation import validate_uploaded_image
+from input_validation import is_valid_name
 from accounts.models import SystemSettings
 
 User = get_user_model()
@@ -241,7 +243,8 @@ def login(request):
     """
     Shared login page/handler for ALL roles (admin, doctor, receptionist,
     patient) -- there's no separate login view per role. On GET, just
-    shows the login form.
+    shows the login form (unless already logged in, in which case it
+    redirects straight to that role's dashboard instead).
 
     On POST:
       - Authenticates by email + password (``username`` is the email here
@@ -261,6 +264,9 @@ def login(request):
       - On bad credentials, shows a generic "Invalid email or password"
         error and redirects back to the login page.
     """
+    if request.user.is_authenticated:
+        return _redirect_for_role(request, request.user)
+
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
@@ -426,7 +432,13 @@ def register(request):
       - Otherwise sends an OTP and stashes
         ``request.session['pending_otp_user_id']`` just like ``login``
         does, redirecting to ``verify_otp`` to finish signing in.
+
+    If the visitor is already logged in, redirects straight to their role's
+    dashboard instead of showing the sign-up form.
     """
+    if request.user.is_authenticated:
+        return _redirect_for_role(request, request.user)
+
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
         email = request.POST.get('email')
@@ -438,6 +450,10 @@ def register(request):
 
         if not all([full_name, email, phone, gender, password, confirm_password]):
             messages.error(request, 'Please fill in all required fields.')
+            return redirect('register')
+
+        if not is_valid_name(full_name):
+            messages.error(request, 'Please enter a valid full name (letters only).')
             return redirect('register')
 
         if password != confirm_password:
@@ -462,22 +478,34 @@ def register(request):
             return redirect('register')
 
         # username is set to the email since this project authenticates
-        # by email rather than a separate username.
-        user = User.objects.create_user(
-            username=email,
-            email=email,
-            password=password,
-            first_name=first_name,
-            last_name=last_name,
-            role='patient'
-        )
+        # by email rather than a separate username. Wrapped in
+        # transaction.atomic() so a failure creating the Patient profile
+        # (e.g. a bad date_of_birth) rolls back the User too, instead of
+        # leaving an orphaned account that owns the email forever.
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(
+                    username=email,
+                    email=email,
+                    password=password,
+                    first_name=first_name,
+                    last_name=last_name,
+                    role='patient'
+                )
 
-        Patient.objects.create(
-            user=user,
-            phone=phone,
-            date_of_birth=dob,
-            gender=gender.capitalize()
-        )
+                Patient.objects.create(
+                    user=user,
+                    phone=phone,
+                    # date_of_birth is optional (Patient.date_of_birth is
+                    # nullable) -- an empty string from the date input is
+                    # not a valid date, so normalize it to None rather
+                    # than letting Django's DateField reject it.
+                    date_of_birth=dob or None,
+                    gender=gender.capitalize()
+                )
+        except IntegrityError:
+            messages.error(request, 'Email already registered.')
+            return redirect('register')
 
         if not SystemSettings.get_solo().otp_login_enabled:
             auth_login(request, user)
@@ -560,11 +588,31 @@ def logout_view(request):
     return redirect('login')
 
 
+def patient_required(view_func):
+    """
+    Decorator restricting access to logged-in users with role='patient'.
+    Wraps `login_required` (so an anonymous user is first sent to the
+    login page), and additionally rejects any logged-in user whose role
+    isn't 'patient' -- mirroring `doctor_required`/`receptionist_required`/
+    `admin_required` in the other three apps. Applied to every patient
+    account/appointment/billing/notification view below; the public pages
+    and pre-login auth flow above intentionally stay role-agnostic.
+    """
+    @wraps(view_func)
+    @login_required
+    def wrapper(request, *args, **kwargs):
+        if request.user.role != 'patient':
+            messages.error(request, 'Access restricted to patients.')
+            return redirect('home')
+        return view_func(request, *args, **kwargs)
+    return wrapper
+
+
 # ================================================================
 # Patient Profile
 # ================================================================
 
-@login_required
+@patient_required
 def patient_profile(request):
     """
     The logged-in patient's own profile page. Requires login (any role
@@ -582,10 +630,18 @@ def patient_profile(request):
     patient, created = Patient.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+
+        if not all([first_name, last_name, email]):
+            messages.error(request, 'Please fill in all required fields.')
+            return redirect('patient_profile')
+
         user = request.user
-        user.first_name = request.POST.get('first_name')
-        user.last_name = request.POST.get('last_name')
-        user.email = request.POST.get('email')
+        user.first_name = first_name
+        user.last_name = last_name
+        user.email = email
         user.save()
 
         patient.phone = request.POST.get('phone')
@@ -623,7 +679,7 @@ def patient_profile(request):
     return render(request, 'patient/profile.html', context)
 
 
-@login_required
+@patient_required
 def change_password(request):
     """
     Lets the logged-in patient change their own account password, posted
@@ -651,6 +707,10 @@ def change_password(request):
             messages.error(request, 'Current password is incorrect.')
             return redirect(change_password_url)
 
+        if not new_password or not confirm_new_password:
+            messages.error(request, 'Please fill in both new password fields.')
+            return redirect(change_password_url)
+
         if new_password != confirm_new_password:
             messages.error(request, 'New passwords do not match.')
             return redirect(change_password_url)
@@ -675,7 +735,7 @@ def change_password(request):
 # Appointments
 # ================================================================
 
-@login_required
+@patient_required
 def get_doctor_slots(request):
     """
     AJAX/JSON endpoint used by the booking form to fetch a doctor's
@@ -696,7 +756,7 @@ def get_doctor_slots(request):
     return JsonResponse(doctor.get_available_slots(appointment_date))
 
 
-@login_required
+@patient_required
 def book_appointment(request):
     """
     Step one of patient self-service booking (patient-only in practice,
@@ -762,7 +822,7 @@ def book_appointment(request):
     return render(request, 'patient/book_appointment.html', {'doctors': doctors})
 
 
-@login_required
+@patient_required
 def confirm_appointment_billing(request):
     """
     Step two of patient self-service booking: a review-only page. Requires
@@ -793,7 +853,7 @@ def confirm_appointment_billing(request):
     })
 
 
-@login_required
+@patient_required
 def card_payment(request):
     """
     Step three (final step) of patient self-service booking: a fake card
@@ -825,35 +885,39 @@ def card_payment(request):
     parsed_date = datetime.strptime(pending['appointment_date'], '%Y-%m-%d').date()
 
     if request.method == 'POST':
-        # Re-validate availability in case the slot was booked by someone
-        # else between the earlier steps and now.
-        availability = doctor.get_available_slots(parsed_date)
-        matching_slot = next((s for s in availability['slots'] if s['time'] == pending['time_slot']), None)
-        if not availability['available'] or matching_slot is None or matching_slot['booked']:
-            messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
-            del request.session['pending_appointment']
-            return redirect('book_appointment')
+        # select_for_update() locks this doctor's row for the rest of the
+        # transaction, so a second, near-simultaneous booking request for
+        # the SAME doctor blocks until this one commits or rolls back --
+        # closing the race window between the availability check and the
+        # Appointment.objects.create() below. (Appointment has no DB-level
+        # unique constraint on doctor/date/slot -- see the model docstring
+        # -- so without this lock, two requests could both pass the check
+        # and both succeed.)
+        with transaction.atomic():
+            locked_doctor = Doctor.objects.select_for_update().get(id=doctor.id)
+            availability = locked_doctor.get_available_slots(parsed_date)
+            matching_slot = next((s for s in availability['slots'] if s['time'] == pending['time_slot']), None)
+            if not availability['available'] or matching_slot is None or matching_slot['booked']:
+                messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
+                del request.session['pending_appointment']
+                return redirect('book_appointment')
 
-        # This is the actual creation point for the appointment -- nothing
-        # was written to the database during the earlier steps. The
-        # availability recheck above closes most of the race window, but
-        # two requests can still slip through it at almost the same instant
-        # (e.g. a double-submitted click) -- caught here as a fallback
-        # rather than surfacing a raw IntegrityError to the patient.
-        try:
-            appointment = Appointment.objects.create(
-                patient=patient,
-                doctor=doctor,
-                department=pending['department'],
-                appointment_date=pending['appointment_date'],
-                time_slot=pending['time_slot'],
-                visit_type=pending['visit_type'],
-                reason=pending['reason'],
-            )
-        except IntegrityError:
-            messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
-            del request.session['pending_appointment']
-            return redirect('book_appointment')
+            # This is the actual creation point for the appointment --
+            # nothing was written to the database during the earlier steps.
+            try:
+                appointment = Appointment.objects.create(
+                    patient=patient,
+                    doctor=doctor,
+                    department=pending['department'],
+                    appointment_date=pending['appointment_date'],
+                    time_slot=pending['time_slot'],
+                    visit_type=pending['visit_type'],
+                    reason=pending['reason'],
+                )
+            except IntegrityError:
+                messages.error(request, 'Sorry, that slot was just taken. Please choose another.')
+                del request.session['pending_appointment']
+                return redirect('book_appointment')
 
         # No real gateway is charged -- the "payment" is simulated, so the
         # bill is created already paid rather than left pending.
@@ -886,7 +950,7 @@ def card_payment(request):
     })
 
 
-@login_required
+@patient_required
 def cancel_pending_appointment(request):
     """
     Lets the patient back out of the pending-appointment flow: discards
@@ -897,7 +961,7 @@ def cancel_pending_appointment(request):
     return redirect('book_appointment')
 
 
-@login_required
+@patient_required
 def my_appointments(request):
     """
     Lists the logged-in patient's own appointments (most recent date
@@ -909,7 +973,7 @@ def my_appointments(request):
     return render(request, 'patient/my_appointments.html', {'appointments': appointments})
 
 
-@login_required
+@patient_required
 def my_billing(request):
     """
     Read-only view of the logged-in patient's own bills, newest first,
@@ -925,7 +989,7 @@ def my_billing(request):
     })
 
 
-@login_required
+@patient_required
 def billing_receipt(request, bill_id):
     """
     Printable receipt for one of the logged-in patient's own bills.
@@ -944,7 +1008,7 @@ def billing_receipt(request, bill_id):
     return render(request, 'patient/billing_receipt.html', {'bill': bill})
 
 
-@login_required
+@patient_required
 def cancel_appointment(request, appointment_id):
     """
     Lets a patient cancel one of their own appointments. The
@@ -975,21 +1039,21 @@ def cancel_appointment(request, appointment_id):
 # Notifications
 # ================================================================
 
-@login_required
+@patient_required
 def notifications_view(request):
     """Lists all notifications belonging to the logged-in user (any role, since Notification links to User directly)."""
     notes = Notification.objects.filter(user=request.user)
     return render(request, 'patient/notifications.html', {'notifications': notes})
 
 
-@login_required
+@patient_required
 def mark_all_read(request):
     """Bulk-marks every unread notification for the logged-in user as read, then redirects back to the notifications list."""
     Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
     return redirect('notifications')
 
 
-@login_required
+@patient_required
 def dismiss_notification(request, notification_id):
     """
     Deletes a single notification belonging to the logged-in user. The
