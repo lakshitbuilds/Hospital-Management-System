@@ -1,176 +1,44 @@
 {% extends 'adminpanel/base.html' %}
 {% load static %}
-
-{% block title %}Generate Report - Admin Panel{% endblock %}
-
+{% block title %}Reports - Admin Panel{% endblock %}
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/adminpanel/list.css' %}">
+<style>
+.report-hero{background:linear-gradient(135deg,#0d6efd,#4f46e5);color:#fff;border-radius:18px;padding:24px;margin-bottom:20px;box-shadow:0 12px 30px rgba(13,110,253,.15)}
+.report-filter-card{border:0;border-radius:18px;box-shadow:0 8px 28px rgba(15,23,42,.08);overflow:hidden}.filter-section{padding:22px}.filter-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#64748b}.form-control,.form-select{min-height:46px;border-radius:10px}.report-type-card{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc}.export-note{background:#eef6ff;border:1px solid #cfe2ff;border-radius:12px;padding:12px 14px;color:#475569}
+</style>
 {% endblock %}
-
 {% block content %}
-
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-    <div>
-        <h4 class="adm-page-title">Generate Report</h4>
-        <p class="adm-page-subtitle mb-0">
-            Generate reports for patients, appointments, doctors, and billing.
-        </p>
-    </div>
+<div class="report-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
+ <div><div class="small text-white-50 mb-1">ADMIN ANALYTICS</div><h3 class="mb-1">Report Center</h3><p class="mb-0 text-white-50">Build focused hospital reports using advanced filters, then export them as PDF or CSV.</p></div>
+ <i class="bi bi-bar-chart-line-fill fs-1"></i>
 </div>
-
-<div class="adm-card">
-
-    <div class="p-4">
-
-        <form method="get" action="{% url 'generate_report' %}">
-
-            <!-- Report Type -->
-            <div class="mb-4">
-                <label for="report_type" class="form-label fw-semibold">
-                    Report Type
-                </label>
-
-                <select
-                    name="report_type"
-                    id="report_type"
-                    class="form-select"
-                    required
-                >
-                    <option value="" selected disabled>
-                        Select Report Type
-                    </option>
-                    <option value="patients">
-                        Patient Report
-                    </option>
-                    <option value="appointments">
-                        Appointment Report
-                    </option>
-                    <option value="doctors">
-                        Doctor Report
-                    </option>
-                    <option value="billing">
-                        Billing Report
-                    </option>
-                </select>
-            </div>
-
-
-            <!-- Date Range -->
-            <div class="mb-4">
-
-                <label class="form-label fw-semibold">
-                    Date Range
-                </label>
-
-                <div class="row g-3">
-
-                    <div class="col-md-6">
-                        <label
-                            for="start_date"
-                            class="form-label text-muted small"
-                        >
-                            Start Date
-                        </label>
-
-                        <input
-                            type="date"
-                            name="start_date"
-                            id="start_date"
-                            class="form-control"
-                        >
-                    </div>
-
-                    <div class="col-md-6">
-                        <label
-                            for="end_date"
-                            class="form-label text-muted small"
-                        >
-                            End Date
-                        </label>
-
-                        <input
-                            type="date"
-                            name="end_date"
-                            id="end_date"
-                            class="form-control"
-                        >
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- Status -->
-            <div class="mb-4">
-
-                <label
-                    for="status"
-                    class="form-label fw-semibold"
-                >
-                    Status
-                </label>
-
-                <select
-                    name="status"
-                    id="status"
-                    class="form-select"
-                >
-                    <option value="">
-                        All Status
-                    </option>
-
-                    <option value="pending">
-                        Pending
-                    </option>
-
-                    <option value="confirmed">
-                        Confirmed
-                    </option>
-
-                    <option value="completed">
-                        Completed
-                    </option>
-
-                    <option value="cancelled">
-                        Cancelled
-                    </option>
-
-                    <option value="no_show">
-                        No Show
-                    </option>
-                </select>
-
-            </div>
-
-
-        
-
-            <!-- Actions -->
-            <div class="d-flex justify-content-end gap-2 pt-2">
-
-                <a
-                    href="{% url 'admin_dashboard' %}"
-                    class="btn btn-outline-secondary"
-                >
-                    <i class="bi bi-x-lg me-1"></i>
-                    Cancel
-                </a>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary"
-                >
-                    <i class="bi bi-file-earmark-bar-graph me-1"></i>
-                    Generate Report
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
-
-</div>
-
+<div class="card report-filter-card"><div class="filter-section">
+<form method="get" action="{% url 'generate_report' %}" id="reportForm">
+ <div class="row g-3">
+  <div class="col-lg-4"><label class="filter-label mb-2">Report Type *</label><select name="report_type" id="report_type" class="form-select" required><option value="">Choose report...</option><option value="patients" {% if report_type == 'patients' %}selected{% endif %}>Patient Report</option><option value="appointments" {% if report_type == 'appointments' %}selected{% endif %}>Appointment Report</option><option value="doctors" {% if report_type == 'doctors' %}selected{% endif %}>Doctor Report</option><option value="billing" {% if report_type == 'billing' %}selected{% endif %}>Billing Report</option></select></div>
+  <div class="col-lg-8"><label class="filter-label mb-2">Quick Search</label><div class="input-group"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Patient ID, patient name, doctor, email, specialization..."></div></div>
+  <div class="col-md-3"><label class="filter-label mb-2">Start Date</label><input type="date" name="start_date" value="{{ start_date }}" class="form-control"></div>
+  <div class="col-md-3"><label class="filter-label mb-2">End Date</label><input type="date" name="end_date" value="{{ end_date }}" class="form-control"></div>
+  <div class="col-md-3" id="statusWrap"><label class="filter-label mb-2">Status</label><select name="status" id="status" class="form-select"><option value="">All statuses</option></select></div>
+  <div class="col-md-3" id="departmentWrap"><label class="filter-label mb-2">Department</label><select name="department" class="form-select"><option value="">All departments</option>{% for value,label in departments %}<option value="{{ value }}" {% if department == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+  <div class="col-md-6" id="doctorWrap"><label class="filter-label mb-2">Doctor</label><select name="doctor" class="form-select"><option value="">All doctors</option>{% for doctor in doctors %}<option value="{{ doctor.id }}" {% if doctor_id == doctor.id|stringformat:'s' %}selected{% endif %}>Dr. {{ doctor.user.get_full_name }} - {{ doctor.get_department_display }}</option>{% endfor %}</select></div>
+  <div class="col-md-6" id="billTypeWrap"><label class="filter-label mb-2">Bill Type</label><select name="bill_type" class="form-select"><option value="">All bill types</option>{% for value,label in bill_types %}<option value="{{ value }}" {% if bill_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+ </div>
+ <div class="export-note mt-4"><i class="bi bi-info-circle me-2"></i>First generate the filtered report. On the results page you can download the exact same filtered data as <strong>PDF</strong> or <strong>CSV</strong>.</div>
+ <div class="d-flex justify-content-between flex-wrap gap-2 mt-4"><a href="{% url 'generate_report' %}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters</a><button class="btn btn-primary px-4" type="submit"><i class="bi bi-funnel-fill me-1"></i>Generate Report</button></div>
+</form></div></div>
+{% endblock %}
+{% block js %}
+<script>
+(function(){
+ const type=document.getElementById('report_type'), status=document.getElementById('status');
+ const currentStatus='{{ status|escapejs }}';
+ const appointment=[['pending','Pending'],['confirmed','Confirmed'],['completed','Completed'],['cancelled','Cancelled'],['no_show','No Show']];
+ const billing=[['pending','Pending'],['paid','Paid'],['waived','Waived']];
+ function toggle(id,show){document.getElementById(id).style.display=show?'':'none'}
+ function refresh(){const t=type.value; const statuses=t==='billing'?billing:(t==='appointments'?appointment:[]); status.innerHTML='<option value="">All statuses</option>'; statuses.forEach(([v,l])=>{const o=new Option(l,v);if(v===currentStatus)o.selected=true;status.add(o)}); toggle('statusWrap',t==='appointments'||t==='billing');toggle('departmentWrap',t==='appointments'||t==='doctors'||t==='billing');toggle('doctorWrap',t==='appointments'||t==='billing');toggle('billTypeWrap',t==='billing');}
+ type.addEventListener('change',refresh);refresh();
+})();
+</script>
 {% endblock %}
