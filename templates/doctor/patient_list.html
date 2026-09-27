@@ -1,45 +1,76 @@
 {% extends 'doctor/base.html' %}
+{% load static %}
 
 {% block title %}Patient List - Doctor Portal{% endblock %}
 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/doctor/appointment_list.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="mb-1">Patient List</h2>
-        <p class="text-muted mb-0">Patients who have appointments with you.</p>
+
+<h4 class="doc-page-title">Patient List</h4>
+<p class="doc-page-subtitle">Patients who have appointments with you.</p>
+
+<div class="doc-card">
+    <div class="appointment-list-toolbar">
+        <form class="apt-search-box" method="get">
+            <i class="bi bi-search"></i>
+            <input type="search" name="q" value="{{ query }}" placeholder="Search by patient name, email or phone...">
+        </form>
     </div>
+
+    {% if patients %}
+    <div class="table-responsive">
+        <table class="appointment-table">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for patient in patients %}
+                <tr>
+                    <td>
+                        <div class="table-patient-cell">
+                            {% if patient.profile_image %}
+                            <img src="{{ patient.profile_image.url }}" alt="{{ patient.user.get_full_name }}">
+                            {% else %}
+                            <img src="{% static 'public/images/patient-1.jpg' %}" alt="{{ patient.user.get_full_name }}">
+                            {% endif %}
+                            <div>
+                                <h6>{{ patient.user.get_full_name|default:patient.user.username }}</h6>
+                                <span>Patient ID #{{ patient.id }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ patient.user.email|default:"-" }}</td>
+                    <td>{{ patient.phone|default:"-" }}</td>
+                    <td class="text-end">
+                        <div class="table-actions">
+                            <a href="{% url 'patient_details' patient.id %}" class="table-action-btn" title="View Patient Details">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'add_prescription' %}?patient={{ patient.id }}" class="table-action-btn" title="Add Prescription">
+                                <i class="bi bi-file-earmark-medical"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="table-empty-state">
+        <i class="bi bi-people"></i>
+        <h6>No patients found</h6>
+        <p>{% if query %}Try a different search term.{% else %}Patients will appear here after they book an appointment with you.{% endif %}</p>
+    </div>
+    {% endif %}
 </div>
 
-<div class="card border-0 shadow-sm">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Email</th>
-                        <th>Phone</th>
-                        <th class="text-end">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for patient in patients %}
-                    <tr>
-                        <td>{{ patient.user.get_full_name|default:patient.user.username }}</td>
-                        <td>{{ patient.user.email|default:"-" }}</td>
-                        <td>{{ patient.phone|default:"-" }}</td>
-                        <td class="text-end">
-                            <a href="{% url 'patient_details' patient.id %}" class="btn btn-sm btn-primary">View Details</a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center py-5 text-muted">No patients found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
 {% endblock %}
