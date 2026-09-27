@@ -20,7 +20,8 @@ urlpatterns = [
     path('verify-otp/', views.verify_otp, name='verify_otp'),
     path('resend-otp/', views.resend_otp, name='resend_otp'),
 
-    # ===== Patient Profile =====
+    # ===== Patient Dashboard & Profile =====
+    path('patient-dashboard/', views.patient_dashboard, name='patient_dashboard'),
     path('patient-profile/', views.patient_profile, name='patient_profile'),
     path('patient-profile/change-password/', views.change_password, name='patient_change_password'),
 
