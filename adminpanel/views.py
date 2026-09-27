@@ -33,6 +33,9 @@ from input_validation import is_valid_name
 from pagination import paginate
 from safe_redirect import safe_next_redirect
 
+from django.http import HttpResponse
+import csv
+
 User = get_user_model()
 
 DEPARTMENT_LABELS = dict(Doctor.DEPARTMENT_CHOICES)
@@ -849,3 +852,298 @@ def change_password(request):
         return redirect('admin_profile')
 
     return render(request, 'adminpanel/change_password.html')
+
+
+
+# ================================================================
+# Reports
+# ================================================================
+
+
+
+
+@admin_required
+def generate_report(request):
+    """
+    Generate reports for patients, appointments, doctors and billing.
+
+    The report can be filtered by:
+    - Report type
+    - Start date
+    - End date
+    - Status
+
+    The generated report can also be downloaded as CSV.
+    """
+
+    report_type = request.GET.get('report_type', '').strip()
+    start_date = request.GET.get('start_date', '').strip()
+    end_date = request.GET.get('end_date', '').strip()
+    status = request.GET.get('status', '').strip()
+
+    # ============================================================
+    # FIRST TIME OPENING REPORT PAGE
+    # ============================================================
+
+    if not report_type:
+        return render(
+            request,
+            'adminpanel/generate_report.html'
+        )
+
+    headers = []
+    rows = []
+
+    # ============================================================
+    # PATIENT REPORT
+    # ============================================================
+
+    if report_type == 'patients':
+
+        patients = Patient.objects.select_related(
+            'user'
+        ).order_by(
+            '-created_at',
+            '-id'
+        )
+
+        if start_date:
+            patients = patients.filter(
+                created_at__date__gte=start_date
+            )
+
+        if end_date:
+            patients = patients.filter(
+                created_at__date__lte=end_date
+            )
+
+        headers = [
+            'Patient ID',
+            'Patient Name',
+            'Email',
+            'Created At',
+        ]
+
+        rows = [
+            [
+                patient.patient_id,
+                patient.user.get_full_name(),
+                patient.user.email,
+                patient.created_at.strftime('%d-%m-%Y'),
+            ]
+            for patient in patients
+        ]
+
+    # ============================================================
+    # APPOINTMENT REPORT
+    # ============================================================
+
+    elif report_type == 'appointments':
+
+        appointments = Appointment.objects.select_related(
+            'patient__user',
+            'doctor__user'
+        ).order_by(
+            '-appointment_date',
+            '-id'
+        )
+
+        if start_date:
+            appointments = appointments.filter(
+                appointment_date__gte=start_date
+            )
+
+        if end_date:
+            appointments = appointments.filter(
+                appointment_date__lte=end_date
+            )
+
+        if status:
+            appointments = appointments.filter(
+                status=status
+            )
+
+        headers = [
+            'Patient',
+            'Doctor',
+            'Department',
+            'Appointment Date',
+            'Status',
+        ]
+
+        rows = [
+            [
+                appointment.patient.user.get_full_name(),
+
+                f"Dr. {appointment.doctor.user.get_full_name()}",
+
+                DEPARTMENT_LABELS.get(
+                    appointment.department,
+                    appointment.department
+                ),
+
+                appointment.appointment_date.strftime(
+                    '%d-%m-%Y'
+                ),
+
+                appointment.get_status_display(),
+            ]
+            for appointment in appointments
+        ]
+
+    # ============================================================
+    # DOCTOR REPORT
+    # ============================================================
+
+    elif report_type == 'doctors':
+
+        doctors = Doctor.objects.select_related(
+            'user'
+        ).order_by(
+            'user__first_name',
+            'id'
+        )
+
+        headers = [
+            'Doctor Name',
+            'Department',
+            'Specialization',
+            'Qualification',
+            'Experience',
+            'Consultation Fee',
+        ]
+
+        rows = [
+            [
+                f"Dr. {doctor.user.get_full_name()}",
+
+                doctor.get_department_display(),
+
+                doctor.specialization,
+
+                doctor.qualification,
+
+                doctor.experience_years,
+
+                doctor.consultation_fee,
+            ]
+            for doctor in doctors
+        ]
+
+    # ============================================================
+    # BILLING REPORT
+    # ============================================================
+
+    elif report_type == 'billing':
+
+        bills = Billing.objects.select_related(
+            'patient__user',
+            'appointment__doctor__user'
+        ).order_by(
+            '-created_at',
+            '-id'
+        )
+
+        if start_date:
+            bills = bills.filter(
+                appointment__appointment_date__gte=start_date
+            )
+
+        if end_date:
+            bills = bills.filter(
+                appointment__appointment_date__lte=end_date
+            )
+
+        if status:
+            bills = bills.filter(
+                status=status
+            )
+
+        headers = [
+            'Patient',
+            'Patient ID',
+            'Bill Type',
+            'Doctor',
+            'Appointment Date',
+            'Amount',
+            'Status',
+        ]
+
+        rows = [
+            [
+                bill.patient.user.get_full_name(),
+
+                bill.patient.patient_id,
+
+                bill.get_bill_type_display(),
+
+                f"Dr. {bill.appointment.doctor.user.get_full_name()}",
+
+                bill.appointment.appointment_date.strftime(
+                    '%d-%m-%Y'
+                ),
+
+                bill.amount,
+
+                bill.get_status_display(),
+            ]
+            for bill in bills
+        ]
+
+    # ============================================================
+    # INVALID REPORT TYPE
+    # ============================================================
+
+    else:
+
+        messages.error(
+            request,
+            'Invalid report type.'
+        )
+
+        return redirect('generate_report')
+
+    # ============================================================
+    # DOWNLOAD CSV
+    # ============================================================
+
+    if request.GET.get('format') == 'csv':
+
+        response = HttpResponse(
+            content_type='text/csv'
+        )
+
+        response['Content-Disposition'] = (
+            f'attachment; filename="{report_type}_report.csv"'
+        )
+
+        writer = csv.writer(response)
+
+        # Header
+        writer.writerow(headers)
+
+        # Data
+        for row in rows:
+            writer.writerow(row)
+
+        return response
+
+    # ============================================================
+    # SHOW GENERATED REPORT
+    # ============================================================
+
+    context = {
+        'report_type': report_type,
+        'start_date': start_date,
+        'end_date': end_date,
+        'status': status,
+        'headers': headers,
+        'rows': rows,
+        'total_records': len(rows),
+    }
+
+    return render(
+        request,
+        'adminpanel/report_result.html',
+        context
+    )
