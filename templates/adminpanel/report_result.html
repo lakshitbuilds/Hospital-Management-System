@@ -1,203 +1,22 @@
 {% extends 'adminpanel/base.html' %}
 {% load static %}
-
-{% block title %}Report - Admin Panel{% endblock %}
-
+{% block title %}{{ report_type|title }} Report - Admin Panel{% endblock %}
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/adminpanel/list.css' %}">
+<style>
+.report-head{background:linear-gradient(135deg,#0f172a,#334155);color:white;border-radius:18px;padding:22px}.stat-box{background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:16px;height:100%}.stat-label{font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:#64748b;font-weight:700}.stat-value{font-size:1.3rem;font-weight:750;color:#0f172a}.filter-chip{display:inline-flex;align-items:center;background:#f1f5f9;color:#475569;border-radius:999px;padding:6px 11px;font-size:.82rem}.report-table-card{border:0;border-radius:16px;box-shadow:0 8px 28px rgba(15,23,42,.07);overflow:hidden}.report-actions .btn{border-radius:10px}.data-table td,.data-table th{white-space:nowrap}
+</style>
 {% endblock %}
-
 {% block content %}
-
-<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-
-    <div>
-        <h4 class="adm-page-title">
-            Generated Report
-        </h4>
-
-        <p class="adm-page-subtitle mb-0">
-            Report generated successfully.
-        </p>
-    </div>
-
-    <a
-        href="{% url 'generate_report' %}"
-        class="btn btn-outline-secondary"
-    >
-        <i class="bi bi-arrow-left me-1"></i>
-        Generate Another Report
-    </a>
-
+<div class="report-head d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3"><div><div class="text-white-50 small mb-1">GENERATED REPORT</div><h3 class="mb-1">{{ report_type|title }} Report</h3><div class="text-white-50">{{ filter_summary }}</div></div><div class="report-actions d-flex gap-2 flex-wrap"><a href="{% querystring format='pdf' %}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a><a href="{% querystring format='csv' %}" class="btn btn-success"><i class="bi bi-filetype-csv me-1"></i>CSV</a><a href="{% url 'generate_report' %}" class="btn btn-light"><i class="bi bi-sliders me-1"></i>New Report</a></div></div>
+<div class="row g-3 mb-3">
+ <div class="col-md-4"><div class="stat-box"><div class="stat-label">Total Records</div><div class="stat-value">{{ total_records }}</div></div></div>
+ <div class="col-md-4"><div class="stat-box"><div class="stat-label">Date Range</div><div class="stat-value fs-6">{{ start_date|default:'Any date' }} → {{ end_date|default:'Any date' }}</div></div></div>
+ <div class="col-md-4"><div class="stat-box"><div class="stat-label">{% if total_amount != None %}Filtered Amount{% else %}Report Type{% endif %}</div><div class="stat-value">{% if total_amount != None %}₹{{ total_amount }}{% else %}{{ report_type|title }}{% endif %}</div></div></div>
 </div>
-
-
-<div class="adm-card">
-
-    <!-- Report Information -->
-
-    <div class="p-4 border-bottom">
-
-        <div class="row g-3">
-
-            <div class="col-md-3">
-
-                <small class="text-muted d-block">
-                    Report Type
-                </small>
-
-                <strong>
-                    {{ report_type|title }}
-                </strong>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <small class="text-muted d-block">
-                    Start Date
-                </small>
-
-                <strong>
-                    {% if start_date %}
-                        {{ start_date }}
-                    {% else %}
-                        All
-                    {% endif %}
-                </strong>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <small class="text-muted d-block">
-                    End Date
-                </small>
-
-                <strong>
-                    {% if end_date %}
-                        {{ end_date }}
-                    {% else %}
-                        All
-                    {% endif %}
-                </strong>
-
-            </div>
-
-
-            <div class="col-md-3">
-
-                <small class="text-muted d-block">
-                    Total Records
-                </small>
-
-                <strong>
-                    {{ total_records }}
-                </strong>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- Report Table -->
-
-    <div class="table-responsive">
-
-        <table class="data-table">
-
-            <thead>
-
-                <tr>
-
-                    {% for header in headers %}
-                        <th>
-                            {{ header }}
-                        </th>
-                    {% endfor %}
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                {% for row in rows %}
-
-                <tr>
-
-                    {% for value in row %}
-
-                        <td>
-                            {{ value }}
-                        </td>
-
-                    {% endfor %}
-
-                </tr>
-
-                {% empty %}
-
-                <tr>
-
-                    <td
-                        colspan="{{ headers|length }}"
-                        class="text-center text-muted py-5"
-                    >
-
-                        <i class="bi bi-file-earmark-x fs-3 d-block mb-2"></i>
-
-                        No records found for the selected filters.
-
-                    </td>
-
-                </tr>
-
-                {% endfor %}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-
-    <!-- Footer -->
-<div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
-
-    <span class="text-muted">
-        Total Records: <strong>{{ total_records }}</strong>
-    </span>
-
-    <div class="d-flex gap-2">
-
-        <!-- Download Report -->
-        <a
-            href="{% querystring format='csv' %}"
-            class="btn btn-success"
-        >
-            <i class="bi bi-download me-1"></i>
-            Download Report
-        </a>
-
-        <!-- Generate New Report -->
-        <a
-            href="{% url 'generate_report' %}"
-            class="btn btn-primary"
-        >
-            <i class="bi bi-plus-lg me-1"></i>
-            Generate New Report
-        </a>
-
-    </div>
-
+<div class="report-table-card bg-white">
+ <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2"><div><strong>Report Data</strong><div class="text-muted small">Showing records matching your selected filters.</div></div><span class="filter-chip"><i class="bi bi-funnel me-1"></i>{{ total_records }} result{{ total_records|pluralize }}</span></div>
+ <div class="table-responsive"><table class="data-table mb-0"><thead><tr>{% for header in headers %}<th>{{ header }}</th>{% endfor %}</tr></thead><tbody>{% for row in rows %}<tr>{% for value in row %}<td>{{ value }}</td>{% endfor %}</tr>{% empty %}<tr><td colspan="{{ headers|length }}" class="text-center py-5"><i class="bi bi-search fs-2 text-muted d-block mb-2"></i><strong>No matching records</strong><div class="text-muted small">Try changing or clearing some filters.</div></td></tr>{% endfor %}</tbody></table></div>
+ <div class="p-3 border-top d-flex justify-content-between align-items-center flex-wrap gap-2"><span class="text-muted">Filtered records: <strong>{{ total_records }}</strong></span><div class="d-flex gap-2"><a href="{% querystring format='pdf' %}" class="btn btn-outline-danger"><i class="bi bi-file-earmark-pdf me-1"></i>Download PDF</a><a href="{% querystring format='csv' %}" class="btn btn-outline-success"><i class="bi bi-filetype-csv me-1"></i>Download CSV</a></div></div>
 </div>
-
-
-
 {% endblock %}
