@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .dashboard_views import patient_dashboard
 
 urlpatterns = [
 
@@ -21,7 +22,7 @@ urlpatterns = [
     path('resend-otp/', views.resend_otp, name='resend_otp'),
 
     # ===== Patient Dashboard & Profile =====
-    path('patient-dashboard/', views.patient_dashboard, name='patient_dashboard'),
+    path('patient-dashboard/', patient_dashboard, name='patient_dashboard'),
     path('patient-profile/', views.patient_profile, name='patient_profile'),
     path('patient-profile/change-password/', views.change_password, name='patient_change_password'),
 
