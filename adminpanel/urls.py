@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from . import report_views
 
 urlpatterns = [
 
@@ -46,6 +47,6 @@ urlpatterns = [
     path('profile/edit/', views.edit_profile, name='admin_edit_profile'),
     path('profile/change-password/', views.change_password, name='admin_change_password'),
 
-    path('reports/generate/',views.generate_report,name='generate_report')
-    
+    # ===== Reports =====
+    path('reports/generate/', report_views.generate_report, name='generate_report'),
 ]
