@@ -1,0 +1,56 @@
+{% extends 'patient/base.html' %}
+{% load static %}
+{% block title %}Patient Dashboard - MediCare Hospital{% endblock %}
+{% block css %}<link rel="stylesheet" href="{% static 'css/patient/dashboard.css' %}">{% endblock %}
+{% block content %}
+<section class="patient-dashboard py-5">
+  <div class="container">
+    <div class="dashboard-welcome mb-4">
+      <div>
+        <span class="dashboard-kicker">Patient Portal</span>
+        <h1>Welcome, {{ request.user.first_name|default:request.user.username }}</h1>
+        <p>Manage your appointments and healthcare details in one place.</p>
+      </div>
+      <a href="{% url 'book_appointment' %}" class="btn dashboard-primary-btn"><i class="bi bi-calendar-plus me-2"></i>Book Appointment</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+      <div class="col-md-4"><div class="dashboard-stat-card"><div class="dashboard-stat-icon"><i class="bi bi-calendar-check"></i></div><div><span>Upcoming</span><strong>{{ upcoming_count }}</strong><small>Appointments</small></div></div></div>
+      <div class="col-md-4"><div class="dashboard-stat-card"><div class="dashboard-stat-icon"><i class="bi bi-calendar2-week"></i></div><div><span>Total</span><strong>{{ total_appointments }}</strong><small>Appointments</small></div></div></div>
+      <div class="col-md-4"><div class="dashboard-stat-card"><div class="dashboard-stat-icon"><i class="bi bi-check-circle"></i></div><div><span>Completed</span><strong>{{ completed_count }}</strong><small>Appointments</small></div></div></div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="dashboard-panel h-100">
+          <div class="dashboard-panel-head"><div><h5>Upcoming Appointments</h5><p>Your next scheduled visits</p></div><a href="{% url 'my_appointments' %}">View all <i class="bi bi-arrow-right"></i></a></div>
+          {% if upcoming_appointments %}
+          <div class="dashboard-appointments">
+            {% for appt in upcoming_appointments %}
+            <div class="dashboard-appointment-row">
+              <div class="appointment-date"><strong>{{ appt.appointment_date|date:'d' }}</strong><span>{{ appt.appointment_date|date:'M' }}</span></div>
+              <div class="appointment-main"><h6>Dr. {{ appt.doctor.user.get_full_name }}</h6><p>{{ appt.get_department_display }} &middot; {{ appt.time_slot }}</p></div>
+              <span class="dashboard-status status-{{ appt.status }}">{{ appt.get_status_display }}</span>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="dashboard-empty"><i class="bi bi-calendar2-x"></i><h6>No upcoming appointments</h6><p>Book an appointment when you need to see a doctor.</p><a href="{% url 'book_appointment' %}">Book appointment</a></div>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="dashboard-panel">
+          <div class="dashboard-panel-head"><div><h5>Quick Actions</h5><p>Common patient services</p></div></div>
+          <div class="dashboard-actions">
+            <a href="{% url 'book_appointment' %}"><i class="bi bi-calendar-plus"></i><span><strong>Book Appointment</strong><small>Schedule a doctor visit</small></span><i class="bi bi-chevron-right"></i></a>
+            <a href="{% url 'my_appointments' %}"><i class="bi bi-calendar2-week"></i><span><strong>My Appointments</strong><small>View your appointment history</small></span><i class="bi bi-chevron-right"></i></a>
+            <a href="{% url 'my_billing' %}"><i class="bi bi-receipt"></i><span><strong>My Billing</strong><small>View bills and receipts</small></span><i class="bi bi-chevron-right"></i></a>
+            <a href="{% url 'patient_profile' %}"><i class="bi bi-person"></i><span><strong>My Profile</strong><small>Manage personal details</small></span><i class="bi bi-chevron-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
