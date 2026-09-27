@@ -2,8 +2,9 @@
    DOCTOR PORTAL - SHARED LAYOUT JAVASCRIPT
    Features:
    1. Mobile Sidebar Toggle (+ overlay)
-   2. Active Sidebar Link by Current Path
-   3. Dark / Light Mode Toggle
+   2. Patient List sidebar navigation fix
+   3. Active Sidebar Link by Current Path
+   4. Dark / Light Mode Toggle
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -37,9 +38,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ----------------------------------------------------------------------
-       2. Active Sidebar Link by Current Path
+       2. Patient List sidebar navigation fix
+       base.html previously points "Patient Details" at appointment_list.
+       Keep the existing layout untouched and correct that link here.
     ---------------------------------------------------------------------- */
     var sidebarLinks = document.querySelectorAll('.sidebar-link');
+    sidebarLinks.forEach(function (link) {
+        if (link.textContent.trim() === 'Patient Details') {
+            link.href = '/doctor/patients/';
+            link.childNodes.forEach(function (node) {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim() === 'Patient Details') {
+                    node.textContent = 'Patient List';
+                }
+            });
+        }
+    });
+
+
+    /* ----------------------------------------------------------------------
+       3. Active Sidebar Link by Current Path
+    ---------------------------------------------------------------------- */
     var currentPath = window.location.pathname.replace(/\/$/, '') || '/';
 
     sidebarLinks.forEach(function (link) {
@@ -49,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     /* ----------------------------------------------------------------------
-       3. Dark / Light Mode Toggle
+       4. Dark / Light Mode Toggle
        Theme itself is applied pre-paint by an inline script in base.html;
        this just wires up the button, syncs the icon, and persists the choice.
     ---------------------------------------------------------------------- */
