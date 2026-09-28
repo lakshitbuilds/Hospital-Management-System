@@ -4,39 +4,59 @@
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/adminpanel/list.css' %}">
 <style>
-.report-hero{background:linear-gradient(135deg, #5c3317, #a06b45);color:#fff;border-radius:18px;padding:24px;margin-bottom:20px;box-shadow:0 12px 30px rgba(13,110,253,.15)}
-.report-filter-card{border:0;border-radius:18px;box-shadow:0 8px 28px rgba(15,23,42,.08);overflow:hidden}.filter-section{padding:22px}.filter-label{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;color:#64748b}.form-control,.form-select{min-height:46px;border-radius:10px}.report-type-card{border:1px solid #e2e8f0;border-radius:12px;padding:14px;background:#f8fafc}.export-note{background:#eef6ff;border:1px solid #cfe2ff;border-radius:12px;padding:12px 14px;color:#475569}
+.report-hero{background:linear-gradient(135deg,#5c3317,#a06b45);color:#fff;border-radius:18px;padding:26px 30px;margin-bottom:22px;box-shadow:0 12px 30px rgba(92,51,23,.18)}
+.report-hero-icon{width:64px;height:64px;border-radius:16px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center}
+.report-filter-card{border:1px solid #eadfd7;border-radius:18px;box-shadow:0 8px 28px rgba(15,23,42,.07);overflow:hidden;background:#fff}
+.report-card-header{padding:20px 24px;border-bottom:1px solid #eee5df;background:#fffaf7;display:flex;align-items:center;gap:12px}
+.report-card-header .header-icon{width:42px;height:42px;border-radius:11px;background:#f1e4da;color:#754523;display:flex;align-items:center;justify-content:center;font-size:1.1rem}
+.filter-section{padding:24px}.form-group-box{height:100%;padding:17px;border:1px solid #e9e1dc;border-radius:14px;background:#fff;transition:.2s ease}.form-group-box:focus-within{border-color:#a06b45;box-shadow:0 0 0 3px rgba(160,107,69,.09)}
+.filter-label{font-size:.76rem;text-transform:uppercase;letter-spacing:.055em;font-weight:700;color:#5f4636;margin-bottom:8px;display:block}.filter-label i{color:#a06b45;margin-right:5px}.required-star{color:#b42318}
+.form-control,.form-select{min-height:46px;border-radius:10px;border-color:#ddd3cc;background-color:#fff}.form-control:focus,.form-select:focus{border-color:#a06b45;box-shadow:0 0 0 .2rem rgba(160,107,69,.12)}
+.filter-divider{display:flex;align-items:center;gap:12px;margin:24px 0 17px;color:#806858;font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em}.filter-divider:before,.filter-divider:after{content:'';height:1px;background:#eadfd7;flex:1}
+.export-note{background:#fff8f3;border:1px solid #ead7c8;border-radius:12px;padding:13px 15px;color:#665247;font-size:.9rem}.export-note i{color:#8b572f}
+.form-actions{border-top:1px solid #eee5df;margin:24px -24px -24px;padding:18px 24px;background:#fcfaf9;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.btn-report{background:#6f4022;border-color:#6f4022;color:#fff;min-width:175px}.btn-report:hover,.btn-report:focus{background:#59331b;border-color:#59331b;color:#fff}.btn-reset{border-color:#cbbcaf;color:#624b3c}.btn-reset:hover{background:#f4ece7;border-color:#b9a697;color:#4d382c}
+@media(max-width:767.98px){.report-hero{padding:22px}.report-hero-icon{display:none}.filter-section{padding:18px}.form-actions{margin:20px -18px -18px;padding:16px 18px}.form-actions .btn{width:100%}}
 </style>
 {% endblock %}
 {% block content %}
-<div class="report-hero d-flex justify-content-between align-items-center flex-wrap gap-3">
- <div><div class="small text-white-50 mb-1">ADMIN ANALYTICS</div><h3 class="mb-1">Report Center</h3><p class="mb-0 text-white-50">Build focused hospital reports using advanced filters, then export them as PDF or CSV.</p></div>
- <i class="bi bi-bar-chart-line-fill fs-1"></i>
+<div class="report-hero d-flex justify-content-between align-items-center gap-3">
+ <div><div class="small text-white-50 mb-1 fw-semibold">ADMIN ANALYTICS</div><h3 class="mb-1 fw-bold">Report Center</h3><p class="mb-0 text-white-50">Select a report, choose the date range and apply relevant filters.</p></div>
+ <div class="report-hero-icon"><i class="bi bi-file-earmark-bar-graph fs-2"></i></div>
 </div>
-<div class="card report-filter-card"><div class="filter-section">
-<form method="get" action="{% url 'generate_report' %}" id="reportForm">
- <div class="row g-3">
-  <div class="col-lg-4"><label class="filter-label mb-2">Report Type *</label><select name="report_type" id="report_type" class="form-select" required><option value="">Choose report...</option><option value="patients" {% if report_type == 'patients' %}selected{% endif %}>Patient Report</option><option value="appointments" {% if report_type == 'appointments' %}selected{% endif %}>Appointment Report</option><option value="doctors" {% if report_type == 'doctors' %}selected{% endif %}>Doctor Report</option><option value="billing" {% if report_type == 'billing' %}selected{% endif %}>Billing Report</option></select></div>
-  <div class="col-md-4"><label class="filter-label mb-2">Start Date *</label><input type="date" name="start_date" value="{{ start_date }}" max="{% now 'Y-m-d' %}" class="form-control" required></div>
-  <div class="col-md-4"><label class="filter-label mb-2">End Date *</label><input type="date" name="end_date" value="{{ end_date }}" max="{% now 'Y-m-d' %}" class="form-control" required></div>
-  <div class="col-md-3" id="statusWrap"><label class="filter-label mb-2">Status</label><select name="status" id="status" class="form-select"><option value="">All statuses</option></select></div>
-  <div class="col-md-3" id="departmentWrap"><label class="filter-label mb-2">Department</label><select name="department" class="form-select"><option value="">All departments</option>{% for value,label in departments %}<option value="{{ value }}" {% if department == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
-  <div class="col-md-6" id="doctorWrap"><label class="filter-label mb-2">Doctor</label><select name="doctor" class="form-select"><option value="">All doctors</option>{% for doctor in doctors %}<option value="{{ doctor.id }}" {% if doctor_id == doctor.id|stringformat:'s' %}selected{% endif %}>Dr. {{ doctor.user.get_full_name }} - {{ doctor.get_department_display }}</option>{% endfor %}</select></div>
-  <div class="col-md-6" id="billTypeWrap"><label class="filter-label mb-2">Bill Type</label><select name="bill_type" class="form-select"><option value="">All bill types</option>{% for value,label in bill_types %}<option value="{{ value }}" {% if bill_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="card report-filter-card">
+ <div class="report-card-header"><div class="header-icon"><i class="bi bi-sliders"></i></div><div><h5 class="mb-1">Report Filters</h5><p class="text-muted small mb-0">Fields marked with <span class="required-star">*</span> are required.</p></div></div>
+ <div class="filter-section">
+  <form method="get" action="{% url 'generate_report' %}" id="reportForm">
+   <div class="row g-3">
+    <div class="col-lg-4"><div class="form-group-box"><label class="filter-label"><i class="bi bi-file-earmark-text"></i>Report Type <span class="required-star">*</span></label><select name="report_type" id="report_type" class="form-select" required><option value="">Select report type</option><option value="patients" {% if report_type == 'patients' %}selected{% endif %}>Patient Report</option><option value="appointments" {% if report_type == 'appointments' %}selected{% endif %}>Appointment Report</option><option value="doctors" {% if report_type == 'doctors' %}selected{% endif %}>Doctor Report</option><option value="billing" {% if report_type == 'billing' %}selected{% endif %}>Billing Report</option></select></div></div>
+    <div class="col-lg-4"><div class="form-group-box"><label class="filter-label"><i class="bi bi-calendar-event"></i>Start Date <span class="required-star">*</span></label><input type="date" name="start_date" id="start_date" value="{{ start_date }}" max="{% now 'Y-m-d' %}" class="form-control" required></div></div>
+    <div class="col-lg-4"><div class="form-group-box"><label class="filter-label"><i class="bi bi-calendar-check"></i>End Date <span class="required-star">*</span></label><input type="date" name="end_date" id="end_date" value="{{ end_date }}" max="{% now 'Y-m-d' %}" class="form-control" required></div></div>
+   </div>
+   <div class="filter-divider"><span>Additional Filters</span></div>
+   <div class="row g-3" id="additionalFilters">
+    <div class="col-md-4" id="statusWrap"><div class="form-group-box"><label class="filter-label"><i class="bi bi-check2-circle"></i>Status</label><select name="status" id="status" class="form-select"><option value="">All statuses</option></select></div></div>
+    <div class="col-md-4" id="departmentWrap"><div class="form-group-box"><label class="filter-label"><i class="bi bi-building"></i>Department</label><select name="department" class="form-select"><option value="">All departments</option>{% for value,label in departments %}<option value="{{ value }}" {% if department == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div>
+    <div class="col-md-4" id="doctorWrap"><div class="form-group-box"><label class="filter-label"><i class="bi bi-person-badge"></i>Doctor</label><select name="doctor" class="form-select"><option value="">All doctors</option>{% for doctor in doctors %}<option value="{{ doctor.id }}" {% if doctor_id == doctor.id|stringformat:'s' %}selected{% endif %}>Dr. {{ doctor.user.get_full_name }} - {{ doctor.get_department_display }}</option>{% endfor %}</select></div></div>
+    <div class="col-md-4" id="billTypeWrap"><div class="form-group-box"><label class="filter-label"><i class="bi bi-receipt"></i>Bill Type</label><select name="bill_type" class="form-select"><option value="">All bill types</option>{% for value,label in bill_types %}<option value="{{ value }}" {% if bill_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div>
+   </div>
+   <div class="export-note mt-4"><i class="bi bi-info-circle-fill me-2"></i>Generate the report first. The results page will let you download the same filtered data as <strong>PDF</strong> or <strong>CSV</strong>.</div>
+   <div class="form-actions"><a href="{% url 'generate_report' %}" class="btn btn-reset px-4"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters</a><button class="btn btn-report px-4" type="submit"><i class="bi bi-file-earmark-bar-graph me-2"></i>Generate Report</button></div>
+  </form>
  </div>
- <div class="export-note mt-4"><i class="bi bi-info-circle me-2"></i>First generate the filtered report. On the results page you can download the exact same filtered data as <strong>PDF</strong> or <strong>CSV</strong>.</div>
- <div class="d-flex justify-content-between flex-wrap gap-2 mt-4"><a href="{% url 'generate_report' %}" class="btn btn-outline-secondary px-4"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters</a><button class="btn btn-primary px-4" type="submit"><i class="bi bi-funnel-fill me-1"></i>Generate Report</button></div>
-</form></div></div>
+</div>
 {% endblock %}
 {% block js %}
 <script>
 (function(){
- const type=document.getElementById('report_type'), status=document.getElementById('status');
+ const type=document.getElementById('report_type'),status=document.getElementById('status'),start=document.getElementById('start_date'),end=document.getElementById('end_date');
  const currentStatus='{{ status|escapejs }}';
  const appointment=[['pending','Pending'],['confirmed','Confirmed'],['completed','Completed'],['cancelled','Cancelled'],['no_show','No Show']];
  const billing=[['pending','Pending'],['paid','Paid'],['waived','Waived']];
  function toggle(id,show){document.getElementById(id).style.display=show?'':'none'}
- function refresh(){const t=type.value; const statuses=t==='billing'?billing:(t==='appointments'?appointment:[]); status.innerHTML='<option value="">All statuses</option>'; statuses.forEach(([v,l])=>{const o=new Option(l,v);if(v===currentStatus)o.selected=true;status.add(o)}); toggle('statusWrap',t==='appointments'||t==='billing');toggle('departmentWrap',t==='appointments'||t==='doctors'||t==='billing');toggle('doctorWrap',t==='appointments'||t==='billing');toggle('billTypeWrap',t==='billing');}
+ function refresh(){const t=type.value;const statuses=t==='billing'?billing:(t==='appointments'?appointment:[]);status.innerHTML='<option value="">All statuses</option>';statuses.forEach(([v,l])=>{const o=new Option(l,v);if(v===currentStatus)o.selected=true;status.add(o)});toggle('statusWrap',t==='appointments'||t==='billing');toggle('departmentWrap',t==='appointments'||t==='doctors'||t==='billing');toggle('doctorWrap',t==='appointments'||t==='billing');toggle('billTypeWrap',t==='billing');}
+ start.addEventListener('change',function(){end.min=this.value;if(end.value&&end.value<this.value)end.value='';});
+ if(start.value)end.min=start.value;
  type.addEventListener('change',refresh);refresh();
 })();
 </script>
