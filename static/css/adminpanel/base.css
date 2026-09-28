@@ -103,7 +103,7 @@ img {
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
-    color: var(--adm-text-dark);
+    color: white;
     line-height: 1.3;
 }
 
