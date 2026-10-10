@@ -19,14 +19,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var cancelPatientName = document.getElementById('cancelAptPatientName');
     var confirmCancelBtn = document.getElementById('confirmCancelAptBtn');
     var cancelForm = document.getElementById('cancelAptForm');
-    var pendingAppointmentId = null;
+    var pendingCancelUrl = null;
 
     if (cancelModalEl) {
         cancelModalEl.addEventListener('show.bs.modal', function (event) {
             var triggerBtn = event.relatedTarget;
             if (!triggerBtn) return;
 
-            pendingAppointmentId = triggerBtn.getAttribute('data-appointment-id');
+            pendingCancelUrl = triggerBtn.getAttribute('data-cancel-url');
 
             var patientName = triggerBtn.getAttribute('data-patient-name');
             if (cancelPatientName && patientName) {
@@ -37,8 +37,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (confirmCancelBtn) {
         confirmCancelBtn.addEventListener('click', function () {
-            if (pendingAppointmentId && cancelForm) {
-                cancelForm.action = '/receptionist/appointments/' + pendingAppointmentId + '/cancel/';
+            if (pendingCancelUrl && cancelForm) {
+                cancelForm.action = pendingCancelUrl;
                 cancelForm.submit();
             }
         });
