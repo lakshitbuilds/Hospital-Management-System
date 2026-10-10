@@ -504,49 +504,71 @@ def book_appointment(request):
 
 @receptionist_required
 def confirm_appointment(request, appointment_id):
-    """
-    Confirms a pending appointment (`receptionist_confirm_appointment` URL).
+    """Confirm a pending appointment, without allowing invalid status changes."""
+    if request.method != 'POST':
+        return safe_next_redirect(request, 'receptionist_appointment_list')
 
-    Restricted to receptionists. On POST, sets the appointment's status to
-    'confirmed', notifies the patient, and shows a success message.
-    Redirects back to whatever URL was passed in the `next` POST field, or
-    to the appointment list if none was given. GET requests just redirect
-    without changing anything.
-    """
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-    if request.method == 'POST':
+    with transaction.atomic():
+        appointment = get_object_or_404(
+            Appointment.objects.select_for_update().select_related('patient__user', 'doctor__user'),
+            id=appointment_id,
+        )
+        if appointment.status != 'pending':
+            messages.error(request, 'Only pending appointments can be confirmed.')
+            return safe_next_redirect(request, 'receptionist_appointment_list')
+
         appointment.status = 'confirmed'
-        appointment.save()
+        appointment.save(update_fields=['status', 'updated_at'])
         Notification.objects.create(
             user=appointment.patient.user,
             notification_type='confirmed',
-            message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} on {appointment.appointment_date} has been confirmed.',
+            message=(
+                f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} '
+                f'on {appointment.appointment_date} has been confirmed.'
+            ),
         )
-        messages.success(request, 'Appointment confirmed.')
+
+    messages.success(request, 'Appointment confirmed.')
     return safe_next_redirect(request, 'receptionist_appointment_list')
 
 
 @receptionist_required
 def cancel_appointment(request, appointment_id):
-    """
-    Cancels an appointment (`receptionist_cancel_appointment` URL).
+    """Cancel an active appointment and notify the patient."""
+    if request.method != 'POST':
+        return safe_next_redirect(request, 'receptionist_appointment_list')
 
-    Restricted to receptionists. On POST, sets the appointment's status to
-    'cancelled', notifies the patient that the front desk cancelled it, and
-    shows a success message. Redirects back to the `next` POST field if
-    given, otherwise to the appointment list.
-    """
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-    if request.method == 'POST':
+    with transaction.atomic():
+        appointment = get_object_or_404(
+            Appointment.objects.select_for_update().select_related('patient__user', 'doctor__user'),
+            id=appointment_id,
+        )
+        if appointment.status not in ('pending', 'confirmed'):
+            messages.error(request, 'Only pending or confirmed appointments can be cancelled.')
+            return safe_next_redirect(request, 'receptionist_appointment_list')
+
         appointment.status = 'cancelled'
-        appointment.save()
+        appointment.save(update_fields=['status', 'updated_at'])
         Notification.objects.create(
             user=appointment.patient.user,
             notification_type='cancelled',
-            message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} on {appointment.appointment_date} was cancelled by the front desk.',
+            message=(
+                f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} '
+                f'on {appointment.appointment_date} was cancelled by the front desk.'
+            ),
         )
+
+    # The database update must remain successful even when the email service
+    # or an email template is temporarily unavailable.
+    try:
         send_appointment_cancelled_email(appointment, cancelled_by='the front desk')
-        messages.success(request, 'Appointment cancelled.')
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception(
+            'Unable to send cancellation email for appointment %s', appointment.id
+        )
+
+    messages.success(request, 'Appointment cancelled.')
     return safe_next_redirect(request, 'receptionist_appointment_list')
 
 
