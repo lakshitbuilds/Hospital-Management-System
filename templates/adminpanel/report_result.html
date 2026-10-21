@@ -8,7 +8,7 @@
 </style>
 {% endblock %}
 {% block content %}
-<div class="report-head d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3"><div><div class="text-white-50 small mb-1">GENERATED REPORT</div><h3 class="mb-1">{{ report_type|title }} Report</h3><div class="text-white-50">{{ filter_summary }}</div></div><div class="report-actions d-flex gap-2 flex-wrap"><a href="{% querystring format='pdf' %}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a><a href="{% querystring format='csv' %}" class="btn btn-success"><i class="bi bi-filetype-csv me-1"></i>CSV</a><a href="{% url 'generate_report' %}" class="btn btn-light"><i class="bi bi-sliders me-1"></i>New Report</a></div></div>
+<div class="report-head d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3"><div><div class="text-white-50 small mb-1">GENERATED REPORT</div><h3 class="mb-1 text-white">{{ report_type|title }} Report</h3><div class="text-white-50">{{ filter_summary }}</div></div><div class="report-actions d-flex gap-2 flex-wrap"><a href="{% querystring format='pdf' %}" class="btn btn-danger"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a><a href="{% querystring format='csv' %}" class="btn btn-success"><i class="bi bi-filetype-csv me-1"></i>CSV</a><a href="{% url 'generate_report' %}" class="btn btn-light"><i class="bi bi-sliders me-1"></i>New Report</a></div></div>
 <div class="row g-3 mb-3">
  <div class="col-md-4"><div class="stat-box"><div class="stat-label">Total Records</div><div class="stat-value">{{ total_records }}</div></div></div>
  <div class="col-md-4"><div class="stat-box"><div class="stat-label">Date Range</div><div class="stat-value fs-6">{{ start_date|default:'Any date' }} → {{ end_date|default:'Any date' }}</div></div></div>
