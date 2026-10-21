@@ -14,11 +14,7 @@
 ============================================================= -->
 <div class="doc-card profile-header-card">
     <div class="profile-header-main">
-        {% if doctor.profile_picture %}
-        <img src="{{ doctor.profile_picture.url }}" alt="Dr. {{ doctor.user.get_full_name }}" class="profile-header-avatar">
-        {% else %}
-        <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. {{ doctor.user.get_full_name }}" class="profile-header-avatar">
-        {% endif %}
+        <img src="{{ doctor.photo_url }}" alt="Dr. {{ doctor.user.get_full_name }}" class="profile-header-avatar">
         <div>
             <h4>Dr. {{ doctor.user.get_full_name }}</h4>
             <div class="profile-header-badges">

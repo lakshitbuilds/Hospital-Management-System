@@ -20,11 +20,7 @@
     <div class="col-lg-4">
         <div class="doc-card text-center avatar-card">
             <div class="edit-avatar-wrap">
-                {% if doctor.profile_picture %}
-                <img src="{{ doctor.profile_picture.url }}" alt="Dr. {{ doctor.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
-                {% else %}
-                <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. {{ doctor.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
-                {% endif %}
+                <img src="{{ doctor.photo_url }}" alt="Dr. {{ doctor.user.get_full_name }}" id="avatarPreview" class="edit-avatar-preview">
                 <button type="button" class="avatar-edit-btn" id="avatarEditBtn" aria-label="Change profile picture">
                     <i class="bi bi-camera-fill"></i>
                 </button>

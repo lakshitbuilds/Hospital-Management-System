@@ -57,11 +57,7 @@
             </div>
 
             <div class="sidebar-doctor-card">
-                {% if request.user.doctor_profile.profile_picture %}
-                <img src="{{ request.user.doctor_profile.profile_picture.url }}" alt="Doctor avatar" class="sidebar-doctor-avatar">
-                {% else %}
-                <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Doctor avatar" class="sidebar-doctor-avatar">
-                {% endif %}
+                <img src="{{ request.user.doctor_profile.photo_url }}" alt="Doctor avatar" class="sidebar-doctor-avatar">
                 <div>
                     <h6>Dr. {{ request.user.get_full_name }}</h6>
                     <span>{{ request.user.doctor_profile.get_department_display }}</span>
@@ -176,11 +172,7 @@
 
                     <div class="dropdown">
                         <button class="topbar-profile-btn" type="button" id="topbarProfileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            {% if request.user.doctor_profile.profile_picture %}
-                            <img src="{{ request.user.doctor_profile.profile_picture.url }}" alt="Dr. {{ request.user.get_full_name }}" class="topbar-avatar">
-                            {% else %}
-                            <img src="{% static 'public/images/doctor-1.jpg' %}" alt="Dr. {{ request.user.get_full_name }}" class="topbar-avatar">
-                            {% endif %}
+                            <img src="{{ request.user.doctor_profile.photo_url }}" alt="Dr. {{ request.user.get_full_name }}" class="topbar-avatar">
                             <i class="bi bi-chevron-down"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="topbarProfileDropdown">

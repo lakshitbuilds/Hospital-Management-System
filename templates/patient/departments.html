@@ -16,7 +16,7 @@
     <div class="container">
         <h1>Departments</h1>
         <nav class="breadcrumb-nav">
-            <a href="#">Home</a>
+            <a href="{% url 'home' %}">Home</a>
             <i class="bi bi-chevron-right"></i>
             <span class="current">Departments</span>
         </nav>
@@ -40,109 +40,109 @@
         <div class="row gy-4">
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="cardiology" tabindex="-1">
                     <img src="{% static 'public/images/dept-cardiology.jpg' %}" alt="Cardiology department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-heart-pulse-fill"></i></div>
                         <h5>Cardiology</h5>
                         <p>12 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Cardiology" data-department-description="Care focused on the heart and cardiovascular system. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Cardiology details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="neurology" tabindex="-1">
                     <img src="{% static 'public/images/dept-neurology.jpg' %}" alt="Neurology department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-activity"></i></div>
                         <h5>Neurology</h5>
                         <p>9 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Neurology" data-department-description="Care focused on the brain, spinal cord and nerves. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Neurology details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="orthopedics" tabindex="-1">
                     <img src="{% static 'public/images/dept-orthopedics.jpg' %}" alt="Orthopedics department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-person-wheelchair"></i></div>
                         <h5>Orthopedics</h5>
                         <p>10 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Orthopedics" data-department-description="Care focused on bones, joints and the musculoskeletal system. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Orthopedics details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="pediatrics" tabindex="-1">
                     <img src="{% static 'public/images/dept-pediatrics.jpg' %}" alt="Pediatrics department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-emoji-smile-fill"></i></div>
                         <h5>Pediatrics</h5>
                         <p>8 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Pediatrics" data-department-description="Care focused on the health and development of children. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Pediatrics details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="ophthalmology" tabindex="-1">
                     <img src="{% static 'public/images/dept-ophthalmology.jpg' %}" alt="Ophthalmology department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-eye-fill"></i></div>
                         <h5>Ophthalmology</h5>
                         <p>6 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Ophthalmology" data-department-description="Care focused on eye health and vision. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Ophthalmology details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="dermatology" tabindex="-1">
                     <img src="{% static 'public/images/dept-dermatology.jpg' %}" alt="Dermatology department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-droplet-half"></i></div>
                         <h5>Dermatology</h5>
                         <p>5 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Dermatology" data-department-description="Care focused on the skin, hair and nails. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Dermatology details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="general-medicine" tabindex="-1">
                     <img src="{% static 'public/images/dept-general-medicine.jpg' %}" alt="General Medicine department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-clipboard2-pulse-fill"></i></div>
                         <h5>General Medicine</h5>
                         <p>15 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="General Medicine" data-department-description="Care focused on general health concerns and ongoing medical care. Contact our care coordinators to discuss available specialists and appointments." aria-label="View General Medicine details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="dental-care" tabindex="-1">
                     <img src="{% static 'public/images/dept-dental.jpg' %}" alt="Dental Care department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-emoji-laughing-fill"></i></div>
                         <h5>Dental Care</h5>
                         <p>7 Specialists</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Dental Care" data-department-description="Care focused on teeth, gums and oral health. Contact our care coordinators to discuss available specialists and appointments." aria-label="View Dental Care details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4 col-md-6">
-                <div class="department-card">
+                <div class="department-card" id="emergency-care" tabindex="-1">
                     <img src="{% static 'public/images/dept-emergency.jpg' %}" alt="Emergency department">
                     <div class="department-overlay">
                         <div class="department-icon"><i class="bi bi-truck-front-fill"></i></div>
                         <h5>Emergency Care</h5>
                         <p>24/7 Availability</p>
-                        <a href="#" class="department-link">View Details <i class="bi bi-arrow-right"></i></a>
+                        <button type="button" class="department-link" data-bs-toggle="modal" data-bs-target="#departmentDetailsModal" data-department-name="Emergency Care" data-department-description="Care focused on urgent medical needs. Contact the hospital directly for information about emergency services." aria-label="View Emergency Care details">View Details <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
                     </div>
                 </div>
             </div>
@@ -160,10 +160,10 @@
             <h2>Looking for a Specific Department?</h2>
             <p>Our care coordinators can connect you with the right team in minutes.</p>
             <div class="cta-actions">
-                <a href="#" class="btn btn-light btn-lg">
+                <a href="{% url 'book_appointment' %}" class="btn btn-light btn-lg">
                     <i class="bi bi-calendar2-check me-2"></i>Book Appointment
                 </a>
-                <a href="#" class="btn btn-outline-light btn-lg">
+                <a href="{% url 'contact' %}" class="btn btn-outline-light btn-lg">
                     <i class="bi bi-telephone me-2"></i>Contact Us
                 </a>
             </div>
@@ -171,4 +171,23 @@
     </div>
 </section>
 
+<div class="modal fade" id="departmentDetailsModal" tabindex="-1" aria-labelledby="departmentDetailsTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="departmentDetailsTitle">Department Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body"><p id="departmentDetailsDescription" class="mb-0"></p></div>
+            <div class="modal-footer">
+                <a href="{% url 'contact' %}" class="btn btn-outline-primary">Contact Us</a>
+                <a href="{% url 'book_appointment' %}" class="btn btn-primary">Book Appointment</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script src="{% static 'js/patient/departments.js' %}"></script>
 {% endblock %}

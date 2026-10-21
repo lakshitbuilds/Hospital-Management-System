@@ -17,11 +17,7 @@
     {% for row in doctor_rows %}
     <div class="col-lg-4 col-md-6">
         <div class="rec-card doctor-list-card">
-            {% if row.doctor.profile_picture %}
-            <img src="{{ row.doctor.profile_picture.url }}" alt="Dr. {{ row.doctor.user.get_full_name }}" class="doctor-list-avatar">
-            {% else %}
-            <img src="{% static row.photo_path %}" alt="Dr. {{ row.doctor.user.get_full_name }}" class="doctor-list-avatar">
-            {% endif %}
+            <img src="{{ row.doctor.photo_url }}" alt="Dr. {{ row.doctor.user.get_full_name }}" class="doctor-list-avatar">
             <div class="doctor-list-info">
                 <h6>Dr. {{ row.doctor.user.get_full_name }}</h6>
                 <p>{{ row.doctor.specialization|default:row.doctor.get_department_display }}</p>

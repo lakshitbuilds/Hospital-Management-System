@@ -173,7 +173,9 @@ def _redirect_for_role(request, user):
 
 def home(request):
     """Public landing page ('/'). No auth required. Just renders the template."""
-    return render(request, "patient/index.html")
+    return render(request, "patient/index.html", {
+        "doctors": Doctor.objects.select_related("user").order_by("pk")[:4],
+    })
 
 
 def about(request):
@@ -193,14 +195,9 @@ def department(request):
 
 def doctors(request):
     """
-    Public "Meet our doctors" listing page. No auth required. Fetches every
-    Doctor row (with its User joined in) and assigns each one a stock
-    photo path (cycling through 8 placeholder images by index) since the
-    project doesn't have real doctor photos.
+    Public doctor listing with uploaded photos or temporary demo portraits.
     """
-    doctor_list = list(Doctor.objects.select_related('user').all())
-    for index, doc in enumerate(doctor_list):
-        doc.photo_path = f'public/images/doctor-{(index % 8) + 1}.jpg'
+    doctor_list = list(Doctor.objects.select_related('user').order_by('pk'))
     return render(request, "patient/doctors.html", {'doctors': doctor_list})
 
 

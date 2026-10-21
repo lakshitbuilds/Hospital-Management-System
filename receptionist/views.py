@@ -700,13 +700,10 @@ def doctor_list(request):
     }
 
     doctor_rows = []
-    for index, doc in enumerate(doctors):
+    for doc in doctors:
         avail = availability_map.get(doc.id)
         doctor_rows.append({
             'doctor': doc,
-            # No real photo upload for doctors - cycle through 8 placeholder
-            # images based on list position so each doctor gets a stable-looking photo.
-            'photo_path': f'public/images/doctor-{(index % 8) + 1}.jpg',
             # A blocked date always wins. Otherwise use the explicit
             # DoctorAvailability record for today if one exists; failing
             # that, default to "available" on every day except Sunday.

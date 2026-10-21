@@ -10,6 +10,7 @@
    1. DEPARTMENT CARDS
    ========================================================================== */
 .department-card {
+    scroll-margin-top: 110px;
     position: relative;
     border-radius: var(--border-radius);
     overflow: hidden;
@@ -76,8 +77,14 @@
     font-weight: 500;
     font-size: 0.88rem;
     color: var(--white);
-    opacity: 0;
-    transform: translateY(6px);
+    opacity: 1;
+    transform: translateY(0);
+    background: none;
+    border: 0;
+    padding: 0;
+    align-self: flex-start;
+    cursor: pointer;
+    font-family: inherit;
     transition: var(--transition);
 }
 
@@ -107,4 +114,9 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.department-link:focus-visible {
+    outline: 2px solid var(--white);
+    outline-offset: 4px;
 }

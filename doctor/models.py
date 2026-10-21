@@ -67,6 +67,14 @@ class Doctor(models.Model):
     buffer_time = models.PositiveIntegerField(default=5)
     max_per_day = models.PositiveIntegerField(blank=True, null=True)
 
+    @property
+    def photo_url(self):
+        """Use the saved profile photo consistently across doctor directories."""
+        if self.profile_picture:
+            return self.profile_picture.url
+        from django.templatetags.static import static
+        return static('public/images/doctor-1.jpg')
+
     def __str__(self):
         return f"Dr. {self.user.get_full_name()} - {self.department}"
 
