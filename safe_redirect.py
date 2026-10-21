@@ -11,17 +11,23 @@ defense-in-depth rather than leaving it open.
 """
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
+from django.urls import NoReverseMatch, reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 
 
 def safe_next_redirect(request, fallback):
     """
-    Redirects to `request.POST.get('next')` if it's a safe, same-site URL;
-    otherwise falls back to `redirect(fallback)` (a URL name, as normally
-    passed to Django's `redirect()`).
+    Accept a named route or a safe, absolute-path/same-site URL in `next`.
+    Invalid names and relative paths fall back to the supplied URL name.
     """
-    next_url = request.POST.get('next')
-    if next_url and url_has_allowed_host_and_scheme(
+    next_url = request.POST.get('next', '').strip()
+    if next_url:
+        # Forms may submit a named route rather than a literal URL.
+        try:
+            next_url = reverse(next_url)
+        except NoReverseMatch:
+            pass
+    if next_url and next_url.startswith(('/', 'http://', 'https://')) and url_has_allowed_host_and_scheme(
         url=next_url,
         allowed_hosts={request.get_host()},
         require_https=request.is_secure(),
