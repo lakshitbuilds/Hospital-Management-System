@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!triggerBtn) return;
 
             document.getElementById('rxModalPdf').href = triggerBtn.getAttribute('data-pdf-url');
+            document.getElementById('rxModalPdf').setAttribute('data-print-target', triggerBtn.getAttribute('data-print-target'));
 
             var medicines = [];
             try {

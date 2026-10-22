@@ -15,6 +15,8 @@ read directly off request.POST / request.GET / request.FILES.
 from datetime import datetime, date, timedelta
 from functools import wraps
 
+from form_handling import preserve_form
+from patient.cancellation import cancel_with_reason
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
@@ -218,26 +220,10 @@ def appointment_list(request):
 
 @doctor_required
 def doctor_cancel_appointment(request, appointment_id):
-    """
-    POST-only action (restricted to the doctor role) that lets a doctor
-    cancel one of their own appointments (again scoped via `doctor=doctor`
-    so a doctor can't cancel another doctor's appointment). Sets the
-    appointment status to 'cancelled' and creates a Notification so the
-    patient is informed it was the doctor who cancelled. Redirects to
-    `appointment_list`.
-    """
-    doctor = get_doctor(request)
-    appointment = get_object_or_404(Appointment, id=appointment_id, doctor=doctor)
-    if request.method == 'POST':
-        appointment.status = 'cancelled'
-        appointment.save()
-        Notification.objects.create(
-            user=appointment.patient.user,
-            notification_type='cancelled',
-            message=f'Your appointment with Dr. {doctor.user.get_full_name()} on {appointment.appointment_date} was cancelled by the doctor.'
-        )
-        send_appointment_cancelled_email(appointment, cancelled_by='the doctor')
-    return redirect('appointment_list')
+    return cancel_with_reason(
+        request, Appointment.objects.filter(doctor=get_doctor(request)), appointment_id,
+        portal='doctor', fallback='appointment_list', actor='the doctor',
+    )
 
 
 # ================================================================
@@ -290,6 +276,7 @@ def patient_details(request, patient_id):
 # ================================================================
 
 @doctor_required
+@preserve_form
 def add_prescription(request):
     """
     Serves the `add_prescription` URL. Restricted to the doctor role.
@@ -446,6 +433,7 @@ def prescription_history(request):
 # ================================================================
 
 @doctor_required
+@preserve_form
 def availability(request):
     """
     Serves the `availability` URL: lets a doctor configure their recurring
@@ -526,10 +514,14 @@ def availability(request):
                 }
             )
 
-        doctor.slot_duration = request.POST.get('slot_duration') or 30
-        doctor.buffer_time = request.POST.get('buffer_time') or 5
-        max_per_day = request.POST.get('max_per_day')
-        doctor.max_per_day = max_per_day or None
+        try:
+            doctor.slot_duration = int(request.POST.get('slot_duration') or 30)
+            doctor.buffer_time = int(request.POST.get('buffer_time') or 5)
+            max_per_day = request.POST.get('max_per_day')
+            doctor.max_per_day = int(max_per_day) if max_per_day else None
+        except (TypeError, ValueError):
+            messages.error(request, 'Slot duration, buffer time, and patient limit must be whole numbers.')
+            return redirect('availability')
         doctor.save()
 
         # Simplest way to sync the blocked-dates list from a raw HTML form
@@ -567,6 +559,12 @@ def availability(request):
         })
 
     blocked_dates = BlockedDate.objects.filter(doctor=doctor)
+    if request.POST:
+        reasons = request.POST.getlist('blocked_reason[]')
+        blocked_dates = [
+            {'date': value, 'reason': reasons[index] if index < len(reasons) else ''}
+            for index, value in enumerate(request.POST.getlist('blocked_date[]'))
+        ]
 
     return render(request, 'doctor/availability.html', {
         'doctor': doctor,
@@ -656,6 +654,7 @@ def doctor_profile(request):
 
 
 @doctor_required
+@preserve_form
 def edit_profile(request):
     """
     Serves the `edit_profile` URL. Restricted to the doctor role.
@@ -725,6 +724,7 @@ def edit_profile(request):
 
 
 @doctor_required
+@preserve_form
 def change_password(request):
     """
     Serves the `change_password` URL, letting the logged-in doctor change

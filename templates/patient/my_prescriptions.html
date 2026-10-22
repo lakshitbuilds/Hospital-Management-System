@@ -10,12 +10,12 @@
 <section class="section-padding">
   <div class="container">
     {% for rx in prescriptions %}
-    <article class="card mb-4" aria-labelledby="prescription-{{ rx.id }}">
+    <article id="patient-rx-{{ rx.id }}" class="card mb-4" aria-labelledby="prescription-{{ rx.id }}">
       <div class="card-body">
         <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
           <h2 class="h5" id="prescription-{{ rx.id }}">Dr. {{ rx.doctor.user.get_full_name }}</h2>
           <span>{{ rx.created_at|date:"M d, Y" }}</span>
-          <a href="{% url 'patient_prescription_pdf' rx.id %}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" data-print-document>Preview &amp; Print</a>
+          <a href="{% url 'patient_prescription_pdf' rx.id %}" class="btn btn-outline-primary btn-sm" data-print-document data-print-target="#patient-rx-{{ rx.id }}">Preview &amp; Print</a>
         </div>
         {% if rx.appointment %}<p class="text-muted">Appointment: {{ rx.appointment.appointment_date|date:"M d, Y" }} &middot; {{ rx.appointment.time_slot }}</p>{% endif %}
         <h3 class="h6">Diagnosis</h3>

@@ -61,12 +61,13 @@
                         <form action="{% url 'admin_update_appointment_status' appt.id %}" method="post" class="shift-select-form">
                             {% csrf_token %}
                             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                            <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <select name="status" class="form-select form-select-sm" data-cancellation-select data-original-status="{{ appt.status }}" data-cancel-url="{% url 'admin_update_appointment_status' appt.id %}" data-cancel-details="{{ appt.patient.user.get_full_name }} | Dr. {{ appt.doctor.user.get_full_name }} | {{ appt.appointment_date|date:'d M Y' }} | {{ appt.time_slot }}">
                                 {% for value, label in appt.STATUS_CHOICES %}
                                 <option value="{{ value }}" {% if appt.status == value %}selected{% endif %}>{{ label }}</option>
                                 {% endfor %}
                             </select>
                         </form>
+                        {% if appt.cancellation_reason %}<div class="small text-muted text-break mt-1">Cancellation reason: {{ appt.cancellation_reason }}{% if appt.cancellation_explanation %} - {{ appt.cancellation_explanation }}{% endif %}</div>{% endif %}
                     </td>
                     <td class="text-end">
                         <div class="table-actions">

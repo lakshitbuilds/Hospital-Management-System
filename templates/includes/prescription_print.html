@@ -1,0 +1,12 @@
+<article id="prescription-print-{{ rx.id }}" hidden>
+<h1>MediCare Hospital - Prescription</h1>
+<p>Prescription #{{ rx.id }} | {{ rx.created_at|date:"d M Y" }}</p>
+<p><strong>Patient:</strong> {{ rx.patient.user.get_full_name }} | {{ rx.patient.patient_id }}</p>
+<p><strong>Doctor:</strong> Dr. {{ rx.doctor.user.get_full_name }}</p>
+<div class="prescription-section"><h2>Diagnosis</h2><p>{{ rx.diagnosis }}</p></div>
+<table><thead><tr><th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead><tbody>
+{% for m in rx.medicines.all %}<tr><td>{{ m.name }}</td><td>{{ m.dosage }}</td><td>{{ m.get_frequency_display }}</td><td>{{ m.duration }}</td><td>{{ m.instructions }}</td></tr>{% empty %}<tr><td colspan="5">No medicines prescribed.</td></tr>{% endfor %}
+</tbody></table>
+{% if rx.advice %}<div class="prescription-section"><h2>Doctor's Advice</h2><p>{{ rx.advice }}</p></div>{% endif %}
+{% if rx.follow_up_date %}<p><strong>Follow-up:</strong> {{ rx.follow_up_date|date:"d M Y" }}</p>{% endif %}
+</article>

@@ -11,12 +11,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var filterButtons = document.querySelectorAll('.apt-filter-btn');
     var appointmentList = document.getElementById('appointmentList');
     var emptyState = document.getElementById('aptEmptyState');
-    var cancelModalEl = document.getElementById('cancelModal');
-    var cancelDoctorName = document.getElementById('cancelDoctorName');
-    var confirmCancelBtn = document.getElementById('confirmCancelBtn');
-    var cancelForm = document.getElementById('cancelForm');
     var currentFilter = 'all';
-    var currentAppointmentId = null;
 
     function getCards() {
         return appointmentList.querySelectorAll('.appointment-card');
@@ -57,33 +52,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
-    /* ----------------------------------------------------------------------
-       2. Cancel Confirmation Modal
-       Reads which appointment triggered the modal from the button's
-       data attributes, then submits the hidden cancel form on confirm.
-    ---------------------------------------------------------------------- */
-    if (cancelModalEl) {
-        cancelModalEl.addEventListener('show.bs.modal', function (event) {
-            var triggerBtn = event.relatedTarget;
-            if (!triggerBtn) return;
-
-            currentAppointmentId = triggerBtn.getAttribute('data-appointment-id');
-            var doctorName = triggerBtn.getAttribute('data-doctor-name');
-
-            if (cancelDoctorName && doctorName) {
-                cancelDoctorName.textContent = doctorName;
-            }
-        });
-    }
-
-    if (confirmCancelBtn) {
-        confirmCancelBtn.addEventListener('click', function () {
-            if (currentAppointmentId && cancelForm) {
-                cancelForm.action = '/appointments/' + currentAppointmentId + '/cancel/';
-                cancelForm.submit();
-            }
-        });
-    }
 
 });
 

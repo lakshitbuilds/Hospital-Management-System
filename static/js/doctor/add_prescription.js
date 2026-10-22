@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    renumberRows();
+
     function buildMedicineRow() {
         var template = medicineRows.querySelector('.medicine-row');
         var newRow = template.cloneNode(true);

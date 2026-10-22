@@ -111,7 +111,7 @@
 
                             <label class="form-label d-block">Available Time Slots</label>
                             <div class="alert alert-warning d-none" id="slotNotice" role="alert"></div>
-                            <div class="time-slot-grid" id="timeSlotGrid" data-slots-url="{% url 'get_doctor_slots' %}">
+                            <div class="time-slot-grid" id="timeSlotGrid" data-selected-slot="{{ request.POST.time_slot }}" data-slots-url="{% url 'get_doctor_slots' %}">
                                 <p class="time-slot-empty">Choose a doctor and date above to see available times.</p>
                             </div>
                             <p class="time-slot-hint"><i class="bi bi-square-fill is-booked-dot"></i>Booked slots are unavailable &mdash; this list updates automatically if another patient books or cancels.</p>

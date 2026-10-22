@@ -24,6 +24,8 @@ from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q, Sum
 from django.http import JsonResponse
+from form_handling import preserve_form
+from patient.cancellation import cancel_with_reason
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -151,6 +153,7 @@ def patient_list(request):
 
 
 @receptionist_required
+@preserve_form
 def register_patient(request):
     """
     Serves walk-in patient registration (`receptionist_register_patient` URL).
@@ -394,6 +397,7 @@ def get_doctor_slots(request):
 
 
 @receptionist_required
+@preserve_form
 def book_appointment(request):
     """
     Serves staff-assisted appointment booking (`receptionist_book_appointment` URL).
@@ -530,26 +534,10 @@ def confirm_appointment(request, appointment_id):
 
 @receptionist_required
 def cancel_appointment(request, appointment_id):
-    """
-    Cancels an appointment (`receptionist_cancel_appointment` URL).
-
-    Restricted to receptionists. On POST, sets the appointment's status to
-    'cancelled', notifies the patient that the front desk cancelled it, and
-    shows a success message. Redirects back to the `next` POST field if
-    given, otherwise to the appointment list.
-    """
-    appointment = get_object_or_404(Appointment, id=appointment_id)
-    if request.method == 'POST':
-        appointment.status = 'cancelled'
-        appointment.save()
-        Notification.objects.create(
-            user=appointment.patient.user,
-            notification_type='cancelled',
-            message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} on {appointment.appointment_date} was cancelled by the front desk.',
-        )
-        send_appointment_cancelled_email(appointment, cancelled_by='the front desk')
-        messages.success(request, 'Appointment cancelled.')
-    return safe_next_redirect(request, 'receptionist_appointment_list')
+    return cancel_with_reason(
+        request, Appointment.objects.all(), appointment_id,
+        portal='receptionist', fallback='receptionist_appointment_list', actor='the front desk',
+    )
 
 
 @receptionist_required
@@ -774,6 +762,7 @@ def receptionist_profile(request):
 
 
 @receptionist_required
+@preserve_form
 def edit_profile(request):
     """
     Serves the receptionist's own profile edit form (`receptionist_edit_profile` URL).
@@ -819,6 +808,7 @@ def edit_profile(request):
 
 
 @receptionist_required
+@preserve_form
 def change_password(request):
     """
     Serves the receptionist's own password change form (`receptionist_change_password` URL).

@@ -35,6 +35,7 @@
             {% endif %}
             <div class="timeline-info">
                 <h6>{{ appt.patient.user.get_full_name }}</h6>
+                {% if appt.cancellation_reason %}<p class="text-break">Cancellation reason: {{ appt.cancellation_reason }}{% if appt.cancellation_explanation %} - {{ appt.cancellation_explanation }}{% endif %}</p>{% endif %}
                 <p>with Dr. {{ appt.doctor.user.get_full_name }} &middot; {{ appt.reason|truncatechars:40 }}</p>
             </div>
             <span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span>
@@ -49,13 +50,7 @@
                 </form>
                 {% endif %}
                 {% if appt.status == 'pending' or appt.status == 'confirmed' %}
-                <form action="{% url 'receptionist_cancel_appointment' appt.id %}" method="post" class="d-inline">
-                    {% csrf_token %}
-                    <input type="hidden" name="next" value="receptionist_today_appointments">
-                    <button type="submit" class="table-action-btn table-action-danger" title="Cancel Appointment">
-                        <i class="bi bi-x-lg"></i>
-                    </button>
-                </form>
+                <button type="button" class="table-action-btn table-action-danger" title="Cancel Appointment" data-bs-toggle="modal" data-bs-target="#appointmentCancellationModal" data-cancel-url="{% url 'receptionist_cancel_appointment' appt.id %}" data-cancel-details="{{ appt.patient.user.get_full_name }} | Dr. {{ appt.doctor.user.get_full_name }} | {{ appt.appointment_date|date:'d M Y' }} | {{ appt.time_slot }}"><i class="bi bi-x-lg"></i></button>
                 {% endif %}
                 {% if appt.status == 'confirmed' %}
                 <form action="{% url 'receptionist_mark_no_show' appt.id %}" method="post" class="d-inline">

@@ -1,0 +1,15 @@
+{% load cancellation_tags %}
+{% cancellation_reasons as reason_choices %}
+<fieldset data-cancellation-reasons>
+  <legend class="form-label fs-6">Reason for Cancellation</legend>
+  {% for choice in reason_choices %}
+  <div class="form-check mb-2">
+    <input type="radio" class="form-check-input" name="cancellation_reason" id="{{ reason_prefix }}-{{ forloop.counter }}" value="{{ choice }}" required {% if cancellation_reason == choice %}checked{% endif %}>
+    <label class="form-check-label" for="{{ reason_prefix }}-{{ forloop.counter }}">{{ choice }}</label>
+  </div>
+  {% endfor %}
+</fieldset>
+<div class="mt-3" data-cancellation-other {% if cancellation_reason != 'Other' %}hidden{% endif %}>
+  <label for="{{ reason_prefix }}-explanation" class="form-label">Please specify the cancellation reason</label>
+  <textarea id="{{ reason_prefix }}-explanation" name="cancellation_explanation" class="form-control" rows="4" placeholder="Please enter the reason for cancelling this appointment..." {% if cancellation_reason == 'Other' %}required{% else %}disabled{% endif %}>{{ cancellation_explanation }}</textarea>
+</div>

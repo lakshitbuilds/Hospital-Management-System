@@ -45,7 +45,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        if (firstVisible) {
+        var selected = doctorSelect.options[doctorSelect.selectedIndex];
+        if (firstVisible && (!selected || selected.hidden)) {
             doctorSelect.value = firstVisible.value;
         }
 
@@ -86,6 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     departmentInputs.forEach(function (input) {
         input.addEventListener('change', function () {
+            timeSlotGrid.removeAttribute('data-selected-slot');
             filterDoctorsByDepartment(input.value);
             loadTimeSlots();
         });
@@ -93,6 +95,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (doctorSelect) {
         doctorSelect.addEventListener('change', function () {
+            timeSlotGrid.removeAttribute('data-selected-slot');
             updateSummary();
             loadTimeSlots();
         });
@@ -100,6 +103,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (dateInput) {
         dateInput.addEventListener('change', function () {
+            timeSlotGrid.removeAttribute('data-selected-slot');
             updateSummary();
             loadTimeSlots();
         });
@@ -158,6 +162,7 @@ document.addEventListener('DOMContentLoaded', function () {
             input.value = slot.time;
             input.className = 'time-slot-input';
             if (slot.booked) input.disabled = true;
+            if (!slot.booked && slot.time === timeSlotGrid.getAttribute('data-selected-slot')) input.checked = true;
 
             var label = document.createElement('label');
             label.setAttribute('for', id);
@@ -326,7 +331,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Initialize summary and time slots on page load
-    filterDoctorsByDepartment(document.querySelector('.department-input:checked').value);
+    var initialDepartment = document.querySelector('.department-input:checked');
+    if (initialDepartment) filterDoctorsByDepartment(initialDepartment.value);
     loadTimeSlots();
 
 });

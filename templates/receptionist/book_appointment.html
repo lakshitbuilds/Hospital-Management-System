@@ -25,7 +25,7 @@
                 <div class="row gy-3 mb-4">
                     <div class="col-md-6 position-relative">
                         <label for="patientSearchInput" class="form-label">Patient</label>
-                        <input type="text" class="form-control" id="patientSearchInput" autocomplete="off"
+                        <input type="text" class="form-control" id="patientSearchInput" name="patient_search" autocomplete="off"
                                data-search-url="{% url 'receptionist_search_patients' %}"
                                placeholder="Search by name or patient ID..."
                                value="{% if preselected_patient %}{{ preselected_patient.user.get_full_name }} &middot; {{ preselected_patient.patient_id }}{% endif %}">
@@ -60,7 +60,7 @@
                 </div>
 
                 <label class="form-label d-block">Time Slot</label>
-                <div class="time-slot-grid" id="timeSlotGrid" data-slots-url="{% url 'receptionist_get_doctor_slots' %}">
+                <div class="time-slot-grid" id="timeSlotGrid" data-selected-slot="{{ request.POST.time_slot }}" data-slots-url="{% url 'receptionist_get_doctor_slots' %}">
                     <p class="time-slot-empty">Choose a doctor and date above to see available times.</p>
                 </div>
 

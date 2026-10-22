@@ -244,6 +244,6 @@
     <script src="{% static 'js/receptionist/receptionist.js' %}"></script>
 
     <!-- ===== Page Specific JS Block ===== -->
-    <script src="{% static 'js/shared/print_document.js' %}"></script>{% block javascript %}{% endblock %}
+    {% include 'includes/cancellation_modal.html' %}<script src="{% static 'js/shared/cancel_appointment.js' %}?v=2"></script>{% include 'includes/document_preview.html' %}<script src="{% static 'js/shared/print_document.js' %}?v=3"></script>{% block javascript %}{% endblock %}
 </body>
 </html>

@@ -90,3 +90,13 @@ class PDFExportTests(TestCase):
                                              instructions='Very long instructions ' * 500)
         self.client.force_login(self.users['doctor'])
         self.assert_pdf(self.client.get(reverse('doctor_prescription_pdf', args=[self.rx.pk])), f'prescription-{self.rx.pk:06d}.pdf')
+
+    def test_prescription_print_controls_use_html_targets(self):
+        self.client.force_login(self.users['doctor'])
+        response = self.client.get(reverse('prescription_history'))
+        self.assertContains(response, 'Print History (current page)')
+        self.assertContains(response, f'data-print-target="#prescription-print-{self.rx.pk}"')
+        self.assertContains(response, 'Allergy &lt;mild&gt; &amp; irritation')
+        self.assertContains(response, 'id="documentPrintContent"')
+        self.assertNotContains(response, 'documentPreviewFrame')
+        self.assertContains(response, 'data-print-target="#prescriptionHistoryPrint"')

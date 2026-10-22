@@ -1,0 +1,12 @@
+{% extends portal_base %}
+{% block content %}
+<h4>Cancel Appointment</h4>
+<p>{{ appointment.patient.user.get_full_name }} | Dr. {{ appointment.doctor.user.get_full_name }} | {{ appointment.appointment_date }} | {{ appointment.time_slot }}</p>
+<div class="alert alert-danger" role="alert">{{ cancellation_error }}</div>
+<form method="post" data-cancellation-form>{% csrf_token %}<input type="hidden" name="status" value="cancelled">
+<input type="hidden" name="next" value="{{ back_url }}">
+{% include 'includes/cancellation_reason_fields.html' with reason_prefix='cancel-error' %}
+<button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+<a href="{{ back_url }}" class="btn btn-outline-primary">Go Back</a>
+</form>
+{% endblock %}

@@ -11,7 +11,7 @@
 
 <div class="receipt-page-actions">
     <a href="{% url 'receptionist_billing_list' %}" class="back-link"><i class="bi bi-arrow-left me-2"></i>Back to Billing</a>
-    <a href="{% querystring format='pdf' %}" class="btn btn-primary" target="_blank" rel="noopener" data-print-document><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
+    <a href="{% querystring format='pdf' %}" class="btn btn-primary" data-print-document data-print-target="#receiptCard"><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
 </div>
 
 <div class="rec-card receipt-card" id="receiptCard">

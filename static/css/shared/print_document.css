@@ -1,0 +1,23 @@
+#documentPrintContent { display: none; }
+@page { size: A4 portrait; margin: 15mm; }
+@media print {
+  body.printing-document { background: #fff !important; margin: 0 !important; padding: 0 !important; overflow: visible !important; }
+  body.printing-document > :not(#documentPrintContent) { display: none !important; }
+  body.printing-document > #documentPrintContent { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+  #documentPrintContent, #documentPrintContent * { color: #111 !important; background: #fff !important; box-shadow: none !important; text-shadow: none !important; font-family: Arial, sans-serif !important; }
+  #documentPrintContent { font-size: 11pt; line-height: 1.45; }
+  #documentPrintContent .print-history-title { display: block !important; }
+  #documentPrintContent h1 { font-size: 20pt; margin: 0 0 6mm; }
+  #documentPrintContent h2, #documentPrintContent h3, #documentPrintContent h4, #documentPrintContent h5, #documentPrintContent h6 { break-after: avoid; margin: 5mm 0 3mm; }
+  #documentPrintContent p { white-space: pre-wrap; overflow-wrap: anywhere; }
+  #documentPrintContent table { width: 100% !important; table-layout: fixed; border-collapse: collapse; font-size: 9pt; }
+  #documentPrintContent th, #documentPrintContent td { padding: 2.5mm !important; border: 1px solid #aaa !important; white-space: normal !important; overflow-wrap: anywhere; }
+  #documentPrintContent thead { display: table-header-group; }
+  #documentPrintContent tfoot { display: table-row-group; }
+  #documentPrintContent tr, #documentPrintContent .rx-modal-section, #documentPrintContent .prescription-section { break-inside: avoid; page-break-inside: avoid; }
+  #documentPrintContent .table-responsive, #documentPrintContent article, #documentPrintContent .card, #documentPrintContent .doc-card { overflow: visible !important; height: auto !important; max-height: none !important; }
+  #documentPrintContent img { max-width: 35mm; max-height: 25mm; }
+  #documentPrintContent .row { display: block !important; }
+  #documentPrintContent [class*="col-"] { width: 100% !important; }
+  #documentPrintContent button, #documentPrintContent .btn, #documentPrintContent form, #documentPrintContent .back-link, #documentPrintContent .table-actions, #documentPrintContent .list-pagination, #documentPrintContent .report-actions, #documentPrintContent .filter-chip, #documentPrintContent [data-print-document], #documentPrintContent .print-hide { display: none !important; }
+}

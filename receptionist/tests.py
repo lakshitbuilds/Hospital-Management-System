@@ -81,7 +81,7 @@ class PortalWorkflowTests(TestCase):
                 self.appointment.status = 'confirmed'
                 self.appointment.save()
                 response = self.client.post(reverse(action, args=[self.appointment.pk]),
-                    {'next': 'receptionist_today_appointments'}, follow=True)
+                    {'next': 'receptionist_today_appointments', 'cancellation_reason': 'Patient requested rescheduling'}, follow=True)
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.redirect_chain[0][0], reverse('receptionist_today_appointments'))
                 self.appointment.refresh_from_db()
@@ -118,7 +118,7 @@ class PortalWorkflowTests(TestCase):
                 self.appointment.status = 'confirmed'
                 self.appointment.save()
                 response = self.client.post(reverse(action, args=[self.appointment.pk]),
-                    {'next': target}, follow=True)
+                    {'next': target, 'cancellation_reason': 'Patient requested rescheduling'}, follow=True)
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(response.redirect_chain[0][0], reverse(target))
                 self.appointment.refresh_from_db()

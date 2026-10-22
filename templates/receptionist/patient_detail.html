@@ -129,7 +129,7 @@
                             <td>{{ appt.appointment_date|date:"M d, Y" }} &middot; {{ appt.time_slot }}</td>
                             <td>Dr. {{ appt.doctor.user.get_full_name }}</td>
                             <td>{{ appt.get_visit_type_display }}</td>
-                            <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span></td>
+                            <td><span class="status-badge status-{{ appt.status }}">{{ appt.get_status_display }}</span>{% if appt.cancellation_reason %}<div class="small text-muted text-break mt-1">Cancellation reason: {{ appt.cancellation_reason }}{% if appt.cancellation_explanation %} - {{ appt.cancellation_explanation }}{% endif %}</div>{% endif %}</td>
                         </tr>
                         {% empty %}
                         <tr><td colspan="4" class="text-center text-muted">No appointment history yet.</td></tr>

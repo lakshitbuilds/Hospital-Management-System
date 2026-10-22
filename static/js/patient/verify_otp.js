@@ -108,9 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
             attemptsNote.textContent = freshAttemptsNote;
         }
 
-        // Clear the boxes so the patient can try again.
-        boxes.forEach(function (box) { box.value = ''; });
-        hiddenInput.value = '';
+        // Keep the entered code visible so it can be corrected.
         focusBox(0);
     }
 
@@ -124,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
             credentials: 'same-origin',
         })
             .then(function (response) {
+                if (!response.ok) throw new Error('Verification request failed');
                 var destinationUrl = response.url;
                 var landedOnVerifyPage = new URL(destinationUrl).pathname === window.location.pathname;
 
@@ -150,10 +149,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }, 1400);
             })
             .catch(function () {
-                // Network hiccup: fall back to a plain form submit rather
-                // than leaving the user stuck behind the overlay.
+                // A failed request must release the overlay without clearing
+                // the code or silently submitting the same request again.
                 hideOverlay();
-                form.submit();
+                if (inlineError) {
+                    inlineError.textContent = 'Verification could not be completed. Please try again.';
+                    inlineError.classList.remove('d-none');
+                }
             });
     }
 

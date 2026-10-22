@@ -43,7 +43,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    if (window.location.hash) {
+    var errorTab = document.getElementById('formErrorTab');
+    if (errorTab && errorTab.getAttribute('data-tab')) {
+        activateTab(errorTab.getAttribute('data-tab'));
+    } else if (window.location.hash) {
         activateTab(window.location.hash.slice(1));
     }
 

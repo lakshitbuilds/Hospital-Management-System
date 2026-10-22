@@ -92,6 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (doctorSelect && summaryDoctor) {
         doctorSelect.addEventListener('change', function () {
+            timeSlotGrid.removeAttribute('data-selected-slot');
             summaryDoctor.textContent = selectedText(doctorSelect);
             loadTimeSlots();
         });
@@ -99,6 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (dateInput && summaryDate) {
         dateInput.addEventListener('change', function () {
+            timeSlotGrid.removeAttribute('data-selected-slot');
             summaryDate.textContent = dateInput.value || 'Not selected';
             loadTimeSlots();
         });
@@ -107,6 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (timeSlotGrid && summaryTime) {
         timeSlotGrid.addEventListener('change', function (event) {
             if (event.target.name === 'time_slot') {
+                timeSlotGrid.removeAttribute('data-selected-slot');
                 summaryTime.textContent = event.target.value;
             }
         });
@@ -136,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
             input.value = slot.time;
             input.className = 'time-slot-input';
             if (slot.booked) input.disabled = true;
+            if (!slot.booked && slot.time === timeSlotGrid.getAttribute('data-selected-slot')) input.checked = true;
 
             var label = document.createElement('label');
             label.setAttribute('for', id);

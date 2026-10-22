@@ -33,7 +33,7 @@
 
         <div class="receipt-page-actions">
             <a href="{% url 'my_billing' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back to My Billing</a>
-            <a href="{% querystring format='pdf' %}" class="btn btn-primary" target="_blank" rel="noopener" data-print-document><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
+            <a href="{% querystring format='pdf' %}" class="btn btn-primary" data-print-document data-print-target="#receiptCard"><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
         </div>
 
         <div class="booking-form-card receipt-card" id="receiptCard">

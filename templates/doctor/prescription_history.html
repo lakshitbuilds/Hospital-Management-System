@@ -12,6 +12,9 @@
 <h4 class="doc-page-title">Prescription History</h4>
 <p class="doc-page-subtitle">All prescriptions you've issued to patients.</p>
 
+<button type="button" class="btn btn-outline-primary mb-3" data-print-document data-print-target="#prescriptionHistoryPrint">Print History (current page)</button>
+<section id="prescriptionHistoryPrint">
+<h2 class="d-none print-history-title">Prescription History</h2>
 <div class="doc-card">
 
     <!-- Toolbar -->
@@ -36,7 +39,7 @@
                     <th>Date</th>
                     <th>Diagnosis</th>
                     <th>Medicines</th>
-                    <th class="text-end">Actions</th>
+                    <th class="text-end print-hide">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -56,10 +59,10 @@
                     <td>{{ rx.created_at|date:"M d, Y" }}</td>
                     <td>{{ rx.diagnosis|truncatechars:40 }}</td>
                     <td><span class="medicine-count-badge">{{ rx.medicines.count }} medicine{{ rx.medicines.count|pluralize }}</span></td>
-                    <td class="text-end">
+                    <td class="text-end print-hide">
                         <div class="table-actions">
                             <button type="button" class="table-action-btn" title="View" data-bs-toggle="modal" data-bs-target="#viewRxModal" data-rx-id="rx{{ rx.id }}"
-                                data-pdf-url="{% url 'doctor_prescription_pdf' rx.id %}"
+                                data-print-target="#prescription-print-{{ rx.id }}" data-pdf-url="{% url 'doctor_prescription_pdf' rx.id %}"
                                 data-patient-name="{{ rx.patient.user.get_full_name }}"
                                 data-patient-avatar="{% if rx.patient.profile_image %}{{ rx.patient.profile_image.url }}{% else %}{% static 'public/images/patient-1.jpg' %}{% endif %}"
                                 data-date="{{ rx.created_at|date:'M d, Y' }}"
@@ -69,7 +72,7 @@
                                 data-medicines='[{% for m in rx.medicines.all %}{"name":"{{ m.name|escapejs }}","dosage":"{{ m.dosage|escapejs }}","frequency":"{{ m.get_frequency_display|default:m.frequency|escapejs }}","duration":"{{ m.duration|escapejs }}","instructions":"{{ m.instructions|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <a href="{% url 'doctor_prescription_pdf' rx.id %}" class="table-action-btn" title="Preview and print prescription" aria-label="Preview and print prescription" target="_blank" rel="noopener" data-print-document>
+                            <a href="{% url 'doctor_prescription_pdf' rx.id %}" class="table-action-btn" title="Preview and print prescription" aria-label="Preview and print prescription" data-print-document data-print-target="#prescription-print-{{ rx.id }}">
                                 <i class="bi bi-printer"></i>
                             </a>
                         </div>
@@ -119,6 +122,8 @@
 
 </div>
 
+</section>
+{% for rx in page_obj %}{% include 'includes/prescription_print.html' %}{% endfor %}
 <!-- ============================================================
      VIEW PRESCRIPTION MODAL
 ============================================================= -->
@@ -177,7 +182,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
-                <a class="btn btn-primary" id="rxModalPdf" target="_blank" rel="noopener" data-print-document><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
+                <a class="btn btn-primary" id="rxModalPdf" data-print-document><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
             </div>
         </div>
     </div>
@@ -191,5 +196,5 @@
     // so it needs the real static URL prefix instead of guessing '/static/'.
     window.STATIC_URL_PREFIX = "{% static '' %}";
 </script>
-<script src="{% static 'js/doctor/prescription_history.js' %}?v=3"></script>
+<script src="{% static 'js/doctor/prescription_history.js' %}?v=4"></script>
 {% endblock %}

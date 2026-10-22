@@ -5,6 +5,7 @@
 <link rel="stylesheet" href="{% static 'css/patient/profile.css' %}" />
 {% endblock %} 
 {% block content %}
+<span hidden id="formErrorTab" data-tab="{{ request.form_error_tab }}"></span>
 
 <!-- ============================================================
      PAGE HEADER

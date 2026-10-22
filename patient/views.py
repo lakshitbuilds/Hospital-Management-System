@@ -29,6 +29,8 @@ from pdf_documents import pdf_response, receipt_pdf, prescription_pdf
 import secrets
 from datetime import datetime, timedelta
 
+from form_handling import preserve_form
+from patient.cancellation import cancel_with_reason
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login as auth_login, logout, get_user_model, update_session_auth_hash
@@ -203,6 +205,7 @@ def doctors(request):
     return render(request, "patient/doctors.html", {'doctors': doctor_list})
 
 
+@preserve_form
 def contact(request):
     """
     Public "Contact us" page. No auth required. On GET, shows the form; on
@@ -238,6 +241,7 @@ def contact(request):
 # Auth
 # ================================================================
 
+@preserve_form(atomic=False)
 def login(request):
     """
     Shared login page/handler for ALL roles (admin, doctor, receptionist,
@@ -414,6 +418,7 @@ def resend_otp(request):
     return redirect('verify_otp')
 
 
+@preserve_form
 def register(request):
     """
     Public self-registration page for new PATIENTS only (other roles are
@@ -520,6 +525,7 @@ def register(request):
     return render(request, 'patient/register.html')
 
 
+@preserve_form
 def forgot_password(request):
     """
     Public "forgot password" page. On GET, shows the request form.
@@ -540,6 +546,7 @@ def forgot_password(request):
     return render(request, 'patient/forgot_password.html')
 
 
+@preserve_form
 def reset_password_confirm(request, uidb64, token):
     """
     Landing page for the link emailed by forgot_password. Validates the
@@ -612,6 +619,7 @@ def patient_required(view_func):
 # ================================================================
 
 @patient_required
+@preserve_form
 def patient_profile(request):
     """
     The logged-in patient's own profile page. Requires login (any role
@@ -679,6 +687,7 @@ def patient_profile(request):
 
 
 @patient_required
+@preserve_form(error_view='patient_profile')
 def change_password(request):
     """
     Lets the logged-in patient change their own account password, posted
@@ -756,6 +765,7 @@ def get_doctor_slots(request):
 
 
 @patient_required
+@preserve_form
 def book_appointment(request):
     """
     Step one of patient self-service booking (patient-only in practice,
@@ -1018,29 +1028,10 @@ def billing_receipt(request, bill_id):
 
 @patient_required
 def cancel_appointment(request, appointment_id):
-    """
-    Lets a patient cancel one of their own appointments. The
-    ``patient__user=request.user`` filter in the lookup doubles as an
-    ownership check -- a 404 is raised if the appointment doesn't belong
-    to the logged-in user, instead of leaking whether the id exists.
-    Only acts on POST (sets status to 'cancelled' and creates a
-    'cancelled'-type Notification); either way redirects to
-    ``my_appointments``.
-    """
-    appointment = get_object_or_404(Appointment, id=appointment_id, patient__user=request.user)
-
-    if request.method == 'POST':
-        appointment.status = 'cancelled'
-        appointment.save()
-
-        Notification.objects.create(
-            user=request.user,
-            notification_type='cancelled',
-            message=f'Your appointment with Dr. {appointment.doctor.user.get_full_name()} was cancelled.'
-        )
-        send_appointment_cancelled_email(appointment)
-
-    return redirect('my_appointments')
+    return cancel_with_reason(
+        request, Appointment.objects.filter(patient__user=request.user), appointment_id,
+        portal='patient', fallback='my_appointments', actor=None,
+    )
 
 
 # ================================================================

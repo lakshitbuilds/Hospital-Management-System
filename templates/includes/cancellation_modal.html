@@ -1,0 +1,15 @@
+<div class="modal fade" id="appointmentCancellationModal" tabindex="-1" aria-labelledby="appointmentCancellationTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+    <form id="appointmentCancellationForm" method="post" data-cancellation-form>
+      {% csrf_token %}
+      <input type="hidden" name="status" value="cancelled">
+      <div class="modal-header"><h5 class="modal-title" id="appointmentCancellationTitle">Cancel Appointment</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">
+        <p id="appointmentCancellationDetails"></p>
+        {% include 'includes/cancellation_reason_fields.html' with reason_prefix='cancel-modal' %}
+        <p class="text-danger mt-2 mb-0" id="appointmentCancellationError" role="alert" hidden></p>
+      </div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Go Back</button><button type="submit" class="btn btn-danger" id="appointmentCancellationConfirm">Confirm Cancellation</button></div>
+    </form>
+  </div></div>
+</div>

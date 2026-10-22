@@ -24,6 +24,8 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
 from django.db.models import Count, Q, Sum
+from form_handling import preserve_form
+from patient.cancellation import cancel_with_reason
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -201,6 +203,7 @@ def doctor_list(request):
 
 
 @admin_required
+@preserve_form
 def add_doctor(request):
     """Onboard a new doctor (admin-only).
 
@@ -211,8 +214,8 @@ def add_doctor(request):
     confirmation matches and the email isn't already registered, then
     creates a new `User` with role='doctor' and a linked `Doctor` record
     in one go. On success, redirects to that doctor's detail page; on
-    validation failure, redirects back to this same form with an error
-    message.
+    validation failure, re-renders this form with an error message and
+    the submitted values (via preserve_form).
     """
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
@@ -351,6 +354,7 @@ def receptionist_list(request):
 
 
 @admin_required
+@preserve_form
 def add_receptionist(request):
     """Onboard a new receptionist (admin-only).
 
@@ -570,6 +574,9 @@ def update_appointment_status(request, appointment_id):
     came from (the `next` POST field), falling back to the appointment
     list.
     """
+    if request.method == 'POST' and request.POST.get('status') == 'cancelled':
+        return cancel_with_reason(request, Appointment.objects.all(), appointment_id,
+            portal='adminpanel', fallback='admin_appointment_list', actor='the administrator')
     appointment = get_object_or_404(Appointment, id=appointment_id)
     if request.method == 'POST':
         status = request.POST.get('status')
@@ -774,6 +781,7 @@ def admin_profile(request):
 
 
 @admin_required
+@preserve_form
 def edit_profile(request):
     """Edit the logged-in admin's own name/email (admin-only).
 
@@ -804,6 +812,7 @@ def edit_profile(request):
 
 
 @admin_required
+@preserve_form
 def change_password(request):
     """Change the logged-in admin's own password (admin-only).
 

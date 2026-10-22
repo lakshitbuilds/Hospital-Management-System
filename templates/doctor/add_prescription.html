@@ -70,9 +70,10 @@
 
                 <div id="medicineRows">
 
+                    {% for row in request.form_medicine_rows %}
                     <div class="medicine-row">
                         <div class="medicine-row-header">
-                            <span class="medicine-row-index">#1</span>
+                            <span class="medicine-row-index">#{{ forloop.counter }}</span>
                             <button type="button" class="remove-medicine-btn" aria-label="Remove medicine" disabled>
                                 <i class="bi bi-trash3"></i>
                             </button>
@@ -103,7 +104,7 @@
                             </div>
                         </div>
                     </div>
-
+                    {% endfor %}
                 </div>
 
                 <datalist id="medicineSuggestions">

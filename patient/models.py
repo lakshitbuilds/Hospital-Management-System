@@ -43,6 +43,14 @@ class Patient(models.Model):
 
 
 class Appointment(models.Model):
+    CANCELLATION_REASONS = (
+        'Patient is unavailable',
+        'Doctor is unavailable',
+        'Patient requested rescheduling',
+        'Appointment booked by mistake',
+        'Health issue or emergency',
+        'Other',
+    )
     STATUS_CHOICES = (
         ('pending', 'Pending'), ('confirmed', 'Confirmed'),
         ('cancelled', 'Cancelled'), ('completed', 'Completed'),
@@ -64,6 +72,8 @@ class Appointment(models.Model):
     visit_type = models.CharField(max_length=20, choices=VISIT_TYPE_CHOICES, default='new')
     reason = models.TextField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending', db_index=True)
+    cancellation_reason = models.TextField(blank=True, choices=[(reason, reason) for reason in CANCELLATION_REASONS])
+    cancellation_explanation = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     department = models.CharField(max_length=30, choices=DEPARTMENT_CHOICES, default='general')
