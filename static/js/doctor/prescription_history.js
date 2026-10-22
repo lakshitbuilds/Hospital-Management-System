@@ -30,6 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
             var triggerBtn = event.relatedTarget;
             if (!triggerBtn) return;
 
+            document.getElementById('rxModalPdf').href = triggerBtn.getAttribute('data-pdf-url');
+
             var medicines = [];
             try {
                 medicines = JSON.parse(triggerBtn.getAttribute('data-medicines') || '[]');

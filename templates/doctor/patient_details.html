@@ -41,9 +41,9 @@
         <a href="{% url 'add_prescription' %}?patient={{ patient.id }}" class="btn btn-primary">
             <i class="bi bi-file-earmark-medical-fill me-2"></i>Add Prescription
         </a>
-        <button type="button" class="btn btn-outline-primary" id="printPatientBtn">
-            <i class="bi bi-printer-fill me-2"></i>Print
-        </button>
+        <a href="{% querystring format='pdf' %}" class="btn btn-outline-primary" target="_blank" rel="noopener" data-print-document>
+            <i class="bi bi-printer me-2"></i>Preview &amp; Print Summary
+        </a>
     </div>
 </div>
 
@@ -164,8 +164,4 @@
 
 </div>
 
-{% endblock %}
-
-{% block javascript %}
-<script src="{% static 'js/doctor/patient_details.js' %}"></script>
 {% endblock %}

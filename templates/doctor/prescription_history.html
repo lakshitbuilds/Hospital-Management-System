@@ -59,6 +59,7 @@
                     <td class="text-end">
                         <div class="table-actions">
                             <button type="button" class="table-action-btn" title="View" data-bs-toggle="modal" data-bs-target="#viewRxModal" data-rx-id="rx{{ rx.id }}"
+                                data-pdf-url="{% url 'doctor_prescription_pdf' rx.id %}"
                                 data-patient-name="{{ rx.patient.user.get_full_name }}"
                                 data-patient-avatar="{% if rx.patient.profile_image %}{{ rx.patient.profile_image.url }}{% else %}{% static 'public/images/patient-1.jpg' %}{% endif %}"
                                 data-date="{{ rx.created_at|date:'M d, Y' }}"
@@ -68,9 +69,9 @@
                                 data-medicines='[{% for m in rx.medicines.all %}{"name":"{{ m.name|escapejs }}","dosage":"{{ m.dosage|escapejs }}","frequency":"{{ m.get_frequency_display|default:m.frequency|escapejs }}","duration":"{{ m.duration|escapejs }}","instructions":"{{ m.instructions|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
                                 <i class="bi bi-eye"></i>
                             </button>
-                            <button type="button" class="table-action-btn" title="Print" onclick="window.print()">
+                            <a href="{% url 'doctor_prescription_pdf' rx.id %}" class="table-action-btn" title="Preview and print prescription" aria-label="Preview and print prescription" target="_blank" rel="noopener" data-print-document>
                                 <i class="bi bi-printer"></i>
-                            </button>
+                            </a>
                         </div>
                     </td>
                 </tr>
@@ -176,7 +177,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary"><i class="bi bi-printer-fill me-2"></i>Print</button>
+                <a class="btn btn-primary" id="rxModalPdf" target="_blank" rel="noopener" data-print-document><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
             </div>
         </div>
     </div>
@@ -190,5 +191,5 @@
     // so it needs the real static URL prefix instead of guessing '/static/'.
     window.STATIC_URL_PREFIX = "{% static '' %}";
 </script>
-<script src="{% static 'js/doctor/prescription_history.js' %}?v=2"></script>
+<script src="{% static 'js/doctor/prescription_history.js' %}?v=3"></script>
 {% endblock %}

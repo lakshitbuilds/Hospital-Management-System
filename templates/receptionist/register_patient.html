@@ -5,6 +5,7 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/receptionist/edit_profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/receptionist/register_patient.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -36,11 +37,25 @@
             </div>
             <div class="col-md-3">
                 <label for="password" class="form-label">Temporary Password</label>
-                <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                <div class="password-input-group">
+                    <input type="password" class="form-control" id="password" name="password" minlength="8" required>
+                    <button type="button" class="password-toggle-btn" data-target="password" aria-controls="password" aria-label="Show password" aria-pressed="false">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="generatePassword">
+                    <i class="bi bi-key me-1" aria-hidden="true"></i>Generate Password
+                </button>
+                <small class="d-block mt-1 text-muted" id="passwordGenerationStatus" role="status"></small>
             </div>
             <div class="col-md-3">
                 <label for="confirmPassword" class="form-label">Confirm Password</label>
-                <input type="password" class="form-control" id="confirmPassword" name="confirm_password" minlength="8" required>
+                <div class="password-input-group">
+                    <input type="password" class="form-control" id="confirmPassword" name="confirm_password" minlength="8" required>
+                    <button type="button" class="password-toggle-btn" data-target="confirmPassword" aria-controls="confirmPassword" aria-label="Show password" aria-pressed="false">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -136,5 +151,6 @@
 {% endblock %}
 
 {% block javascript %}
+<script src="{% static 'js/shared/password_controls.js' %}"></script>
 <script src="{% static 'js/receptionist/register_patient.js' %}"></script>
 {% endblock %}

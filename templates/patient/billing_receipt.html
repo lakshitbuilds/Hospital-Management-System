@@ -33,7 +33,7 @@
 
         <div class="receipt-page-actions">
             <a href="{% url 'my_billing' %}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-2"></i>Back to My Billing</a>
-            <button type="button" class="btn btn-primary" id="printReceiptBtn"><i class="bi bi-printer-fill me-2"></i>Print Receipt</button>
+            <a href="{% querystring format='pdf' %}" class="btn btn-primary" target="_blank" rel="noopener" data-print-document><i class="bi bi-printer me-2"></i>Preview &amp; Print</a>
         </div>
 
         <div class="booking-form-card receipt-card" id="receiptCard">
@@ -103,13 +103,4 @@
     </div>
 </section>
 
-{% endblock %}
-
-{% block javascript %}
-<script>
-    var printReceiptBtn = document.getElementById('printReceiptBtn');
-    if (printReceiptBtn) {
-        printReceiptBtn.addEventListener('click', function () { window.print(); });
-    }
-</script>
 {% endblock %}

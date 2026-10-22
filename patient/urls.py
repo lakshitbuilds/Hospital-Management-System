@@ -34,6 +34,8 @@ urlpatterns = [
     path('book-appointment/billing/cancel/', views.cancel_pending_appointment, name='cancel_pending_appointment'),
     path('my-appointments/', views.my_appointments, name='my_appointments'),
     path('appointments/<int:appointment_id>/cancel/', views.cancel_appointment, name='cancel_appointment'),
+    path('my-prescriptions/<int:prescription_id>/pdf/', views.download_prescription, name='patient_prescription_pdf'),
+    path('my-prescriptions/', views.my_prescriptions, name='my_prescriptions'),
     path('my-billing/', views.my_billing, name='my_billing'),
     path('my-billing/<int:bill_id>/receipt/', views.billing_receipt, name='billing_receipt'),
 

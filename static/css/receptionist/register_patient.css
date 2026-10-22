@@ -1,0 +1,29 @@
+.password-input-group {
+    position: relative;
+}
+
+.rec-card .password-input-group .form-control {
+    padding-right: 3rem;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: 2.75rem;
+    background: none;
+    border: none;
+    border-radius: var(--rec-radius-sm);
+    color: var(--rec-text-light);
+    cursor: pointer;
+}
+
+.password-toggle-btn:hover {
+    color: var(--rec-primary);
+}
+
+.password-toggle-btn:focus-visible {
+    outline: 2px solid var(--rec-primary);
+    outline-offset: -3px;
+}

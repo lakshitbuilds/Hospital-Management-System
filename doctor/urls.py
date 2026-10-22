@@ -18,6 +18,7 @@ urlpatterns = [
     path('patients/<int:patient_id>/', views.patient_details, name='patient_details'),
 
     # ===== Prescriptions =====
+    path('prescriptions/<int:prescription_id>/pdf/', views.download_prescription, name='doctor_prescription_pdf'),
     path('prescriptions/add/', views.add_prescription, name='add_prescription'),
     path('prescriptions/history/', views.prescription_history, name='prescription_history'),
 

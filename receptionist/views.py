@@ -10,6 +10,8 @@ and marking them paid). Every view here is gated to users whose
 decorator defined below. As with the rest of this project, there is no
 forms.py - POST data is read directly from `request.POST` in each view.
 """
+from pdf_documents import pdf_response, receipt_pdf
+
 
 from datetime import date, datetime
 from functools import wraps
@@ -653,18 +655,10 @@ def mark_bill_paid(request, bill_id):
 
 @receptionist_required
 def billing_receipt(request, bill_id):
-    """
-    Printable receipt for one bill (`receptionist_billing_receipt` URL).
-
-    Restricted to receptionists. Read-only -- just looks up the `Billing`
-    by `bill_id` (404 if not found) and renders
-    `receptionist/billing_receipt.html`, a print-friendly page (a "Print"
-    button calling `window.print()` plus an `@media print` rule hiding
-    the sidebar/topbar/actions). This project has no PDF library, so
-    every "receipt"/"printout" here follows the same browser-print
-    pattern already used by `doctor/patient_details.html`.
-    """
+    """View a receipt, or download its document-only PDF after access checks."""
     bill = get_object_or_404(Billing, id=bill_id)
+    if request.GET.get('format') == 'pdf':
+        return pdf_response(receipt_pdf(bill), f'receipt-{bill.pk:06d}.pdf')
     return render(request, 'receptionist/billing_receipt.html', {'bill': bill})
 
 

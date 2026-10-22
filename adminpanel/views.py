@@ -12,6 +12,8 @@ authenticated user whose `role` is `'admin'` can reach any of them.
 There is no `forms.py` in this project (project-wide convention) --
 POST data is read directly from `request.POST` in each view.
 """
+from pdf_documents import pdf_response, receipt_pdf
+
 from datetime import date
 from functools import wraps
 
@@ -632,17 +634,10 @@ def mark_bill_paid(request, bill_id):
 
 @admin_required
 def billing_receipt(request, bill_id):
-    """Printable receipt for one bill (admin-only, system-wide).
-
-    Read-only -- just looks up the `Billing` by `bill_id` (404 if not
-    found) and renders `adminpanel/billing_receipt.html`. That template
-    is a print-friendly page (a "Print" button calling `window.print()`
-    plus an `@media print` rule hiding the sidebar/topbar/actions) --
-    this project has no PDF library, so every "receipt"/"printout" here
-    follows the same browser-print pattern already used by
-    `doctor/patient_details.html` and `doctor/prescription_history.html`.
-    """
+    """View a receipt, or download its document-only PDF after access checks."""
     bill = get_object_or_404(Billing, id=bill_id)
+    if request.GET.get('format') == 'pdf':
+        return pdf_response(receipt_pdf(bill), f'receipt-{bill.pk:06d}.pdf')
     return render(request, 'adminpanel/billing_receipt.html', {'bill': bill})
 
 

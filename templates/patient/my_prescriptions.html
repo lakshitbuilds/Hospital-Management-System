@@ -1,0 +1,43 @@
+{% extends 'patient/base.html' %}
+{% block title %}My Prescriptions - MediCare Hospital{% endblock %}
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <h1>My Prescriptions</h1>
+    <p>Medicines and advice from your doctors.</p>
+  </div>
+</section>
+<section class="section-padding">
+  <div class="container">
+    {% for rx in prescriptions %}
+    <article class="card mb-4" aria-labelledby="prescription-{{ rx.id }}">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-3">
+          <h2 class="h5" id="prescription-{{ rx.id }}">Dr. {{ rx.doctor.user.get_full_name }}</h2>
+          <span>{{ rx.created_at|date:"M d, Y" }}</span>
+          <a href="{% url 'patient_prescription_pdf' rx.id %}" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener" data-print-document>Preview &amp; Print</a>
+        </div>
+        {% if rx.appointment %}<p class="text-muted">Appointment: {{ rx.appointment.appointment_date|date:"M d, Y" }} &middot; {{ rx.appointment.time_slot }}</p>{% endif %}
+        <h3 class="h6">Diagnosis</h3>
+        <div class="mb-3">{{ rx.diagnosis|linebreaksbr }}</div>
+        <h3 class="h6">Medicines</h3>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead><tr><th scope="col">Medicine</th><th scope="col">Dosage</th><th scope="col">Frequency</th><th scope="col">Duration</th><th scope="col">Instructions</th></tr></thead>
+            <tbody>
+              {% for medicine in rx.medicines.all %}
+              <tr><td>{{ medicine.name }}</td><td>{{ medicine.dosage|default:"—" }}</td><td>{{ medicine.get_frequency_display|default:"—" }}</td><td>{{ medicine.duration|default:"—" }}</td><td>{{ medicine.instructions|default:"—" }}</td></tr>
+              {% empty %}<tr><td colspan="5">No medicines prescribed.</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if rx.advice %}<h3 class="h6">Doctor's Advice</h3><div class="mb-3">{{ rx.advice|linebreaksbr }}</div>{% endif %}
+        {% if rx.follow_up_date %}<p class="mb-0"><strong>Follow-up:</strong> {{ rx.follow_up_date|date:"M d, Y" }}</p>{% endif %}
+      </div>
+    </article>
+    {% empty %}
+    <div class="text-center py-5"><i class="bi bi-file-earmark-medical fs-1" aria-hidden="true"></i><h2 class="h5 mt-3">No prescriptions yet</h2><p>Prescriptions will appear here when your doctor adds them.</p></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

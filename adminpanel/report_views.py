@@ -31,7 +31,8 @@ def _column_widths(report_type):
         'doctors': [40, 37, 43, 48, 27, 25],
         'billing': [37, 27, 34, 42, 25, 28, 25],
     }
-    return [value * mm for value in widths.get(report_type, [])]
+    values = widths.get(report_type, [])
+    return [value / sum(values) * 273 * mm for value in values]
 
 
 def _build_pdf(report_type, headers, rows, filter_summary, total_amount=None):
@@ -86,6 +87,7 @@ def _build_pdf(report_type, headers, rows, filter_summary, total_amount=None):
         leading=9.5,
         textColor=colors.HexColor('#263238'),
         alignment=TA_LEFT,
+        splitLongWords=True,
     )
     amount_style = ParagraphStyle(
         'AmountCell',
@@ -108,7 +110,7 @@ def _build_pdf(report_type, headers, rows, filter_summary, total_amount=None):
     ]
 
     info_data = [
-        [Paragraph('<b>Filters</b>', cell_style), Paragraph(filter_summary, cell_style)],
+        [Paragraph('<b>Filters</b>', cell_style), _pdf_text(filter_summary, cell_style)],
         [Paragraph('<b>Generated</b>', cell_style), Paragraph(timezone.localtime().strftime('%d %b %Y, %I:%M %p'), cell_style)],
         [Paragraph('<b>Total Records</b>', cell_style), Paragraph(str(len(rows)), cell_style)],
     ]
@@ -118,7 +120,7 @@ def _build_pdf(report_type, headers, rows, filter_summary, total_amount=None):
             Paragraph(f'Rs. {total_amount}', summary_style),
         ])
 
-    info_table = Table(info_data, colWidths=[32 * mm, 230 * mm], hAlign='LEFT')
+    info_table = Table(info_data, colWidths=[32 * mm, 241 * mm], hAlign='LEFT')
     info_table.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#EAF2F8')),
         ('BACKGROUND', (1, 0), (1, -1), colors.HexColor('#F8FAFC')),
@@ -147,6 +149,7 @@ def _build_pdf(report_type, headers, rows, filter_summary, total_amount=None):
         table_data,
         colWidths=_column_widths(report_type),
         repeatRows=1,
+        splitInRow=1,
         hAlign='CENTER',
     )
     report_table.setStyle(TableStyle([
@@ -358,7 +361,8 @@ def generate_report(request):
     if export_format == 'pdf':
         pdf = _build_pdf(report_type, headers, rows, filter_summary, summary['total_amount'])
         response = HttpResponse(pdf, content_type='application/pdf')
-        response['Content-Disposition'] = f'attachment; filename="{report_type}_report.pdf"'
+        response['Content-Disposition'] = f'inline; filename="{report_type}_report.pdf"'
+        response['Cache-Control'] = 'private, no-store'
         return response
 
     context = {

@@ -23,6 +23,8 @@ handler below reads fields straight off ``request.POST.get(...)`` from
 plain HTML ``<form method="POST">`` templates -- that is intentional, not
 an oversight.
 """
+from pdf_documents import pdf_response, receipt_pdf, prescription_pdf
+
 
 import secrets
 from datetime import datetime, timedelta
@@ -47,7 +49,7 @@ from django.db import IntegrityError, transaction
 
 from .models import Patient, Appointment, Billing, ContactMessage, Notification
 from .emails import send_appointment_booked_email, send_appointment_cancelled_email
-from doctor.models import Doctor
+from doctor.models import Doctor, Prescription
 from image_validation import validate_uploaded_image
 from input_validation import is_valid_name
 from accounts.models import SystemSettings
@@ -971,6 +973,24 @@ def my_appointments(request):
 
 
 @patient_required
+def download_prescription(request, prescription_id):
+    prescription = get_object_or_404(
+        Prescription.objects.select_related('patient__user', 'doctor__user', 'appointment').prefetch_related('medicines'),
+        pk=prescription_id, patient__user=request.user,
+    )
+    return pdf_response(prescription_pdf(prescription), f'prescription-{prescription.pk:06d}.pdf')
+
+
+@patient_required
+def my_prescriptions(request):
+    """Show only prescriptions issued to the signed-in patient."""
+    prescriptions = Prescription.objects.filter(patient__user=request.user).select_related(
+        'doctor__user', 'appointment'
+    ).prefetch_related('medicines').order_by('-created_at', '-id')
+    return render(request, 'patient/my_prescriptions.html', {'prescriptions': prescriptions})
+
+
+@patient_required
 def my_billing(request):
     """
     Read-only view of the logged-in patient's own bills, newest first,
@@ -988,20 +1008,11 @@ def my_billing(request):
 
 @patient_required
 def billing_receipt(request, bill_id):
-    """
-    Printable receipt for one of the logged-in patient's own bills.
-
-    Scoped to `patient=patient` in the lookup (404 if the bill doesn't
-    belong to them) so a patient can't view someone else's receipt by
-    guessing an id in the URL. Renders `patient/billing_receipt.html`, a
-    print-friendly page (a "Print" button calling `window.print()` plus
-    an `@media print` rule hiding the site header/footer) -- this
-    project has no PDF library, so every "receipt"/"printout" here
-    follows the same browser-print pattern already used by
-    `doctor/patient_details.html`.
-    """
+    """View a receipt, or download its document-only PDF after access checks."""
     patient = Patient.objects.get(user=request.user)
     bill = get_object_or_404(Billing, id=bill_id, patient=patient)
+    if request.GET.get('format') == 'pdf':
+        return pdf_response(receipt_pdf(bill), f'receipt-{bill.pk:06d}.pdf')
     return render(request, 'patient/billing_receipt.html', {'bill': bill})
 
 

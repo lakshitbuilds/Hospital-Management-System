@@ -23,6 +23,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db.models import Count, Q
 
+from pdf_documents import pdf_response, prescription_pdf, patient_summary_pdf
 from .models import Doctor, DoctorAvailability, BlockedDate, Prescription, PrescriptionMedicine
 from patient.models import Patient, Appointment, Notification
 from patient.emails import send_appointment_cancelled_email
@@ -263,6 +264,9 @@ def patient_details(request, patient_id):
     history = Appointment.objects.filter(doctor=doctor, patient=patient).order_by('-appointment_date')
     prescriptions = Prescription.objects.filter(doctor=doctor, patient=patient).prefetch_related('medicines')
 
+    if request.GET.get('format') == 'pdf':
+        return pdf_response(patient_summary_pdf(patient, doctor, history, prescriptions), f'patient-{patient.patient_id}.pdf')
+
     # Compute age in whole years from date_of_birth: start with the year
     # difference, then subtract 1 if this year's birthday hasn't happened
     # yet (i.e. today's (month, day) is still earlier than the birthday's).
@@ -381,6 +385,15 @@ def add_prescription(request):
         'preselected_patient_id': preselected_patient_id,
         'preselected_appointment_id': preselected_appointment_id,
     })
+
+
+@doctor_required
+def download_prescription(request, prescription_id):
+    prescription = get_object_or_404(
+        Prescription.objects.select_related('patient__user', 'doctor__user', 'appointment').prefetch_related('medicines'),
+        pk=prescription_id, doctor=get_doctor(request),
+    )
+    return pdf_response(prescription_pdf(prescription), f'prescription-{prescription.pk:06d}.pdf')
 
 
 @doctor_required
